@@ -1,8 +1,8 @@
 package fr.lewon.dofus.bot.sniffer.model.types.hunt
 
 import fr.lewon.dofus.bot.model.move.Direction
-import fr.lewon.dofus.bot.util.d2o.LabelManager
 import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.util.manager.d2o.LabelManager
 
 class TreasureHuntStepFollowDirectionToPOI : TreasureHuntStep() {
 

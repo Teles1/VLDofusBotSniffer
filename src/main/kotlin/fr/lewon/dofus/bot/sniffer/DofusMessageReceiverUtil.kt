@@ -1,24 +1,43 @@
 package fr.lewon.dofus.bot.sniffer
 
-import fr.lewon.dofus.bot.sniffer.managers.MessageManager
+import fr.lewon.dofus.VldbProtocolUpdater
+import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
+import fr.lewon.dofus.bot.sniffer.managers.TypeIdByName
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
+import fr.lewon.dofus.bot.util.io.gamefiles.VldbFilesUtil
 import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.util.logs.VldbLogger
+import fr.lewon.dofus.export.builder.VldbExportPackTaskBuilder
 import org.reflections.Reflections
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 
 object DofusMessageReceiverUtil {
 
-
-    private val messagesById = Reflections(INetworkMessage::class.java.packageName)
-        .getSubTypesOf(INetworkMessage::class.java)
-        .map { (MessageManager.getId(it.simpleName) ?: error("Couldn't find id for [${it.simpleName}]")) to it }
-        .toMap()
+    private lateinit var messagesById: Map<Int, Class<out INetworkMessage>>
 
     fun parseMessageBuilder(stream: ByteArrayReader, messageId: Int): DofusMessageBuilder? {
         val messageType = messagesById[messageId]
-        val messageName = MessageManager.getName(messageId) ?: return null
+        val messageName = MessageIdByName.getName(messageId) ?: return null
         return DofusMessageBuilder(messageName, messageId, messageType, stream)
+    }
+
+    fun prepareNetworkManagers() {
+        val gameDir = VldbFilesUtil.getDofusDirectory()
+        val swfFile = File(gameDir, "DofusInvoker.swf")
+        if (!swfFile.exists() || !swfFile.isFile) {
+            throw RuntimeException("Unable to find DofusInvoker.swf in Dofus directory")
+        }
+        val builders = listOf(
+            VldbExportPackTaskBuilder("MessageReceiver", MessageIdByName, "_messagesTypes"),
+            VldbExportPackTaskBuilder("ProtocolTypeManager", TypeIdByName, "_typesTypes")
+        )
+        VldbProtocolUpdater.updateManagers(swfFile, builders)
+        messagesById = Reflections(INetworkMessage::class.java.packageName)
+            .getSubTypesOf(INetworkMessage::class.java)
+            .map { (MessageIdByName.getId(it.simpleName) ?: error("Couldn't find id for [${it.simpleName}]")) to it }
+            .toMap()
     }
 
     fun findServerIp(): String {
@@ -32,6 +51,7 @@ object DofusMessageReceiverUtil {
         process.waitFor()
         val lines = BufferedReader(InputStreamReader(process.inputStream)).readLines()
         if (lines.isEmpty()) error("Couldn't find the server ip: The netstat command returned an empty result. Did you launch a Dofus session ?")
+        lines.forEach { VldbLogger.info("Netstat result : $it") }
         if (lines.size > 1) error("Couldn't find the server ip: The netstat command returned ${lines.size} results. Please only let one Dofus session opened ?")
         val words = lines[0].split(" ".toRegex()).toTypedArray()
         var ipAndPort: String? = null

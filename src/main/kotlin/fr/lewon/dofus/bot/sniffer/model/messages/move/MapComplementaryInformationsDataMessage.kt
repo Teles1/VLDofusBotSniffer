@@ -10,8 +10,8 @@ import fr.lewon.dofus.bot.sniffer.model.types.fight.FightCommonInformations
 import fr.lewon.dofus.bot.sniffer.model.types.fight.FightStartingPositions
 import fr.lewon.dofus.bot.sniffer.model.types.house.HouseInformations
 import fr.lewon.dofus.bot.sniffer.model.types.obstacles.MapObstacle
-import fr.lewon.dofus.bot.util.d2o.DofusMapManager
 import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.util.manager.d2o.DofusMapManager
 
 open class MapComplementaryInformationsDataMessage : INetworkMessage {
 

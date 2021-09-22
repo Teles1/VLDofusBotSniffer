@@ -1,6 +1,6 @@
 package fr.lewon.dofus.bot.sniffer
 
-import fr.lewon.dofus.bot.sniffer.managers.MessageManager
+import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
 import fr.lewon.dofus.bot.sniffer.store.EventStore
 import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
@@ -106,7 +106,7 @@ object DofusMessageReceiver : Thread() {
                 VldbLogger.trace("=> messageId = $messageId")
                 VldbLogger.trace("=> sh and bitmask = ${header and BIT_MASK}")
                 VldbLogger.trace("=> message length = $messageLength")
-                if (MessageManager.getName(messageId) == null) {
+                if (MessageIdByName.getName(messageId) == null) {
                     VldbLogger.trace("=> No message for messageId $messageId")
                     return null
                 }
@@ -132,7 +132,7 @@ object DofusMessageReceiver : Thread() {
             VldbLogger.trace("=> messageId = $messageId")
             VldbLogger.trace("=> sh and bitmask = ${header and BIT_MASK}")
             VldbLogger.trace("=> message length = 0")
-            if (MessageManager.getName(messageId) == null) {
+            if (MessageIdByName.getName(messageId) == null) {
                 VldbLogger.trace("=> No message for messageId $messageId")
                 return null
             }

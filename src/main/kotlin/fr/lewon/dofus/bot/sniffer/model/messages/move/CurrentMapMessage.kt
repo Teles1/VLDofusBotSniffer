@@ -2,8 +2,8 @@ package fr.lewon.dofus.bot.sniffer.model.messages.move
 
 import fr.lewon.dofus.bot.model.maps.DofusMap
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
-import fr.lewon.dofus.bot.util.d2o.DofusMapManager
 import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.util.manager.d2o.DofusMapManager
 
 class CurrentMapMessage : INetworkMessage {
 
