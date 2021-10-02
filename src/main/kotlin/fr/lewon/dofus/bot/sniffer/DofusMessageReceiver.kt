@@ -14,22 +14,25 @@ import org.pcap4j.core.Pcaps
 import java.net.InetAddress
 import java.net.NetworkInterface
 
-object DofusMessageReceiver : Thread() {
+object DofusMessageReceiver {
 
     private const val BIT_RIGHT_SHIFT_LEN_PACKET_ID = 2
     private const val BIT_MASK = 3
 
-    private val handle: PcapHandle
-    private val packetListener: PacketListener
+    private lateinit var handle: PcapHandle
+    private lateinit var packetListener: PacketListener
     private var staticHeader = 0
     private var splittedPacket = false
     private var splittedPacketLength = 0
     private var splittedPacketId = 0
     private var inputBuffer: ByteArray = ByteArray(0)
+    private var currentThread: Thread = buildThread()
 
-    init {
+    fun restartThread() {
         val nif = findActiveDevice()
         handle = nif.openLive(65536, PromiscuousMode.PROMISCUOUS, -1)
+        val serverIp = DofusMessageReceiverUtil.findServerIp()
+        handle.setFilter("src $serverIp", BpfCompileMode.OPTIMIZE)
         packetListener = PacketListener { packet ->
             val ethernetPacket = packet.payload
             if (ethernetPacket != null) {
@@ -42,6 +45,28 @@ object DofusMessageReceiver : Thread() {
                 }
             }
         }
+        if (isThreadAlive()) {
+            currentThread.interrupt()
+        }
+        currentThread = buildThread()
+        currentThread.start()
+    }
+
+    private fun buildThread(): Thread {
+        return object : Thread() {
+            override fun run() {
+                handle.loop(-1, packetListener)
+            }
+
+            override fun interrupt() {
+                handle.breakLoop()
+                handle.close()
+            }
+        }
+    }
+
+    fun isThreadAlive(): Boolean {
+        return currentThread.isAlive
     }
 
     /** Find the current active pcap network interface.
@@ -63,17 +88,6 @@ object DofusMessageReceiver : Thread() {
         if (currentAddress == null) error("No active address found. Make sure you have an internet connection.")
         return Pcaps.getDevByAddress(currentAddress)
             ?: error("No active device found. Make sure WinPcap or libpcap is installed.")
-    }
-
-    override fun interrupt() {
-        handle.breakLoop()
-        handle.close()
-    }
-
-    override fun run() {
-        val serverIp = DofusMessageReceiverUtil.findServerIp()
-        handle.setFilter("src $serverIp", BpfCompileMode.OPTIMIZE)
-        handle.loop(-1, packetListener)
     }
 
     private fun receiveData(data: ByteArrayReader) {
