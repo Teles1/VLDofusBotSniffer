@@ -7,7 +7,7 @@ import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
 import fr.lewon.dofus.bot.util.io.gamefiles.VldbFilesUtil
 import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
 import fr.lewon.dofus.bot.util.logs.VldbLogger
-import fr.lewon.dofus.export.builder.VldbExportPackTaskBuilder
+import fr.lewon.dofus.export.builder.VldbIdByNameExportPackTaskBuilder
 import org.reflections.Reflections
 import java.io.BufferedReader
 import java.io.File
@@ -30,8 +30,8 @@ object DofusMessageReceiverUtil {
             throw RuntimeException("Unable to find DofusInvoker.swf in Dofus directory")
         }
         val builders = listOf(
-            VldbExportPackTaskBuilder("MessageReceiver", MessageIdByName, "_messagesTypes"),
-            VldbExportPackTaskBuilder("ProtocolTypeManager", TypeIdByName, "_typesTypes")
+            VldbIdByNameExportPackTaskBuilder("MessageReceiver", MessageIdByName, "_messagesTypes"),
+            VldbIdByNameExportPackTaskBuilder("ProtocolTypeManager", TypeIdByName, "_typesTypes")
         )
         VldbProtocolUpdater.updateManagers(swfFile, builders)
         messagesById = Reflections(INetworkMessage::class.java.packageName)

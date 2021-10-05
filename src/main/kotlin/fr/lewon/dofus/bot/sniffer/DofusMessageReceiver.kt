@@ -28,7 +28,7 @@ object DofusMessageReceiver {
     private var inputBuffer: ByteArray = ByteArray(0)
     private var currentThread: Thread = buildThread()
 
-    fun restartThread() {
+    fun killAndStartThread() {
         val nif = findActiveDevice()
         handle = nif.openLive(65536, PromiscuousMode.PROMISCUOUS, -1)
         val serverIp = DofusMessageReceiverUtil.findServerIp()
