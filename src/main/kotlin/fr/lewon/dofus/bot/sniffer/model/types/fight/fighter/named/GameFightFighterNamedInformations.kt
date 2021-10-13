@@ -2,7 +2,7 @@ package fr.lewon.dofus.bot.sniffer.model.types.fight.fighter.named
 
 import fr.lewon.dofus.bot.sniffer.model.types.fight.fighter.GameFightFighterInformations
 import fr.lewon.dofus.bot.sniffer.model.types.fight.fighter.PlayerStatus
-import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 
 open class GameFightFighterNamedInformations : GameFightFighterInformations() {
 

@@ -3,7 +3,7 @@ package fr.lewon.dofus.bot.sniffer.model.types.fight.charac
 import fr.lewon.dofus.bot.sniffer.model.INetworkType
 import fr.lewon.dofus.bot.sniffer.model.TypeManager
 import fr.lewon.dofus.bot.sniffer.model.types.actor.ActorExtendedAlignmentInformations
-import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 
 class CharacterCharacteristicsInformations : INetworkType {
 

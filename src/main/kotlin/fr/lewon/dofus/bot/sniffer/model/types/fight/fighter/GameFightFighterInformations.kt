@@ -4,7 +4,7 @@ import fr.lewon.dofus.bot.sniffer.model.TypeManager
 import fr.lewon.dofus.bot.sniffer.model.types.actor.GameContextActorInformations
 import fr.lewon.dofus.bot.sniffer.model.types.fight.GameContextBasicSpawnInformation
 import fr.lewon.dofus.bot.sniffer.model.types.fight.charac.GameFightCharacteristics
-import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 
 open class GameFightFighterInformations : GameContextActorInformations() {
 

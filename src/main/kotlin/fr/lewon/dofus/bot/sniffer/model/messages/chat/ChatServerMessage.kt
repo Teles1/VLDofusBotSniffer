@@ -1,7 +1,7 @@
 package fr.lewon.dofus.bot.sniffer.model.messages.chat
 
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
-import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 import org.apache.commons.text.StringEscapeUtils
 
 open class ChatServerMessage : INetworkMessage {

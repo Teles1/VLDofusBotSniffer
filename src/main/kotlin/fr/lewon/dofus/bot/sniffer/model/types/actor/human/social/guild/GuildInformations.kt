@@ -1,7 +1,7 @@
 package fr.lewon.dofus.bot.sniffer.model.types.actor.human.social.guild
 
 import fr.lewon.dofus.bot.sniffer.model.types.actor.human.social.GuildEmblem
-import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 
 class GuildInformations : BasicGuildInformations() {
 

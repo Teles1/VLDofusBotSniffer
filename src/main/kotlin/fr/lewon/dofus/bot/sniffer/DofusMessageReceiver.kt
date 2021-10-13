@@ -3,8 +3,8 @@ package fr.lewon.dofus.bot.sniffer
 import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
 import fr.lewon.dofus.bot.sniffer.store.EventStore
-import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
-import fr.lewon.dofus.bot.util.logs.VldbLogger
+import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.core.logs.VldbLogger
 import org.pcap4j.core.BpfProgram.BpfCompileMode
 import org.pcap4j.core.PacketListener
 import org.pcap4j.core.PcapHandle

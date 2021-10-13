@@ -1,7 +1,7 @@
 package fr.lewon.dofus.bot.sniffer.model.types.actor.roleplay.taxcollector
 
 import fr.lewon.dofus.bot.sniffer.model.types.actor.human.social.alliance.AllianceInformations
-import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 
 class TaxCollectorStaticExtendedInformations : TaxCollectorStaticInformations() {
 

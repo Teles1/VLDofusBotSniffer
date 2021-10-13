@@ -3,7 +3,7 @@ package fr.lewon.dofus.bot.sniffer.model.types.actor
 import fr.lewon.dofus.bot.sniffer.model.INetworkType
 import fr.lewon.dofus.bot.sniffer.model.TypeManager
 import fr.lewon.dofus.bot.sniffer.model.types.fight.disposition.EntityDispositionInformations
-import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 
 open class GameContextActorPositionInformations : INetworkType {
 

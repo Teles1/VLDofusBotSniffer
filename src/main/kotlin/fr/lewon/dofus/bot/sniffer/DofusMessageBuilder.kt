@@ -1,8 +1,8 @@
 package fr.lewon.dofus.bot.sniffer
 
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
-import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
-import fr.lewon.dofus.bot.util.logs.VldbLogger
+import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.core.logs.VldbLogger
 
 class DofusMessageBuilder(
     private val eventName: String,

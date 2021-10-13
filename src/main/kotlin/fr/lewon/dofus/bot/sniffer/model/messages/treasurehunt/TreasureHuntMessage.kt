@@ -1,12 +1,12 @@
 package fr.lewon.dofus.bot.sniffer.model.messages.treasurehunt
 
-import fr.lewon.dofus.bot.model.maps.DofusMap
+import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.core.manager.DofusMapManager
+import fr.lewon.dofus.bot.core.model.maps.DofusMap
 import fr.lewon.dofus.bot.sniffer.model.TypeManager
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
 import fr.lewon.dofus.bot.sniffer.model.types.hunt.TreasureHuntFlag
 import fr.lewon.dofus.bot.sniffer.model.types.hunt.TreasureHuntStep
-import fr.lewon.dofus.bot.util.io.stream.ByteArrayReader
-import fr.lewon.dofus.bot.util.manager.d2o.DofusMapManager
 
 class TreasureHuntMessage : INetworkMessage {
 
