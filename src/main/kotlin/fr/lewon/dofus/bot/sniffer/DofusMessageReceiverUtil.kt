@@ -1,12 +1,12 @@
 package fr.lewon.dofus.bot.sniffer
 
 import fr.lewon.dofus.VldbProtocolUpdater
-import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
-import fr.lewon.dofus.bot.sniffer.managers.TypeIdByName
-import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
 import fr.lewon.dofus.bot.core.io.gamefiles.VldbFilesUtil
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 import fr.lewon.dofus.bot.core.logs.VldbLogger
+import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
+import fr.lewon.dofus.bot.sniffer.managers.TypeIdByName
+import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
 import fr.lewon.dofus.export.builder.VldbIdByNameExportPackTaskBuilder
 import org.reflections.Reflections
 import java.io.BufferedReader
@@ -51,7 +51,7 @@ object DofusMessageReceiverUtil {
         process.waitFor()
         val lines = BufferedReader(InputStreamReader(process.inputStream)).readLines()
         if (lines.isEmpty()) error("Couldn't find the server ip: The netstat command returned an empty result. Did you launch a Dofus session ?")
-        lines.forEach { VldbLogger.info("Netstat result : $it") }
+        lines.forEach { VldbLogger.debug("Netstat result : $it") }
         if (lines.size > 1) error("Couldn't find the server ip: The netstat command returned ${lines.size} results. Please only let one Dofus session opened ?")
         val words = lines[0].split(" ".toRegex()).toTypedArray()
         var ipAndPort: String? = null
