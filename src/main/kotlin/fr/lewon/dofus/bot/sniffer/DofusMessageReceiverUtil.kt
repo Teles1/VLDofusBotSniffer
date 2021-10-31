@@ -16,6 +16,9 @@ import java.io.InputStreamReader
 object DofusMessageReceiverUtil {
 
     private lateinit var messagesById: Map<Int, Class<out INetworkMessage>>
+    private const val NETSTAT_DOFUS_REGEX =
+        "[\\s]+TCP[\\s]+[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+:[0-9]+[\\s]+[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+:5555[\\s]+ESTABLISHED"
+    private const val NETSTAT_COMMAND = "cmd.exe /c netstat -a -p TCP -n | findstr :5555"
 
     fun parseMessageBuilder(stream: ByteArrayReader, messageId: Int): DofusMessageBuilder? {
         val messageType = messagesById[messageId]
@@ -41,28 +44,19 @@ object DofusMessageReceiverUtil {
     }
 
     fun findServerIp(): String {
-        val findServerIpProcessBuilder = ProcessBuilder(
-            "cmd.exe", "/c", "netstat", "-a", "-p", "TCP", "-n",
-            "|", "findstr", ":5555",
-            "|", "findstr", "/V", ":5555[0-9]",
-            "|", "findstr", "ESTABLISHED"
-        )
+        val findServerIpProcessBuilder = ProcessBuilder(NETSTAT_COMMAND.split(" "))
         val process = findServerIpProcessBuilder.start()
         process.waitFor()
         val lines = BufferedReader(InputStreamReader(process.inputStream)).readLines()
+            .filter { it.matches(Regex(NETSTAT_DOFUS_REGEX)) }
         if (lines.isEmpty()) error("Couldn't find the server ip: The netstat command returned an empty result. Did you launch a Dofus session ?")
         lines.forEach { VldbLogger.debug("Netstat result : $it") }
         if (lines.size > 1) error("Couldn't find the server ip: The netstat command returned ${lines.size} results. Please only let one Dofus session opened ?")
         val words = lines[0].split(" ".toRegex()).toTypedArray()
-        var ipAndPort: String? = null
-        for (word in words) {
-            if (word.isNotEmpty() && word.contains(":5555") && !word.contains("127.0.0.1")) {
-                ipAndPort = word
-            }
-        }
-        if (ipAndPort == null) error("Couldn't find the server ip: ip is null. Did you launch a Dofus session ?")
+        val ipAndPort = words.firstOrNull { it.matches(Regex("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+:5555")) }
+            ?: error("Couldn't find the server ip: ip is null. Did you launch a Dofus session ?")
         val address = ipAndPort.split(":".toRegex()).toTypedArray()
-        if (address.size != 2) error("Couldn't find the server ip: server address is " + address.size + " long. Did you launch a Dofus session ?")
+        if (address.size != 2) error("Couldn't find the server ip: server address is invalid. Did you launch a Dofus session ?")
         return address[0]
     }
 

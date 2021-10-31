@@ -2,7 +2,7 @@ package fr.lewon.dofus.bot.sniffer.model.types.fight.member
 
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 
-class FightTeamMemberCharacterInformations : FightTeamMemberInformations() {
+open class FightTeamMemberCharacterInformations : FightTeamMemberInformations() {
 
     lateinit var name: String
     var level = -1

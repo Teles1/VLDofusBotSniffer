@@ -1,18 +1,20 @@
 package fr.lewon.dofus.bot.sniffer
 
-import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
-import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
-import fr.lewon.dofus.bot.sniffer.store.EventStore
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 import fr.lewon.dofus.bot.core.logs.VldbLogger
+import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
+import fr.lewon.dofus.bot.sniffer.store.EventStore
 import org.pcap4j.core.BpfProgram.BpfCompileMode
 import org.pcap4j.core.PacketListener
 import org.pcap4j.core.PcapHandle
 import org.pcap4j.core.PcapNetworkInterface
 import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode
 import org.pcap4j.core.Pcaps
+import org.pcap4j.packet.TcpPacket
 import java.net.InetAddress
 import java.net.NetworkInterface
+import java.util.*
+import java.util.concurrent.ArrayBlockingQueue
 
 object DofusMessageReceiver {
 
@@ -21,10 +23,12 @@ object DofusMessageReceiver {
 
     private lateinit var handle: PcapHandle
     private lateinit var packetListener: PacketListener
+    private lateinit var packetTreatmentTimer: Timer
+    private val packetsToTreat = ArrayBlockingQueue<TcpPacket>(50)
     private var staticHeader = 0
-    private var splittedPacket = false
-    private var splittedPacketLength = 0
-    private var splittedPacketId = 0
+    private var splitPacket = false
+    private var splitPacketLength = 0
+    private var splitPacketId = 0
     private var inputBuffer: ByteArray = ByteArray(0)
     private var currentThread: Thread = buildThread()
 
@@ -33,14 +37,14 @@ object DofusMessageReceiver {
         handle = nif.openLive(65536, PromiscuousMode.PROMISCUOUS, -1)
         val serverIp = DofusMessageReceiverUtil.findServerIp()
         handle.setFilter("src $serverIp", BpfCompileMode.OPTIMIZE)
-        packetListener = PacketListener { packet ->
-            val ethernetPacket = packet.payload
-            if (ethernetPacket != null) {
-                val tcpPacket = ethernetPacket.payload
+        packetListener = PacketListener { ethernetPacket ->
+            val ipV4Packet = ethernetPacket.payload
+            if (ipV4Packet != null) {
+                val tcpPacket = ipV4Packet.payload
                 if (tcpPacket != null) {
-                    val dofusPacket = tcpPacket.payload
-                    if (dofusPacket != null) {
-                        receiveData(ByteArrayReader(dofusPacket.rawData))
+                    if (tcpPacket.payload != null) {
+                        packetsToTreat.add(tcpPacket as TcpPacket)
+                        packetTreatmentTimer.schedule(buildReceiveTimerTask(), 150L)
                     }
                 }
             }
@@ -48,8 +52,21 @@ object DofusMessageReceiver {
         if (isThreadAlive()) {
             currentThread.interrupt()
         }
+        packetsToTreat.clear()
+        packetTreatmentTimer = Timer()
         currentThread = buildThread()
         currentThread.start()
+    }
+
+    private fun buildReceiveTimerTask(): TimerTask {
+        return object : TimerTask() {
+            override fun run() {
+                val tcpPacket = packetsToTreat.minByOrNull { it.header.sequenceNumberAsLong }
+                    ?: error("No TCP packet to treat")
+                packetsToTreat.remove(tcpPacket)
+                receiveData(ByteArrayReader(tcpPacket.payload.rawData))
+            }
+        }
     }
 
     private fun buildThread(): Thread {
@@ -61,6 +78,8 @@ object DofusMessageReceiver {
             override fun interrupt() {
                 handle.breakLoop()
                 handle.close()
+                packetTreatmentTimer.cancel()
+                packetTreatmentTimer.purge()
             }
         }
     }
@@ -93,21 +112,21 @@ object DofusMessageReceiver {
     private fun receiveData(data: ByteArrayReader) {
         VldbLogger.trace(" ------- ")
         if (data.available() > 0) {
-            var messageReceiver = lowReceive(data)
-            while (messageReceiver != null) {
-                messageReceiver.build()?.let { process(it) }
-                messageReceiver = lowReceive(data)
+            var messageBuilder = lowReceive(data)
+            while (messageBuilder != null) {
+                process(messageBuilder)
+                messageBuilder = lowReceive(data)
             }
         }
     }
 
-    private fun process(msg: INetworkMessage) {
-        EventStore.addSocketEvent(msg)
+    private fun process(messageBuilder: DofusMessageBuilder) {
+        messageBuilder.build()?.let { EventStore.addSocketEvent(it) }
     }
 
     private fun lowReceive(src: ByteArrayReader): DofusMessageBuilder? {
         VldbLogger.trace(" -- low receive -- ")
-        if (!splittedPacket) {
+        if (!splitPacket) {
             if (src.available() < 2) {
                 VldbLogger.trace("Not enough data to read the header, byte available : " + src.available() + " (needed : 2)")
                 return null
@@ -135,9 +154,9 @@ object DofusMessageReceiver {
                 }
                 VldbLogger.trace("Not enough data to read msg [$messageId] content, byte available : " + src.available() + " (needed : " + messageLength + ")")
                 staticHeader = -1
-                splittedPacketLength = messageLength
-                splittedPacketId = messageId
-                splittedPacket = true
+                splitPacketLength = messageLength
+                splitPacketId = messageId
+                splitPacket = true
                 inputBuffer = src.readNBytes(src.available())
                 return null
             }
@@ -151,26 +170,29 @@ object DofusMessageReceiver {
                 return null
             }
             staticHeader = header
-            splittedPacketLength = 0
-            splittedPacketId = messageId
-            splittedPacket = true
+            splitPacketLength = 0
+            splitPacketId = messageId
+            splitPacket = true
             return null
         }
         if (staticHeader != -1) {
-            splittedPacketLength = readMessageLength(staticHeader, src)
+            splitPacketLength = readMessageLength(staticHeader, src)
             staticHeader = -1
         }
-        if (src.available() + inputBuffer.size >= splittedPacketLength) {
-            inputBuffer += src.readNBytes(splittedPacketLength - inputBuffer.size)
+        if (src.available() + inputBuffer.size >= splitPacketLength) {
+            inputBuffer += src.readNBytes(splitPacketLength - inputBuffer.size)
             VldbLogger.trace("Full parsing done")
             val inputBufferReader = ByteArrayReader(inputBuffer)
-            val msg = DofusMessageReceiverUtil.parseMessageBuilder(inputBufferReader, splittedPacketId)
-            VldbLogger.trace("=> Bytes left : ${src.available()} / ${inputBufferReader.available()}")
-            splittedPacket = false
+            val msg = DofusMessageReceiverUtil.parseMessageBuilder(inputBufferReader, splitPacketId)
+            VldbLogger.trace("=> Bytes left : ${src.available()}")
+            splitPacket = false
             inputBuffer = ByteArray(0)
             return msg
         }
-        inputBuffer += src.readNBytes(src.available())
+        VldbLogger.trace("=> Saved to buffer : ${src.available()}")
+        inputBuffer += src.readAllBytes()
+        VldbLogger.trace("=> Total buffer size : ${inputBuffer.size}")
+        VldbLogger.trace("=> Needed size : $splitPacketLength")
         return null
     }
 
@@ -179,8 +201,7 @@ object DofusMessageReceiver {
             0 -> 0
             1 -> src.readUnsignedByte()
             2 -> src.readUnsignedShort()
-            3 -> ((src.readByte().toInt() and 255) shl 16) + ((src.readByte().toInt() and 255) shl 8) + (src.readByte()
-                .toInt() and 255)
+            3 -> ((src.readUnsignedByte() and 255) shl 16) + ((src.readUnsignedByte() and 255) shl 8) + (src.readUnsignedByte() and 255)
             else -> error("Invalid length")
         }
 

@@ -5,10 +5,10 @@ import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 class HumanOptionEmote : HumanOption() {
 
     var emoteId = -1
-    var emoteStartType = -1.0
+    var emoteStartTime = -1.0
 
     override fun deserialize(stream: ByteArrayReader) {
         emoteId = stream.readByte().toUByte().toInt()
-        emoteStartType = stream.readDouble()
+        emoteStartTime = stream.readDouble()
     }
 }

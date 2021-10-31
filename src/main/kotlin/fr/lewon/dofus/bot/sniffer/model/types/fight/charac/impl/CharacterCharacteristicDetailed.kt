@@ -1,9 +1,9 @@
 package fr.lewon.dofus.bot.sniffer.model.types.fight.charac.impl
 
-import fr.lewon.dofus.bot.sniffer.model.types.fight.charac.CharacterCharacteristic
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.sniffer.model.types.fight.charac.CharacterCharacteristic
 
-class CharacterCharacteristicDetailed : CharacterCharacteristic() {
+open class CharacterCharacteristicDetailed : CharacterCharacteristic() {
 
     var base = 0
     var additional = 0

@@ -1,7 +1,7 @@
 package fr.lewon.dofus.bot.sniffer.model.types.actor.roleplay.npc
 
-import fr.lewon.dofus.bot.sniffer.model.types.actor.roleplay.GameRolePlayNamedActorInformations
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.sniffer.model.types.actor.roleplay.GameRolePlayNamedActorInformations
 
 class GameRolePlayMountInformations : GameRolePlayNamedActorInformations() {
 
@@ -11,6 +11,6 @@ class GameRolePlayMountInformations : GameRolePlayNamedActorInformations() {
     override fun deserialize(stream: ByteArrayReader) {
         super.deserialize(stream)
         ownerName = stream.readUTF()
-        level = stream.readByte().toUByte().toInt()
+        level = stream.readUnsignedByte()
     }
 }

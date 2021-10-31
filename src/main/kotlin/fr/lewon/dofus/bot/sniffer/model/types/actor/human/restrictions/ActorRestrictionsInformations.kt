@@ -1,8 +1,8 @@
 package fr.lewon.dofus.bot.sniffer.model.types.actor.human.restrictions
 
-import fr.lewon.dofus.bot.sniffer.model.INetworkType
 import fr.lewon.dofus.bot.core.io.stream.BooleanByteWrapper
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.sniffer.model.INetworkType
 
 class ActorRestrictionsInformations : INetworkType {
 
@@ -26,7 +26,6 @@ class ActorRestrictionsInformations : INetworkType {
     var cantSpeakToNPC = false
     var cantChangeZone = false
     var cantAttackMonster = false
-    var cantWalk8Directions = false
 
     override fun deserialize(stream: ByteArrayReader) {
         val box0 = stream.readByte()
@@ -52,6 +51,5 @@ class ActorRestrictionsInformations : INetworkType {
         cantSpeakToNPC = BooleanByteWrapper.getFlag(box2, 1)
         cantChangeZone = BooleanByteWrapper.getFlag(box2, 2)
         cantAttackMonster = BooleanByteWrapper.getFlag(box2, 3)
-        cantWalk8Directions = BooleanByteWrapper.getFlag(box2, 4)
     }
 }

@@ -1,7 +1,7 @@
 package fr.lewon.dofus.bot.sniffer.model.types.actor.roleplay.prism
 
-import fr.lewon.dofus.bot.sniffer.model.types.actor.roleplay.`object`.ObjectItem
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.sniffer.model.types.actor.roleplay.`object`.ObjectItem
 
 class AllianceInsiderPrismInformation : PrismInformation() {
 
