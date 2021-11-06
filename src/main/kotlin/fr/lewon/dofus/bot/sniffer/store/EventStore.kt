@@ -37,6 +37,14 @@ object EventStore {
         }
     }
 
+    fun <T : INetworkType> getAllEvents(eventClass: Class<T>): List<T> {
+        val eventQueue: ArrayBlockingQueue<INetworkType>
+        synchronized(queueMapper) {
+            eventQueue = queueMapper.computeIfAbsent(eventClass) { ArrayBlockingQueue(queueSize) }
+        }
+        return eventQueue.map { eventClass.cast(it) }
+    }
+
     fun <T : INetworkType> getLastEvent(eventClass: Class<T>): T? {
         val eventQueue: ArrayBlockingQueue<INetworkType>
         synchronized(queueMapper) {
