@@ -8,7 +8,7 @@ class HumanOptionEmote : HumanOption() {
     var emoteStartTime = -1.0
 
     override fun deserialize(stream: ByteArrayReader) {
-        emoteId = stream.readByte().toUByte().toInt()
+        emoteId = stream.readUnsignedShort()
         emoteStartTime = stream.readDouble()
     }
 }

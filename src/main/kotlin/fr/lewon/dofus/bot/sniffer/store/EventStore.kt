@@ -62,7 +62,7 @@ object EventStore {
 
     /**
      * Clear all the events in a queue.
-     * Don't do anything if the queue doesn't exist.
+     * Doesn't do anything if the queue doesn't exist.
      * @param eventClass - Type of the event to remove.
      */
     fun <T : INetworkType> clear(eventClass: Class<T>) {
