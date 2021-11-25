@@ -3,22 +3,16 @@ package fr.lewon.dofus.bot.sniffer
 import fr.lewon.dofus.VldbProtocolUpdater
 import fr.lewon.dofus.bot.core.io.gamefiles.VldbFilesUtil
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
-import fr.lewon.dofus.bot.core.logs.VldbLogger
 import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
 import fr.lewon.dofus.bot.sniffer.managers.TypeIdByName
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
 import fr.lewon.dofus.export.builder.VldbIdByNameExportPackTaskBuilder
 import org.reflections.Reflections
-import java.io.BufferedReader
 import java.io.File
-import java.io.InputStreamReader
 
 object DofusMessageReceiverUtil {
 
     private lateinit var messagesById: Map<Int, Class<out INetworkMessage>>
-    private const val NETSTAT_DOFUS_REGEX =
-        "[\\s]+TCP[\\s]+[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+:[0-9]+[\\s]+[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+:5555[\\s]+ESTABLISHED"
-    private const val NETSTAT_COMMAND = "cmd.exe /c netstat -a -p TCP -n | findstr :5555"
 
     fun parseMessageBuilder(stream: ByteArrayReader, messageId: Int): DofusMessageBuilder? {
         val messageType = messagesById[messageId]
@@ -39,25 +33,7 @@ object DofusMessageReceiverUtil {
         VldbProtocolUpdater.updateManagers(swfFile, builders)
         messagesById = Reflections(INetworkMessage::class.java.packageName)
             .getSubTypesOf(INetworkMessage::class.java)
-            .map { (MessageIdByName.getId(it.simpleName) ?: error("Couldn't find id for [${it.simpleName}]")) to it }
-            .toMap()
-    }
-
-    fun findServerIp(): String {
-        val findServerIpProcessBuilder = ProcessBuilder(NETSTAT_COMMAND.split(" "))
-        val process = findServerIpProcessBuilder.start()
-        process.waitFor()
-        val lines = BufferedReader(InputStreamReader(process.inputStream)).readLines()
-            .filter { it.matches(Regex(NETSTAT_DOFUS_REGEX)) }
-        if (lines.isEmpty()) error("Couldn't find the server ip: The netstat command returned an empty result. Did you launch a Dofus session ?")
-        lines.forEach { VldbLogger.debug("Netstat result : $it") }
-        if (lines.size > 1) error("Couldn't find the server ip: The netstat command returned ${lines.size} results. Please only let one Dofus session opened ?")
-        val words = lines[0].split(" ".toRegex()).toTypedArray()
-        val ipAndPort = words.firstOrNull { it.matches(Regex("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+:5555")) }
-            ?: error("Couldn't find the server ip: ip is null. Did you launch a Dofus session ?")
-        val address = ipAndPort.split(":".toRegex()).toTypedArray()
-        if (address.size != 2) error("Couldn't find the server ip: server address is invalid. Did you launch a Dofus session ?")
-        return address[0]
+            .associateBy { (MessageIdByName.getId(it.simpleName) ?: error("Couldn't find id for [${it.simpleName}]")) }
     }
 
 }

@@ -4,25 +4,19 @@ import fr.lewon.dofus.bot.sniffer.model.INetworkType
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.TypeVariable
-import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 object EventStore {
 
     private const val queueSize = 100
-    private val queueMapper = HashMap<Class<out INetworkType>, ArrayBlockingQueue<INetworkType>>()
+    private val queueMapper = HashMap<Long, HashMap<Class<out INetworkType>, ArrayBlockingQueue<INetworkType>>>()
     private val handlerMapper = HashMap<Class<out INetworkType>, ArrayList<EventHandler<INetworkType>>>()
 
-    /**
-     * Add socket event to the parsed list. Remove the first if no space left.
-     * @param dofusEvent - Socket event to add to the queue.
-     */
-    fun addSocketEvent(dofusEvent: INetworkType) {
+    fun addSocketEvent(dofusEvent: INetworkType, snifferId: Long) {
         val eventQueue: ArrayBlockingQueue<INetworkType>
         synchronized(queueMapper) {
-            eventQueue = queueMapper.computeIfAbsent(dofusEvent.javaClass) { ArrayBlockingQueue(queueSize) }
+            eventQueue = queueMapper.computeIfAbsent(snifferId) { HashMap() }
+                .computeIfAbsent(dofusEvent.javaClass) { ArrayBlockingQueue(queueSize) }
         }
         synchronized(eventQueue) {
             if (!eventQueue.offer(dofusEvent)) {
@@ -32,50 +26,39 @@ object EventStore {
         }
         synchronized(handlerMapper) {
             handlerMapper[dofusEvent.javaClass]?.forEach {
-                it.onEventReceived(dofusEvent)
+                it.onEventReceived(dofusEvent, snifferId)
             }
         }
     }
 
-    fun <T : INetworkType> getAllEvents(eventClass: Class<T>): List<T> {
+    fun <T : INetworkType> getAllEvents(eventClass: Class<T>, snifferId: Long): List<T> {
         val eventQueue: ArrayBlockingQueue<INetworkType>
         synchronized(queueMapper) {
-            eventQueue = queueMapper.computeIfAbsent(eventClass) { ArrayBlockingQueue(queueSize) }
+            eventQueue = queueMapper.computeIfAbsent(snifferId) { HashMap() }
+                .computeIfAbsent(eventClass) { ArrayBlockingQueue(queueSize) }
         }
         return eventQueue.map { eventClass.cast(it) }
     }
 
-    fun <T : INetworkType> getLastEvent(eventClass: Class<T>): T? {
+    fun <T : INetworkType> getLastEvent(eventClass: Class<T>, snifferId: Long): T? {
         val eventQueue: ArrayBlockingQueue<INetworkType>
         synchronized(queueMapper) {
-            eventQueue = queueMapper.computeIfAbsent(eventClass) { ArrayBlockingQueue(queueSize) }
+            eventQueue = queueMapper.computeIfAbsent(snifferId) { HashMap() }
+                .computeIfAbsent(eventClass) { ArrayBlockingQueue(queueSize) }
         }
         return eventClass.cast(eventQueue.lastOrNull())
     }
 
-    /**
-     * Clear all the events in the store.
-     */
-    fun clear() {
-        synchronized(queueMapper) { queueMapper.clear() }
+    fun clear(snifferId: Long) {
+        synchronized(queueMapper) { queueMapper[snifferId]?.clear() }
     }
 
-    /**
-     * Clear all the events in a queue.
-     * Doesn't do anything if the queue doesn't exist.
-     * @param eventClass - Type of the event to remove.
-     */
-    fun <T : INetworkType> clear(eventClass: Class<T>) {
+    fun <T : INetworkType> clear(eventClass: Class<T>, snifferId: Long) {
         synchronized(queueMapper) {
-            queueMapper[eventClass]?.clear()
+            queueMapper[snifferId]?.get(eventClass)?.clear()
         }
     }
 
-    /**
-     * Add an event handler to the list. The handler will be called every time the event occurs.
-     * @param eventClass - Type of the event handler.
-     * @param eventHandler - Event handler to add.
-     */
     @Synchronized
     fun <T : INetworkType> addEventHandler(eventClass: Class<T>, eventHandler: EventHandler<T>) {
         synchronized(handlerMapper) {

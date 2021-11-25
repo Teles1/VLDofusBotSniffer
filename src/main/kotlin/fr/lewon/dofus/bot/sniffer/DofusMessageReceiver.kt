@@ -15,28 +15,33 @@ import java.net.InetAddress
 import java.net.NetworkInterface
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.atomic.AtomicLong
 
-object DofusMessageReceiver {
+class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String, hostPort: String) : Thread() {
 
-    private const val BIT_RIGHT_SHIFT_LEN_PACKET_ID = 2
-    private const val BIT_MASK = 3
+    companion object {
+        private const val BIT_RIGHT_SHIFT_LEN_PACKET_ID = 2
+        private const val BIT_MASK = 3
+        private val ID_GENERATOR = AtomicLong(1L)
+    }
 
-    private lateinit var handle: PcapHandle
-    private lateinit var packetListener: PacketListener
-    private lateinit var packetTreatmentTimer: Timer
+    val snifferId = ID_GENERATOR.getAndIncrement()
+    private val handle: PcapHandle
+    private val packetListener: PacketListener
+    private val packetTreatmentTimer: Timer
     private val packetsToTreat = ArrayBlockingQueue<TcpPacket>(50)
     private var staticHeader = 0
     private var splitPacket = false
     private var splitPacketLength = 0
     private var splitPacketId = 0
     private var inputBuffer: ByteArray = ByteArray(0)
-    private var currentThread: Thread = buildThread()
 
-    fun killAndStartThread() {
+    init {
+        packetsToTreat.clear()
+        packetTreatmentTimer = Timer()
         val nif = findActiveDevice()
         handle = nif.openLive(65536, PromiscuousMode.PROMISCUOUS, -1)
-        val serverIp = DofusMessageReceiverUtil.findServerIp()
-        handle.setFilter("src $serverIp", BpfCompileMode.OPTIMIZE)
+        handle.setFilter(buildFilter(serverIp, serverPort, hostIp, hostPort), BpfCompileMode.OPTIMIZE)
         packetListener = PacketListener { ethernetPacket ->
             val ipV4Packet = ethernetPacket.payload
             if (ipV4Packet != null) {
@@ -49,13 +54,25 @@ object DofusMessageReceiver {
                 }
             }
         }
-        if (isThreadAlive()) {
-            currentThread.interrupt()
-        }
+    }
+
+    override fun run() {
+        handle.loop(-1, packetListener)
+    }
+
+    override fun interrupt() {
+        handle.breakLoop()
+        handle.close()
+        packetTreatmentTimer.cancel()
         packetsToTreat.clear()
-        packetTreatmentTimer = Timer()
-        currentThread = buildThread()
-        currentThread.start()
+    }
+
+    private fun buildFilter(serverIp: String, serverPort: String, hostIp: String, hostPort: String): String {
+        return "src host $serverIp and src port $serverPort and dst host $hostIp and dst port $hostPort"
+    }
+
+    fun isSnifferRunning(): Boolean {
+        return isAlive && handle.isOpen
     }
 
     private fun buildReceiveTimerTask(): TimerTask {
@@ -67,25 +84,6 @@ object DofusMessageReceiver {
                 receiveData(ByteArrayReader(tcpPacket.payload.rawData))
             }
         }
-    }
-
-    private fun buildThread(): Thread {
-        return object : Thread() {
-            override fun run() {
-                handle.loop(-1, packetListener)
-            }
-
-            override fun interrupt() {
-                handle.breakLoop()
-                handle.close()
-                packetTreatmentTimer.cancel()
-                packetTreatmentTimer.purge()
-            }
-        }
-    }
-
-    fun isThreadAlive(): Boolean {
-        return currentThread.isAlive
     }
 
     /** Find the current active pcap network interface.
@@ -104,7 +102,7 @@ object DofusMessageReceiver {
                 }
             }
         }
-        if (currentAddress == null) error("No active address found. Make sure you have an internet connection.")
+        currentAddress ?: error("No active address found. Make sure you have an internet connection.")
         return Pcaps.getDevByAddress(currentAddress)
             ?: error("No active device found. Make sure WinPcap or libpcap is installed.")
     }
@@ -121,7 +119,7 @@ object DofusMessageReceiver {
     }
 
     private fun process(messageBuilder: DofusMessageBuilder) {
-        messageBuilder.build()?.let { EventStore.addSocketEvent(it) }
+        messageBuilder.build()?.let { EventStore.addSocketEvent(it, snifferId) }
     }
 
     private fun lowReceive(src: ByteArrayReader): DofusMessageBuilder? {
