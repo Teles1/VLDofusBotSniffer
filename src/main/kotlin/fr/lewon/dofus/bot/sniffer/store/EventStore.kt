@@ -33,18 +33,29 @@ object EventStore {
         return queueMapper.computeIfAbsent(snifferId) { HashMap() }
     }
 
+    private fun getAllEvents(eventQueue: Map<Long, ArrayBlockingQueue<INetworkMessage>>): List<INetworkMessage> {
+        return eventQueue.entries.flatMap { it.value }
+    }
+
+    private fun <T : INetworkMessage> getAllEvents(
+        eventQueue: Map<Long, ArrayBlockingQueue<INetworkMessage>>,
+        eventClass: Class<T>
+    ): List<T> {
+        return getAllEvents(eventQueue)
+            .filter { it::class.java == eventClass }
+            .map { eventClass.cast(it) }
+    }
+
     fun getAllEvents(snifferId: Long): List<INetworkMessage> {
         lock.lock()
-        val allEvents = getEventQueue(snifferId).entries.flatMap { it.value }
+        val allEvents = getAllEvents(getEventQueue(snifferId))
         lock.unlock()
         return allEvents
     }
 
     fun <T : INetworkMessage> getAllEvents(eventClass: Class<T>, snifferId: Long): List<T> {
         lock.lock()
-        val allEvents = getAllEvents(snifferId)
-            .filter { it::class.java == eventClass }
-            .map { eventClass.cast(it) }
+        val allEvents = getAllEvents(getEventQueue(snifferId), eventClass)
         lock.unlock()
         return allEvents
     }
@@ -52,14 +63,26 @@ object EventStore {
     fun containsSequence(
         snifferId: Long,
         mainEventClass: Class<out INetworkMessage>,
-        vararg additionalEventClasses: Class<out INetworkMessage>,
+        vararg additionalEventClasses: Class<out INetworkMessage>
+    ): Boolean {
+        return containsSequence(snifferId, mainEventClass, additionalEventClasses.groupingBy { it }.eachCount())
+    }
+
+    fun containsSequence(
+        snifferId: Long,
+        mainEventClass: Class<out INetworkMessage>,
+        additionalEventClassesWithCount: Map<Class<out INetworkMessage>, Int>,
     ): Boolean {
         try {
             lock.lock()
             val eventQueue = getEventQueue(snifferId)
-            val startSequenceNumber = getFirstSequenceNumber(Long.MIN_VALUE, eventQueue, mainEventClass) ?: return false
-            for (eventClass in additionalEventClasses) {
-                getFirstSequenceNumber(startSequenceNumber, eventQueue, eventClass) ?: return false
+            val subQueue = getSubQueue(eventQueue, mainEventClass) ?: return false
+            for (entry in additionalEventClassesWithCount) {
+                val eventClass = entry.key
+                val count = entry.value
+                if (getAllEvents(subQueue, eventClass).size < count) {
+                    return false
+                }
             }
             return true
         } finally {
@@ -67,14 +90,13 @@ object EventStore {
         }
     }
 
-    private fun getFirstSequenceNumber(
-        startingSequenceNumber: Long,
+    private fun getSubQueue(
         eventQueue: HashMap<Long, ArrayBlockingQueue<INetworkMessage>>,
         eventClass: Class<out INetworkMessage>
-    ): Long? {
+    ): Map<Long, ArrayBlockingQueue<INetworkMessage>>? {
         for (entry in eventQueue) {
-            if (entry.key >= startingSequenceNumber && entry.value.firstOrNull { it::class.java == eventClass } != null) {
-                return entry.key
+            if (entry.value.firstOrNull { it::class.java == eventClass } != null) {
+                return eventQueue.filter { it.key >= entry.key }
             }
         }
         return null
