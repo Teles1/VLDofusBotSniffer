@@ -28,7 +28,7 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
     val snifferId = ID_GENERATOR.getAndIncrement()
     private val handle: PcapHandle
     private val packetListener: PacketListener
-    private val packetTreatmentTimer: Timer
+    private val packetTreatmentTimer = Timer()
     private val packetsToTreat = ArrayBlockingQueue<TcpPacket>(50)
     private var staticHeader = 0
     private var splitPacket = false
@@ -37,8 +37,6 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
     private var inputBuffer: ByteArray = ByteArray(0)
 
     init {
-        packetsToTreat.clear()
-        packetTreatmentTimer = Timer()
         val nif = findActiveDevice()
         handle = nif.openLive(65536, PromiscuousMode.PROMISCUOUS, -1)
         handle.setFilter(buildFilter(serverIp, serverPort, hostIp, hostPort), BpfCompileMode.OPTIMIZE)
@@ -49,7 +47,7 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
                 if (tcpPacket != null) {
                     if (tcpPacket.payload != null) {
                         packetsToTreat.add(tcpPacket as TcpPacket)
-                        packetTreatmentTimer.schedule(buildReceiveTimerTask(), 150L)
+                        packetTreatmentTimer.schedule(buildReceiveTimerTask(), 250L)
                     }
                 }
             }
@@ -81,7 +79,7 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
                 val tcpPacket = packetsToTreat.minByOrNull { it.header.sequenceNumberAsLong }
                     ?: error("No TCP packet to treat")
                 packetsToTreat.remove(tcpPacket)
-                receiveData(ByteArrayReader(tcpPacket.payload.rawData))
+                receiveData(ByteArrayReader(tcpPacket.payload.rawData), tcpPacket.header.sequenceNumberAsLong)
             }
         }
     }
@@ -107,19 +105,19 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
             ?: error("No active device found. Make sure WinPcap or libpcap is installed.")
     }
 
-    private fun receiveData(data: ByteArrayReader) {
+    private fun receiveData(data: ByteArrayReader, sequenceNumber: Long) {
         VldbLogger.trace(" ------- ")
         if (data.available() > 0) {
             var messageBuilder = lowReceive(data)
             while (messageBuilder != null) {
-                process(messageBuilder)
+                process(messageBuilder, sequenceNumber)
                 messageBuilder = lowReceive(data)
             }
         }
     }
 
-    private fun process(messageBuilder: DofusMessageBuilder) {
-        messageBuilder.build()?.let { EventStore.addSocketEvent(it, snifferId) }
+    private fun process(messageBuilder: DofusMessageBuilder, sequenceNumber: Long) {
+        messageBuilder.build()?.let { EventStore.addSocketEvent(it, sequenceNumber, snifferId) }
     }
 
     private fun lowReceive(src: ByteArrayReader): DofusMessageBuilder? {
