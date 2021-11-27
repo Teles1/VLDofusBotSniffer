@@ -57,11 +57,9 @@ object EventStore {
         try {
             lock.lock()
             val eventQueue = getEventQueue(snifferId)
-            var previousSequenceNumber = getFirstSequenceNumber(Long.MIN_VALUE, eventQueue, mainEventClass)
-                ?: return false
+            val startSequenceNumber = getFirstSequenceNumber(Long.MIN_VALUE, eventQueue, mainEventClass) ?: return false
             for (eventClass in additionalEventClasses) {
-                previousSequenceNumber = getFirstSequenceNumber(previousSequenceNumber, eventQueue, eventClass)
-                    ?: return false
+                getFirstSequenceNumber(startSequenceNumber, eventQueue, eventClass) ?: return false
             }
             return true
         } finally {
