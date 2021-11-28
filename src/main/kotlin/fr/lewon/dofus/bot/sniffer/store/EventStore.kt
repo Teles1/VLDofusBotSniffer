@@ -10,16 +10,15 @@ import java.util.concurrent.locks.ReentrantLock
 
 object EventStore {
 
-    private const val queueSize = 200
-    private val queueMapper = HashMap<Long, HashMap<Long, ArrayBlockingQueue<INetworkMessage>>>()
+    private const val queueSize = 500
+    private val queueMapper = HashMap<Long, ArrayBlockingQueue<INetworkMessage>>()
     private val handlerMapper = HashMap<Class<out INetworkMessage>, ArrayList<EventHandler<INetworkMessage>>>()
     private val lock = ReentrantLock()
 
-    fun addSocketEvent(dofusEvent: INetworkMessage, sequenceNumber: Long, snifferId: Long) {
+    fun addSocketEvent(dofusEvent: INetworkMessage, snifferId: Long) {
         try {
             lock.lock()
-            val eventQueue = queueMapper.computeIfAbsent(snifferId) { HashMap() }
-                .computeIfAbsent(sequenceNumber) { ArrayBlockingQueue(queueSize) }
+            val eventQueue = getEventQueue(snifferId)
             if (!eventQueue.offer(dofusEvent)) {
                 eventQueue.poll()
                 eventQueue.offer(dofusEvent)
@@ -32,19 +31,15 @@ object EventStore {
         }
     }
 
-    private fun getEventQueue(snifferId: Long): HashMap<Long, ArrayBlockingQueue<INetworkMessage>> {
-        return queueMapper.computeIfAbsent(snifferId) { HashMap() }
-    }
-
-    private fun getAllEvents(eventQueue: Map<Long, ArrayBlockingQueue<INetworkMessage>>): List<INetworkMessage> {
-        return eventQueue.entries.flatMap { it.value }
+    private fun getEventQueue(snifferId: Long): ArrayBlockingQueue<INetworkMessage> {
+        return queueMapper.computeIfAbsent(snifferId) { ArrayBlockingQueue(queueSize) }
     }
 
     private fun <T : INetworkMessage> getAllEvents(
-        eventQueue: Map<Long, ArrayBlockingQueue<INetworkMessage>>,
+        eventQueue: ArrayBlockingQueue<INetworkMessage>,
         eventClass: Class<T>
     ): List<T> {
-        return getAllEvents(eventQueue)
+        return eventQueue
             .filter { it::class.java == eventClass }
             .map { eventClass.cast(it) }
     }
@@ -52,7 +47,7 @@ object EventStore {
     fun getAllEvents(snifferId: Long): List<INetworkMessage> {
         try {
             lock.lock()
-            return getAllEvents(getEventQueue(snifferId))
+            return getEventQueue(snifferId).toList()
         } finally {
             lock.unlock()
         }
@@ -75,23 +70,23 @@ object EventStore {
         try {
             lock.lock()
             val eventQueue = getEventQueue(snifferId)
-            val firstIndexes = getFirstIndexes(eventQueue, mainEventClass)
+            val firstIndex = getFirstIndex(eventQueue, mainEventClass)
                 ?: error("${mainEventClass.simpleName} not found")
-            val subQueue = getSubQueue(eventQueue, firstIndexes)
-            val lastIndexes = getFirstIndexes(subQueue, endEventClass)
+            val subQueue = getSubQueue(eventQueue, firstIndex)
+            val lastIndex = getFirstIndex(subQueue, endEventClass)
                 ?: error("${endEventClass.simpleName} not found")
 
-            val toRemoveFirst = eventQueue[firstIndexes.first]
-                ?.withIndex()?.firstOrNull { it.index == firstIndexes.second }?.value
-                ?: error("Event with indexes [${firstIndexes.first} ; ${firstIndexes.second}] not found in queue")
-            val toRemoveLast = subQueue[lastIndexes.first]
-                ?.withIndex()?.firstOrNull { it.index == lastIndexes.second }?.value
-                ?: error("Event with indexes [${lastIndexes.first} ; ${lastIndexes.second}] not found in queue")
+            val toRemoveFirst = eventQueue.withIndex().firstOrNull { it.index == firstIndex }?.value
+                ?: error("Event with index [$firstIndex] not found in queue")
+            val toRemoveLast = subQueue.withIndex().firstOrNull { it.index == lastIndex }?.value
+                ?: error("Event with index [$lastIndex] not found in queue")
 
-            eventQueue[firstIndexes.first]?.remove(toRemoveFirst)?.takeIf { it }
-                ?: error("Couldn't remove element from queue at position : [${firstIndexes.first} ; ${firstIndexes.second}]")
-            eventQueue[lastIndexes.first]?.remove(toRemoveLast)?.takeIf { it }
-                ?: error("Couldn't remove element from queue at position : [${lastIndexes.first} ; ${lastIndexes.second}]")
+            if (!eventQueue.remove(toRemoveFirst)) {
+                error("Couldn't remove element from queue at position : [$firstIndex]")
+            }
+            if (!eventQueue.remove(toRemoveLast)) {
+                error("Couldn't remove element from queue at position : [$lastIndex]")
+            }
         } finally {
             lock.unlock()
         }
@@ -105,41 +100,26 @@ object EventStore {
         try {
             lock.lock()
             val eventQueue = getEventQueue(snifferId)
-            val firstIndexes = getFirstIndexes(eventQueue, mainEventClass) ?: return false
-            return getFirstIndexes(getSubQueue(eventQueue, firstIndexes), endEventClass) != null
+            val firstIndex = getFirstIndex(eventQueue, mainEventClass) ?: return false
+            return getFirstIndex(getSubQueue(eventQueue, firstIndex), endEventClass) != null
         } finally {
             lock.unlock()
         }
     }
 
     private fun getSubQueue(
-        eventQueue: Map<Long, ArrayBlockingQueue<INetworkMessage>>,
-        fromIndexes: Pair<Long, Int>
-    ): Map<Long, ArrayBlockingQueue<INetworkMessage>> {
-        val subQueue = HashMap<Long, ArrayBlockingQueue<INetworkMessage>>()
-        val firstMsgQueueContent = eventQueue[fromIndexes.first]
-            ?.filterIndexed { index, _ -> index > fromIndexes.second }
-            ?: emptyList()
-        subQueue[fromIndexes.first] = ArrayBlockingQueue<INetworkMessage>(queueSize)
-            .also { it.addAll(firstMsgQueueContent) }
-        for (entry in eventQueue.filter { it.key > fromIndexes.first }) {
-            subQueue[entry.key] = ArrayBlockingQueue<INetworkMessage>(queueSize)
-                .also { it.addAll(entry.value) }
-        }
-        return subQueue
+        eventQueue: ArrayBlockingQueue<INetworkMessage>,
+        fromIndex: Int
+    ): ArrayBlockingQueue<INetworkMessage> {
+        return ArrayBlockingQueue<INetworkMessage>(queueSize)
+            .also { it.addAll(eventQueue.filterIndexed { index, _ -> index > fromIndex }) }
     }
 
-    private fun getFirstIndexes(
-        eventQueue: Map<Long, ArrayBlockingQueue<INetworkMessage>>,
+    private fun getFirstIndex(
+        eventQueue: ArrayBlockingQueue<INetworkMessage>,
         eventClass: Class<out INetworkMessage>
-    ): Pair<Long, Int>? {
-        for (entry in eventQueue.entries) {
-            val indexOfEventClass = entry.value.indexOfFirst { it::class.java == eventClass }
-            if (indexOfEventClass >= 0) {
-                return Pair(entry.key, indexOfEventClass)
-            }
-        }
-        return null
+    ): Int? {
+        return eventQueue.indexOfFirst { it::class.java == eventClass }.takeIf { it >= 0 }
     }
 
     fun <T : INetworkMessage> getLastEvent(eventClass: Class<T>, snifferId: Long): T? {
@@ -172,9 +152,7 @@ object EventStore {
     fun <T : INetworkType> clear(eventClass: Class<T>, snifferId: Long) {
         try {
             lock.lock()
-            queueMapper[snifferId]?.values?.forEach {
-                it.removeIf { msg -> msg::class.java == eventClass }
-            }
+            queueMapper[snifferId]?.removeIf { msg -> msg::class.java == eventClass }
         } finally {
             lock.unlock()
         }
@@ -183,15 +161,7 @@ object EventStore {
     fun getStoredEventsStr(snifferId: Long): String {
         try {
             lock.lock()
-            val sb = StringBuilder()
-            val eventQueue = getEventQueue(snifferId)
-            eventQueue.entries.forEach {
-                sb.append("${it.key} :\n")
-                for (msg in it.value) {
-                    sb.append(" - ${msg::class.java.simpleName}\n")
-                }
-            }
-            return sb.toString()
+            return getEventQueue(snifferId).joinToString("\n") { it::class.java.simpleName }
         } finally {
             lock.unlock()
         }

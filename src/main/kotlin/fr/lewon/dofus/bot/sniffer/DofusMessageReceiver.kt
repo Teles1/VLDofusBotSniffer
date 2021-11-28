@@ -117,7 +117,7 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
     }
 
     private fun process(messageBuilder: DofusMessageBuilder, sequenceNumber: Long) {
-        messageBuilder.build()?.let { EventStore.addSocketEvent(it, sequenceNumber, snifferId) }
+        messageBuilder.build()?.let { EventStore.addSocketEvent(it, snifferId) }
     }
 
     private fun lowReceive(src: ByteArrayReader): DofusMessageBuilder? {
