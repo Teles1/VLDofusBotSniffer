@@ -1,6 +1,5 @@
 package fr.lewon.dofus.bot.sniffer.store
 
-import fr.lewon.dofus.bot.sniffer.model.INetworkType
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -44,15 +43,6 @@ object EventStore {
             .map { eventClass.cast(it) }
     }
 
-    fun getAllEvents(snifferId: Long): List<INetworkMessage> {
-        try {
-            lock.lock()
-            return getEventQueue(snifferId).toList()
-        } finally {
-            lock.unlock()
-        }
-    }
-
     fun <T : INetworkMessage> getAllEvents(eventClass: Class<T>, snifferId: Long): List<T> {
         try {
             lock.lock()
@@ -62,64 +52,17 @@ object EventStore {
         }
     }
 
-    fun removeSequence(
-        snifferId: Long,
-        mainEventClass: Class<out INetworkMessage>,
-        endEventClass: Class<out INetworkMessage>,
-    ) {
-        try {
-            lock.lock()
-            val eventQueue = getEventQueue(snifferId)
-            val firstIndex = getFirstIndex(eventQueue, mainEventClass)
-                ?: error("${mainEventClass.simpleName} not found")
-            val subQueue = getSubQueue(eventQueue, firstIndex)
-            val lastIndex = getFirstIndex(subQueue, endEventClass)
-                ?: error("${endEventClass.simpleName} not found")
+    fun isAllEventsPresent(snifferId: Long, vararg messageClasses: Class<out INetworkMessage>): Boolean {
+        return isAllEventsPresent(snifferId, messageClasses.groupingBy { it }.eachCount())
+    }
 
-            val toRemoveFirst = eventQueue.withIndex().firstOrNull { it.index == firstIndex }?.value
-                ?: error("Event with index [$firstIndex] not found in queue")
-            val toRemoveLast = subQueue.withIndex().firstOrNull { it.index == lastIndex }?.value
-                ?: error("Event with index [$lastIndex] not found in queue")
-
-            if (!eventQueue.remove(toRemoveFirst)) {
-                error("Couldn't remove element from queue at position : [$firstIndex]")
+    fun isAllEventsPresent(snifferId: Long, messageClassByCount: Map<Class<out INetworkMessage>, Int>): Boolean {
+        for (entry in messageClassByCount.entries) {
+            if (getAllEvents(entry.key, snifferId).size < entry.value) {
+                return false
             }
-            if (!eventQueue.remove(toRemoveLast)) {
-                error("Couldn't remove element from queue at position : [$lastIndex]")
-            }
-        } finally {
-            lock.unlock()
         }
-    }
-
-    fun containsSequence(
-        snifferId: Long,
-        mainEventClass: Class<out INetworkMessage>,
-        endEventClass: Class<out INetworkMessage>
-    ): Boolean {
-        try {
-            lock.lock()
-            val eventQueue = getEventQueue(snifferId)
-            val firstIndex = getFirstIndex(eventQueue, mainEventClass) ?: return false
-            return getFirstIndex(getSubQueue(eventQueue, firstIndex), endEventClass) != null
-        } finally {
-            lock.unlock()
-        }
-    }
-
-    private fun getSubQueue(
-        eventQueue: ArrayBlockingQueue<INetworkMessage>,
-        fromIndex: Int
-    ): ArrayBlockingQueue<INetworkMessage> {
-        return ArrayBlockingQueue<INetworkMessage>(queueSize)
-            .also { it.addAll(eventQueue.filterIndexed { index, _ -> index > fromIndex }) }
-    }
-
-    private fun getFirstIndex(
-        eventQueue: ArrayBlockingQueue<INetworkMessage>,
-        eventClass: Class<out INetworkMessage>
-    ): Int? {
-        return eventQueue.indexOfFirst { it::class.java == eventClass }.takeIf { it >= 0 }
+        return true
     }
 
     fun <T : INetworkMessage> getLastEvent(eventClass: Class<T>, snifferId: Long): T? {
@@ -143,16 +86,69 @@ object EventStore {
     fun clear(snifferId: Long) {
         try {
             lock.lock()
-            queueMapper[snifferId]?.clear()
+            getEventQueue(snifferId).clear()
         } finally {
             lock.unlock()
         }
     }
 
-    fun <T : INetworkType> clear(eventClass: Class<T>, snifferId: Long) {
+    fun <T : INetworkMessage> clear(eventClass: Class<T>, snifferId: Long) {
         try {
             lock.lock()
-            queueMapper[snifferId]?.removeIf { msg -> msg::class.java == eventClass }
+            getEventQueue(snifferId).removeIf { it::class.java == eventClass }
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    fun clearUntilFirst(snifferId: Long, eventClass: Class<out INetworkMessage>) {
+        try {
+            lock.lock()
+            clearUntil(snifferId, getFirstEvent(eventClass, snifferId))
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    fun clearUntilLast(snifferId: Long, eventClass: Class<out INetworkMessage>) {
+        try {
+            lock.lock()
+            clearUntil(snifferId, getLastEvent(eventClass, snifferId))
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    private fun clearUntil(snifferId: Long, event: INetworkMessage?) {
+        try {
+            lock.lock()
+            val eventQueue = getEventQueue(snifferId)
+            while (eventQueue.firstOrNull() != event) {
+                eventQueue.poll()
+            }
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    fun removeEvents(messages: List<INetworkMessage>, snifferId: Long) {
+        try {
+            lock.lock()
+            getEventQueue(snifferId).removeAll(messages.toSet())
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    fun <T : INetworkMessage> removeEvent(eventClass: Class<T>, snifferId: Long, amountToRemove: Int) {
+        try {
+            lock.lock()
+            val eventQueue = getEventQueue(snifferId)
+            for (i in 0 until amountToRemove) {
+                val toRemove = getFirstEvent(eventClass, snifferId)
+                    ?: error("Event not found in queue : ${eventClass.simpleName}")
+                eventQueue.remove(toRemove)
+            }
         } finally {
             lock.unlock()
         }

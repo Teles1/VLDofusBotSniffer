@@ -14,9 +14,9 @@ object DofusMessageReceiverUtil {
 
     private lateinit var messagesById: Map<Int, Class<out INetworkMessage>>
 
-    fun parseMessageBuilder(stream: ByteArrayReader, messageId: Int): DofusMessageBuilder? {
+    fun parseMessageBuilder(stream: ByteArrayReader, messageId: Int): DofusMessageBuilder {
         val messageType = messagesById[messageId]
-        val messageName = MessageIdByName.getName(messageId) ?: return null
+        val messageName = MessageIdByName.getName(messageId) ?: error("No message for id : $messageId")
         return DofusMessageBuilder(messageName, messageId, messageType, stream)
     }
 
