@@ -1,6 +1,5 @@
 package fr.lewon.dofus.bot.sniffer
 
-import fr.lewon.dofus.bot.core.VLDofusBotCoreUtil
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 import fr.lewon.dofus.bot.core.logs.VldbLogger
 import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
@@ -39,7 +38,8 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
     private var splitPacket = false
     private var splitPacketLength = 0
     private var splitPacketId = 0
-    private var inputBuffer: ByteArray = ByteArray(0)
+    private var inputBuffer = ByteArray(0)
+    private var leftoverBuffer = ByteArray(0)
 
     init {
         val nif = findActiveDevice()
@@ -52,7 +52,7 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
                 if (tcpPacket != null) {
                     if (tcpPacket.payload != null) {
                         packetsToTreat.add(tcpPacket as TcpPacket)
-                        packetTreatmentTimer.schedule(buildReceiveTimerTask(), 500L)
+                        packetTreatmentTimer.schedule(buildReceiveTimerTask(), 400L)
                     }
                 }
             }
@@ -71,7 +71,7 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
     }
 
     private fun buildFilter(serverIp: String, serverPort: String, hostIp: String, hostPort: String): String {
-        return "src host $serverIp and src port $serverPort and dst host $hostIp"
+        return "src host $serverIp and src port $serverPort and dst host $hostIp and dst port $hostPort"
     }
 
     fun isSnifferRunning(): Boolean {
@@ -84,17 +84,13 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
                 lock.lock()
                 val tcpPacket = packetsToTreat.minByOrNull { it.header.sequenceNumberAsLong }
                     ?: error("No TCP packet to treat")
-                println("Parsing packet : ${tcpPacket.header.sequenceNumberAsLong}, new sequence : ${!splitPacket}")
                 packetsToTreat.remove(tcpPacket)
+                val rawData = leftoverBuffer + tcpPacket.payload.rawData
                 try {
-                    receiveData(ByteArrayReader(tcpPacket.payload.rawData))
+                    receiveData(ByteArrayReader(rawData))
                 } catch (t: Throwable) {
-                    println("Couldn't parse packet : ${tcpPacket.header.sequenceNumberAsLong} ; size : ${tcpPacket.payload.rawData.size}")
-                    println("Packet currently split : $splitPacket")
-                    println("Input buffer size : ${inputBuffer.size}")
-                    println(Hex.encodeHexString(tcpPacket.payload.rawData))
-                    println(Hex.encodeHexString(tcpPacket.rawData))
                     t.printStackTrace()
+                    VldbLogger.error("Couldn't receive data : ${Hex.encodeHex(rawData)}")
                 } finally {
                     lock.unlock()
                 }
@@ -140,7 +136,7 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
     private fun lowReceive(src: ByteArrayReader): DofusMessageBuilder? {
         if (!splitPacket) {
             if (src.available() < 2) {
-                VldbLogger.error("TOO SMALL TO BE READ : ${Hex.encodeHexString(src.readAllBytes())}")
+                leftoverBuffer = src.readAllBytes()
                 return null
             }
             val header = src.readUnsignedShort()
@@ -198,21 +194,4 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
         }
     }
 
-}
-
-fun main() {
-    DofusMessageReceiverUtil.prepareNetworkManagers()
-    VLDofusBotCoreUtil.initAll()
-
-    var str = "750b425245024034000000080076f0"
-    while (str.length >= 4) {
-        val bar = ByteArrayReader(Hex.decodeHex(str))
-        try {
-            DofusMessageReceiver("1.1.1.1", "12345", "2.2.2.2", "54321").receiveData(bar)
-            println("OK FOR $str")
-        } catch (t: Throwable) {
-            t.printStackTrace()
-        }
-        str = str.substring(2)
-    }
 }
