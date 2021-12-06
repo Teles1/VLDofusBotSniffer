@@ -86,11 +86,14 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
                     ?: error("No TCP packet to treat")
                 packetsToTreat.remove(tcpPacket)
                 val rawData = leftoverBuffer + tcpPacket.payload.rawData
+                leftoverBuffer = ByteArray(0)
                 try {
                     receiveData(ByteArrayReader(rawData))
                 } catch (t: Throwable) {
                     t.printStackTrace()
-                    VldbLogger.error("Couldn't receive data : ${Hex.encodeHex(rawData)}")
+                    val leftoverStr = Hex.encodeHexString(leftoverBuffer)
+                    val rawDataStr = Hex.encodeHexString(rawData)
+                    VldbLogger.error("Couldn't receive data (leftover : $leftoverStr) : $rawDataStr")
                 } finally {
                     lock.unlock()
                 }
