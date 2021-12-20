@@ -14,10 +14,10 @@ object DofusMessageReceiverUtil {
 
     private lateinit var messagesById: Map<Int, Class<out INetworkMessage>>
 
-    fun parseMessageBuilder(stream: ByteArrayReader, messageId: Int): DofusMessageBuilder {
+    fun parseMessagePremise(stream: ByteArrayReader, messageId: Int): DofusMessagePremise {
         val messageType = messagesById[messageId]
         val messageName = MessageIdByName.getName(messageId) ?: error("No message for id : $messageId")
-        return DofusMessageBuilder(messageName, messageId, messageType, stream)
+        return DofusMessagePremise(messageName, messageId, messageType, stream)
     }
 
     fun prepareNetworkManagers() {

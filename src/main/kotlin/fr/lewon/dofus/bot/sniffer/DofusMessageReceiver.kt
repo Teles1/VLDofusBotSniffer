@@ -16,35 +16,27 @@ import java.net.InetAddress
 import java.net.NetworkInterface
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReentrantLock
 
-class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String, hostPort: String) : Thread() {
+class DofusMessageReceiver : Thread() {
 
     companion object {
         private const val BIT_RIGHT_SHIFT_LEN_PACKET_ID = 2
         private const val BIT_MASK = 3
-        private val ID_GENERATOR = AtomicLong(1L)
     }
 
-    val snifferId = ID_GENERATOR.getAndIncrement()
-
-    private val lock = ReentrantLock()
+    private val lock = ReentrantLock(true)
     private val handle: PcapHandle
     private val packetListener: PacketListener
     private val packetTreatmentTimer = Timer()
     private val packetsToTreat = ArrayBlockingQueue<TcpPacket>(50)
-    private var staticHeader = 0
-    private var splitPacket = false
-    private var splitPacketLength = 0
-    private var splitPacketId = 0
-    private var inputBuffer = ByteArray(0)
-    private var leftoverBuffer = ByteArray(0)
+    private val hostStateByConnection = HashMap<DofusConnection, HostState>()
+    private val dofusConnectionByHostPort = HashMap<String, DofusConnection>()
 
     init {
         val nif = findActiveDevice()
         handle = nif.openLive(65536, PromiscuousMode.PROMISCUOUS, -1)
-        handle.setFilter(buildFilter(serverIp, serverPort, hostIp, hostPort), BpfCompileMode.OPTIMIZE)
+        updateFilter()
         packetListener = PacketListener { ethernetPacket ->
             val ipV4Packet = ethernetPacket.payload
             if (ipV4Packet != null) {
@@ -52,11 +44,52 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
                 if (tcpPacket != null) {
                     if (tcpPacket.payload != null) {
                         packetsToTreat.add(tcpPacket as TcpPacket)
-                        packetTreatmentTimer.schedule(buildReceiveTimerTask(), 400L)
+                        packetTreatmentTimer.schedule(buildReceiveTimerTask(), 250L)
                     }
                 }
             }
         }
+    }
+
+    fun startListening(dofusConnection: DofusConnection, eventStore: EventStore, logger: VldbLogger) {
+        try {
+            lock.lockInterruptibly()
+            stopListening(dofusConnection.hostPort)
+            dofusConnectionByHostPort[dofusConnection.hostPort] = dofusConnection
+            hostStateByConnection[dofusConnection] = HostState(dofusConnection, eventStore, logger)
+            updateFilter()
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    fun stopListening(hostPort: String) {
+        try {
+            lock.lockInterruptibly()
+            dofusConnectionByHostPort.remove(hostPort)?.let {
+                hostStateByConnection.remove(it)
+            }
+            updateFilter()
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    private fun updateFilter() {
+        val filter = if (dofusConnectionByHostPort.isEmpty()) {
+            "src host 255.255.255.255 and dst host 255.255.255.255"
+        } else {
+            buildFilter()
+        }
+        handle.setFilter(filter, BpfCompileMode.OPTIMIZE)
+    }
+
+    private fun buildFilter(): String {
+        val srcHostPart = dofusConnectionByHostPort.values.map { it.serverIp }.joinToString(" or ") { "src host $it" }
+        val srcPortPart = dofusConnectionByHostPort.values.map { it.serverPort }.joinToString(" or ") { "src port $it" }
+        val dstHostPart = dofusConnectionByHostPort.values.map { it.hostIp }.joinToString(" or ") { "dst host $it" }
+        val dstPortPart = dofusConnectionByHostPort.values.map { it.hostPort }.joinToString(" or ") { "dst port $it" }
+        return "($srcHostPart) and ($srcPortPart) and ($dstHostPart) and ($dstPortPart)"
     }
 
     override fun run() {
@@ -70,10 +103,6 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
         packetsToTreat.clear()
     }
 
-    private fun buildFilter(serverIp: String, serverPort: String, hostIp: String, hostPort: String): String {
-        return "src host $serverIp and src port $serverPort and dst host $hostIp and dst port $hostPort"
-    }
-
     fun isSnifferRunning(): Boolean {
         return isAlive && handle.isOpen
     }
@@ -81,19 +110,27 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
     private fun buildReceiveTimerTask(): TimerTask {
         return object : TimerTask() {
             override fun run() {
-                lock.lock()
+                lock.lockInterruptibly()
                 val tcpPacket = packetsToTreat.minByOrNull { it.header.sequenceNumberAsLong }
                     ?: error("No TCP packet to treat")
                 packetsToTreat.remove(tcpPacket)
-                val rawData = leftoverBuffer + tcpPacket.payload.rawData
-                leftoverBuffer = ByteArray(0)
+
+                val hostPortStr = tcpPacket.header.dstPort.valueAsString()
+                val dofusConnection = dofusConnectionByHostPort[hostPortStr]
+                    ?: error("Unknown connection for port : $hostPortStr")
+                val hostState = hostStateByConnection[dofusConnection]
+                    ?: error("Unknown host state for port : $hostPortStr")
+
+                val rawData = hostState.leftoverBuffer + tcpPacket.payload.rawData
+                val leftoverStr = Hex.encodeHexString(hostState.leftoverBuffer)
+                hostState.leftoverBuffer = ByteArray(0)
                 try {
-                    receiveData(ByteArrayReader(rawData))
+                    receiveData(hostState, ByteArrayReader(rawData))
                 } catch (t: Throwable) {
                     t.printStackTrace()
-                    val leftoverStr = Hex.encodeHexString(leftoverBuffer)
                     val rawDataStr = Hex.encodeHexString(rawData)
-                    VldbLogger.error("Couldn't receive data (leftover : $leftoverStr) : $rawDataStr")
+                    println("Couldn't receive data (leftover : $leftoverStr) : $rawDataStr")
+                    hostState.logger.error("Couldn't receive data (leftover : $leftoverStr) : $rawDataStr")
                 } finally {
                     lock.unlock()
                 }
@@ -122,24 +159,28 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
             ?: error("No active device found. Make sure WinPcap or libpcap is installed.")
     }
 
-    fun receiveData(data: ByteArrayReader) {
+    fun receiveData(hostState: HostState, data: ByteArrayReader) {
         if (data.available() > 0) {
-            var messageBuilder = lowReceive(data)
-            while (messageBuilder != null) {
-                process(messageBuilder)
-                messageBuilder = lowReceive(data)
+            var messagePremise = lowReceive(hostState, data)
+            while (messagePremise != null) {
+                process(messagePremise, hostState)
+                messagePremise = lowReceive(hostState, data)
             }
         }
     }
 
-    private fun process(messageBuilder: DofusMessageBuilder) {
-        messageBuilder.build()?.let { EventStore.addSocketEvent(it, snifferId) }
+    private fun process(messagePremise: DofusMessagePremise, hostState: HostState) {
+        val untreatedStr = if (messagePremise.eventClass == null) "[UNTREATED] " else ""
+        hostState.logger.info("${untreatedStr}Message received : [${messagePremise.eventName}:${messagePremise.eventId}]")
+        messagePremise.eventClass?.getConstructor()?.newInstance()
+            ?.also { it.deserialize(messagePremise.stream) }
+            ?.let { hostState.eventStore.addSocketEvent(it, hostState.connection) }
     }
 
-    private fun lowReceive(src: ByteArrayReader): DofusMessageBuilder? {
-        if (!splitPacket) {
+    private fun lowReceive(hostState: HostState, src: ByteArrayReader): DofusMessagePremise? {
+        if (!hostState.splitPacket) {
             if (src.available() < 2) {
-                leftoverBuffer = src.readAllBytes()
+                hostState.leftoverBuffer = src.readAllBytes()
                 return null
             }
             val header = src.readUnsignedShort()
@@ -150,40 +191,40 @@ class DofusMessageReceiver(serverIp: String, serverPort: String, hostIp: String,
                     error("No message for messageId $messageId / header : $header / length : $messageLength")
                 }
                 if (src.available() >= messageLength) {
-                    return DofusMessageReceiverUtil.parseMessageBuilder(
+                    return DofusMessageReceiverUtil.parseMessagePremise(
                         ByteArrayReader(src.readNBytes(messageLength)),
                         messageId
                     )
                 }
-                staticHeader = -1
-                splitPacketLength = messageLength
-                splitPacketId = messageId
-                splitPacket = true
-                inputBuffer = src.readNBytes(src.available())
+                hostState.staticHeader = -1
+                hostState.splitPacketLength = messageLength
+                hostState.splitPacketId = messageId
+                hostState.splitPacket = true
+                hostState.inputBuffer = src.readNBytes(src.available())
                 return null
             }
             if (MessageIdByName.getName(messageId) == null) {
                 error("No message for messageId $messageId / header : $header")
             }
-            staticHeader = header
-            splitPacketLength = 0
-            splitPacketId = messageId
-            splitPacket = true
+            hostState.staticHeader = header
+            hostState.splitPacketLength = 0
+            hostState.splitPacketId = messageId
+            hostState.splitPacket = true
             return null
         }
-        if (staticHeader != -1) {
-            splitPacketLength = readMessageLength(staticHeader, src)
-            staticHeader = -1
+        if (hostState.staticHeader != -1) {
+            hostState.splitPacketLength = readMessageLength(hostState.staticHeader, src)
+            hostState.staticHeader = -1
         }
-        if (src.available() + inputBuffer.size >= splitPacketLength) {
-            inputBuffer += src.readNBytes(splitPacketLength - inputBuffer.size)
-            val inputBufferReader = ByteArrayReader(inputBuffer)
-            val msg = DofusMessageReceiverUtil.parseMessageBuilder(inputBufferReader, splitPacketId)
-            splitPacket = false
-            inputBuffer = ByteArray(0)
+        if (src.available() + hostState.inputBuffer.size >= hostState.splitPacketLength) {
+            hostState.inputBuffer += src.readNBytes(hostState.splitPacketLength - hostState.inputBuffer.size)
+            val inputBufferReader = ByteArrayReader(hostState.inputBuffer)
+            val msg = DofusMessageReceiverUtil.parseMessagePremise(inputBufferReader, hostState.splitPacketId)
+            hostState.splitPacket = false
+            hostState.inputBuffer = ByteArray(0)
             return msg
         }
-        inputBuffer += src.readAllBytes()
+        hostState.inputBuffer += src.readAllBytes()
         return null
     }
 

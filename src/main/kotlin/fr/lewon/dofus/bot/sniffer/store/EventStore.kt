@@ -1,128 +1,146 @@
 package fr.lewon.dofus.bot.sniffer.store
 
+import fr.lewon.dofus.bot.sniffer.DofusConnection
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
+import fr.lewon.dofus.bot.sniffer.store.waiters.AbstractMessageWaiter
+import fr.lewon.dofus.bot.sniffer.store.waiters.MessageWaiter
+import fr.lewon.dofus.bot.sniffer.store.waiters.MultipleMessagesWaiter
+import fr.lewon.dofus.bot.sniffer.store.waiters.OrderedMessagesWaiter
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.TypeVariable
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.locks.ReentrantLock
 
-object EventStore {
+class EventStore {
 
-    private const val queueSize = 500
-    private val queueMapper = HashMap<Long, ArrayBlockingQueue<INetworkMessage>>()
-    private val handlerMapper = HashMap<Class<out INetworkMessage>, ArrayList<EventHandler<INetworkMessage>>>()
+    private val eventQueue = ArrayBlockingQueue<INetworkMessage>(QUEUE_SIZE)
     private val lock = ReentrantLock()
+    private val waitLock = ReentrantLock()
 
-    fun addSocketEvent(dofusEvent: INetworkMessage, snifferId: Long) {
+    private var messageWaiter: AbstractMessageWaiter? = null
+
+
+    fun addSocketEvent(dofusEvent: INetworkMessage, connection: DofusConnection) {
         try {
-            lock.lock()
-            val eventQueue = getEventQueue(snifferId)
+            lock.lockInterruptibly()
             if (!eventQueue.offer(dofusEvent)) {
                 eventQueue.poll()
                 eventQueue.offer(dofusEvent)
             }
-            handlerMapper[dofusEvent.javaClass]?.forEach {
-                it.onEventReceived(dofusEvent, snifferId)
+            getMappers(dofusEvent.javaClass).forEach {
+                it.onEventReceived(dofusEvent, connection)
             }
+            messageWaiter?.takeIf { !it.consumed }?.onMessageReceived(dofusEvent)
         } finally {
             lock.unlock()
         }
     }
 
-    private fun getEventQueue(snifferId: Long): ArrayBlockingQueue<INetworkMessage> {
-        return queueMapper.computeIfAbsent(snifferId) { ArrayBlockingQueue(queueSize) }
-    }
-
-    private fun <T : INetworkMessage> getAllEvents(
-        eventQueue: ArrayBlockingQueue<INetworkMessage>,
-        eventClass: Class<T>
-    ): List<T> {
-        return eventQueue
-            .filter { it::class.java == eventClass }
-            .map { eventClass.cast(it) }
-    }
-
-    fun <T : INetworkMessage> getAllEvents(eventClass: Class<T>, snifferId: Long): List<T> {
+    fun <T : INetworkMessage> getAllEvents(eventClass: Class<T>): List<T> {
         try {
-            lock.lock()
-            return getAllEvents(getEventQueue(snifferId), eventClass)
+            lock.lockInterruptibly()
+            return eventQueue
+                .filter { it::class.java == eventClass }
+                .map { eventClass.cast(it) }
         } finally {
             lock.unlock()
         }
     }
 
-    fun isAllEventsPresent(snifferId: Long, vararg messageClasses: Class<out INetworkMessage>): Boolean {
-        return isAllEventsPresent(snifferId, messageClasses.groupingBy { it }.eachCount())
+    fun isAllEventsPresent(vararg messageClasses: Class<out INetworkMessage>): Boolean {
+        return isAllEventsPresent(messageClasses.groupingBy { it }.eachCount())
     }
 
-    fun isAllEventsPresent(snifferId: Long, messageClassByCount: Map<Class<out INetworkMessage>, Int>): Boolean {
+    fun isAllEventsPresent(messageClassByCount: Map<Class<out INetworkMessage>, Int>): Boolean {
         for (entry in messageClassByCount.entries) {
-            if (getAllEvents(entry.key, snifferId).size < entry.value) {
+            if (getAllEvents(entry.key).size < entry.value) {
                 return false
             }
         }
         return true
     }
 
-    fun <T : INetworkMessage> getLastEvent(eventClass: Class<T>, snifferId: Long): T? {
+    fun waitUntilMessagesArrives(messageClass: Class<out INetworkMessage>, timeout: Int): Boolean {
+        return waitUntil(timeout) { MessageWaiter(waitLock, messageClass) }
+    }
+
+    fun waitUntilMultipleMessagesArrive(messageClasses: Array<out Class<out INetworkMessage>>, timeout: Int): Boolean {
+        return waitUntil(timeout) { MultipleMessagesWaiter(waitLock, messageClasses) }
+    }
+
+    fun waitUntilOrderedMessagesArrive(messageClasses: Array<out Class<out INetworkMessage>>, timeout: Int): Boolean {
+        return waitUntil(timeout) { OrderedMessagesWaiter(waitLock, messageClasses) }
+    }
+
+    private fun waitUntil(timeout: Int, buildWaiter: () -> AbstractMessageWaiter): Boolean {
         try {
-            lock.lock()
-            return getAllEvents(eventClass, snifferId).lastOrNull()
+            waitLock.lockInterruptibly()
+            val newMessageWaiter = buildWaiter()
+            messageWaiter = newMessageWaiter
+            return newMessageWaiter.waitUntilNotify(timeout.toLong())
+        } finally {
+            waitLock.unlock()
+        }
+    }
+
+    fun <T : INetworkMessage> getLastEvent(eventClass: Class<T>): T? {
+        try {
+            lock.lockInterruptibly()
+            return getAllEvents(eventClass).lastOrNull()
         } finally {
             lock.unlock()
         }
     }
 
-    fun <T : INetworkMessage> getFirstEvent(eventClass: Class<T>, snifferId: Long): T? {
+    fun <T : INetworkMessage> getFirstEvent(eventClass: Class<T>): T? {
         try {
-            lock.lock()
-            return getAllEvents(eventClass, snifferId).firstOrNull()
+            lock.lockInterruptibly()
+            return getAllEvents(eventClass).firstOrNull()
         } finally {
             lock.unlock()
         }
     }
 
-    fun clear(snifferId: Long) {
+    fun clear() {
         try {
-            lock.lock()
-            getEventQueue(snifferId).clear()
+            lock.lockInterruptibly()
+            eventQueue.clear()
         } finally {
             lock.unlock()
         }
     }
 
-    fun <T : INetworkMessage> clear(eventClass: Class<T>, snifferId: Long) {
+    fun <T : INetworkMessage> clear(eventClass: Class<T>) {
         try {
-            lock.lock()
-            getEventQueue(snifferId).removeIf { it::class.java == eventClass }
+            lock.lockInterruptibly()
+            eventQueue.removeIf { it::class.java == eventClass }
         } finally {
             lock.unlock()
         }
     }
 
-    fun clearUntilFirst(snifferId: Long, eventClass: Class<out INetworkMessage>) {
+    fun clearUntilFirst(eventClass: Class<out INetworkMessage>) {
         try {
-            lock.lock()
-            clearUntil(snifferId, getFirstEvent(eventClass, snifferId))
+            lock.lockInterruptibly()
+            clearUntil(getFirstEvent(eventClass))
         } finally {
             lock.unlock()
         }
     }
 
-    fun clearUntilLast(snifferId: Long, eventClass: Class<out INetworkMessage>) {
+    fun clearUntilLast(eventClass: Class<out INetworkMessage>) {
         try {
-            lock.lock()
-            clearUntil(snifferId, getLastEvent(eventClass, snifferId))
+            lock.lockInterruptibly()
+            clearUntil(getLastEvent(eventClass))
         } finally {
             lock.unlock()
         }
     }
 
-    private fun clearUntil(snifferId: Long, event: INetworkMessage?) {
+    private fun clearUntil(event: INetworkMessage?) {
         try {
-            lock.lock()
-            val eventQueue = getEventQueue(snifferId)
+            lock.lockInterruptibly()
             while (eventQueue.firstOrNull() != event) {
                 eventQueue.poll()
             }
@@ -131,79 +149,71 @@ object EventStore {
         }
     }
 
-    fun removeEvents(messages: List<INetworkMessage>, snifferId: Long) {
+    fun getStoredEventsStr(): String {
         try {
-            lock.lock()
-            getEventQueue(snifferId).removeAll(messages.toSet())
+            lock.lockInterruptibly()
+            return eventQueue.joinToString("\n") { it::class.java.simpleName }
         } finally {
             lock.unlock()
         }
     }
 
-    fun <T : INetworkMessage> removeEvent(eventClass: Class<T>, snifferId: Long, amountToRemove: Int) {
-        try {
-            lock.lock()
-            val eventQueue = getEventQueue(snifferId)
-            for (i in 0 until amountToRemove) {
-                val toRemove = getFirstEvent(eventClass, snifferId)
-                    ?: error("Event not found in queue : ${eventClass.simpleName}")
-                eventQueue.remove(toRemove)
+    companion object {
+        private const val QUEUE_SIZE = 500
+        private val HANDLER_MAPPER = HashMap<Class<out INetworkMessage>, ArrayList<EventHandler<INetworkMessage>>>()
+        private val STATIC_LOCK = ReentrantLock()
+
+        fun <T : INetworkMessage> getMappers(eventClass: Class<T>): ArrayList<EventHandler<T>> {
+            try {
+                STATIC_LOCK.lockInterruptibly()
+                return (HANDLER_MAPPER[eventClass] ?: ArrayList()) as ArrayList<EventHandler<T>>
+            } finally {
+                STATIC_LOCK.unlock()
             }
-        } finally {
-            lock.unlock()
         }
-    }
 
-    fun getStoredEventsStr(snifferId: Long): String {
-        try {
-            lock.lock()
-            return getEventQueue(snifferId).joinToString("\n") { it::class.java.simpleName }
-        } finally {
-            lock.unlock()
+        @Synchronized
+        fun <T : INetworkMessage> addEventHandler(eventClass: Class<T>, eventHandler: EventHandler<T>) {
+            val eventHandlers = HANDLER_MAPPER.computeIfAbsent(eventClass) { ArrayList() }
+            eventHandlers.add(eventHandler as EventHandler<INetworkMessage>)
         }
-    }
 
-    @Synchronized
-    fun <T : INetworkMessage> addEventHandler(eventClass: Class<T>, eventHandler: EventHandler<T>) {
-        val eventHandlers = handlerMapper.computeIfAbsent(eventClass) { ArrayList() }
-        eventHandlers.add(eventHandler as EventHandler<INetworkMessage>)
-    }
+        fun <T : INetworkMessage> addEventHandler(eventHandler: EventHandler<T>) {
+            val eventHandlerInterface = getAllGenericInterfaces(eventHandler::class.java)
+                .filterIsInstance<ParameterizedType>()
+                .firstOrNull { EventHandler::class.java.isAssignableFrom(it.rawType as Class<*>) }
+                ?: return
+            val actualTypeArgument = eventHandlerInterface.actualTypeArguments[0]
+            if (actualTypeArgument is TypeVariable<*>) {
+                val argumentClass = actualTypeArgument.bounds[0] as Class<*>
+                val realType = getRealType(argumentClass, eventHandler::class.java, EventHandler::class.java)
+                addEventHandler(realType as Class<T>, eventHandler)
+            } else if (actualTypeArgument is Class<*>) {
+                addEventHandler(actualTypeArgument as Class<T>, eventHandler)
+            }
+        }
 
-    fun <T : INetworkMessage> addEventHandler(eventHandler: EventHandler<T>) {
-        val eventHandlerInterface = getAllGenericInterfaces(eventHandler::class.java)
-            .filterIsInstance<ParameterizedType>()
-            .firstOrNull { EventHandler::class.java.isAssignableFrom(it.rawType as Class<*>) }
-            ?: return
-        val actualTypeArgument = eventHandlerInterface.actualTypeArguments[0]
-        if (actualTypeArgument is TypeVariable<*>) {
-            val argumentClass = actualTypeArgument.bounds[0] as Class<*>
-            val realType = getRealType(argumentClass, eventHandler::class.java, EventHandler::class.java)
-            addEventHandler(realType as Class<T>, eventHandler)
-        } else if (actualTypeArgument is Class<*>) {
-            addEventHandler(actualTypeArgument as Class<T>, eventHandler)
+        private fun getRealType(typeParameterClass: Class<*>, baseClass: Class<*>, parentClass: Class<*>): Class<*> {
+            val genericSuperClass = baseClass.genericSuperclass
+            if (genericSuperClass is ParameterizedType) {
+                genericSuperClass.actualTypeArguments.firstOrNull {
+                    it is Class<*> && typeParameterClass.isAssignableFrom(it)
+                }?.let { return it as Class<*> }
+            }
+            if (baseClass.isAssignableFrom(parentClass)) {
+                return typeParameterClass
+            }
+            return getRealType(typeParameterClass, baseClass.superclass, parentClass)
         }
-    }
 
-    private fun getRealType(typeParameterClass: Class<*>, baseClass: Class<*>, parentClass: Class<*>): Class<*> {
-        val genericSuperClass = baseClass.genericSuperclass
-        if (genericSuperClass is ParameterizedType) {
-            genericSuperClass.actualTypeArguments.firstOrNull {
-                it is Class<*> && typeParameterClass.isAssignableFrom(it)
-            }?.let { return it as Class<*> }
+        private fun getAllGenericInterfaces(refClass: Class<*>): Set<Type> {
+            val interfaces = HashSet<Type>()
+            if (refClass.superclass != null) {
+                interfaces.addAll(getAllGenericInterfaces(refClass.superclass))
+            }
+            interfaces.addAll(refClass.genericInterfaces)
+            return interfaces
         }
-        if (baseClass.isAssignableFrom(parentClass)) {
-            return typeParameterClass
-        }
-        return getRealType(typeParameterClass, baseClass.superclass, parentClass)
-    }
-
-    private fun getAllGenericInterfaces(refClass: Class<*>): Set<Type> {
-        val interfaces = HashSet<Type>()
-        if (refClass.superclass != null) {
-            interfaces.addAll(getAllGenericInterfaces(refClass.superclass))
-        }
-        interfaces.addAll(refClass.genericInterfaces)
-        return interfaces
     }
 
 }
