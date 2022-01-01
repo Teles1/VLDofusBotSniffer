@@ -1,11 +1,11 @@
 package fr.lewon.dofus.bot.sniffer.model.types.actor.roleplay.monster
 
-import fr.lewon.dofus.bot.sniffer.model.TypeManager
-import fr.lewon.dofus.bot.sniffer.model.types.actor.roleplay.GameRolePlayActorInformations
 import fr.lewon.dofus.bot.core.io.stream.BooleanByteWrapper
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.sniffer.model.TypeManager
+import fr.lewon.dofus.bot.sniffer.model.types.actor.roleplay.GameRolePlayActorInformations
 
-class GameRolePlayGroupMonsterInformations : GameRolePlayActorInformations() {
+open class GameRolePlayGroupMonsterInformations : GameRolePlayActorInformations() {
 
     var keyRingBonus = false
     var hasHardcoreDrop = false
