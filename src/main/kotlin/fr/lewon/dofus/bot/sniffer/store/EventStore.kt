@@ -84,19 +84,19 @@ class EventStore {
         }
     }
 
-    fun <T : INetworkMessage> getLastEvent(eventClass: Class<T>): T? {
+    fun <T : INetworkMessage> getLastEvent(eventClass: Class<T>, filterFunction: (T) -> Boolean = { true }): T? {
         try {
             lock.lockInterruptibly()
-            return getAllEvents(eventClass).lastOrNull()
+            return getAllEvents(eventClass).lastOrNull(filterFunction)
         } finally {
             lock.unlock()
         }
     }
 
-    fun <T : INetworkMessage> getFirstEvent(eventClass: Class<T>): T? {
+    fun <T : INetworkMessage> getFirstEvent(eventClass: Class<T>, filterFunction: (T) -> Boolean = { true }): T? {
         try {
             lock.lockInterruptibly()
-            return getAllEvents(eventClass).firstOrNull()
+            return getAllEvents(eventClass).firstOrNull(filterFunction)
         } finally {
             lock.unlock()
         }
