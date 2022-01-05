@@ -149,15 +149,6 @@ class EventStore {
         }
     }
 
-    fun getStoredEventsStr(): String {
-        try {
-            lock.lockInterruptibly()
-            return eventQueue.joinToString("\n") { it::class.java.simpleName }
-        } finally {
-            lock.unlock()
-        }
-    }
-
     companion object {
         private const val QUEUE_SIZE = 500
         private val HANDLER_MAPPER = HashMap<Class<out INetworkMessage>, ArrayList<EventHandler<INetworkMessage>>>()
