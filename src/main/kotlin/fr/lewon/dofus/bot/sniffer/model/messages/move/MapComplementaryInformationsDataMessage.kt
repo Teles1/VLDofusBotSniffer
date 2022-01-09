@@ -1,7 +1,7 @@
 package fr.lewon.dofus.bot.sniffer.model.messages.move
 
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
-import fr.lewon.dofus.bot.core.manager.DofusMapManager
+import fr.lewon.dofus.bot.core.manager.MapManager
 import fr.lewon.dofus.bot.core.model.maps.DofusMap
 import fr.lewon.dofus.bot.sniffer.model.TypeManager
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
@@ -28,7 +28,7 @@ open class MapComplementaryInformationsDataMessage : INetworkMessage {
 
     override fun deserialize(stream: ByteArrayReader) {
         subAreaId = stream.readVarShort()
-        map = DofusMapManager.getDofusMap(stream.readDouble())
+        map = MapManager.getDofusMap(stream.readDouble())
         for (i in 0 until stream.readUnsignedShort()) {
             val house = TypeManager.getInstance<HouseInformations>(stream.readUnsignedShort())
             house.deserialize(stream)

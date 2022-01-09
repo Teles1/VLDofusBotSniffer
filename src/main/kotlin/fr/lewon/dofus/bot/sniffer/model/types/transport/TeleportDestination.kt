@@ -1,7 +1,7 @@
 package fr.lewon.dofus.bot.sniffer.model.types.transport
 
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
-import fr.lewon.dofus.bot.core.manager.DofusMapManager
+import fr.lewon.dofus.bot.core.manager.MapManager
 import fr.lewon.dofus.bot.core.model.maps.DofusMap
 import fr.lewon.dofus.bot.sniffer.model.INetworkType
 
@@ -15,7 +15,7 @@ class TeleportDestination : INetworkType {
 
     override fun deserialize(stream: ByteArrayReader) {
         type = stream.readByte().toInt()
-        map = DofusMapManager.getDofusMap(stream.readDouble())
+        map = MapManager.getDofusMap(stream.readDouble())
         subAreaId = stream.readVarShort()
         level = stream.readVarShort()
         cost = stream.readVarShort()

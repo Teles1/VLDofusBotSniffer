@@ -1,7 +1,7 @@
 package fr.lewon.dofus.bot.sniffer.model.messages.treasurehunt
 
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
-import fr.lewon.dofus.bot.core.manager.DofusMapManager
+import fr.lewon.dofus.bot.core.manager.MapManager
 import fr.lewon.dofus.bot.core.model.maps.DofusMap
 import fr.lewon.dofus.bot.sniffer.model.TypeManager
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
@@ -21,7 +21,7 @@ class TreasureHuntMessage : INetworkMessage {
 
     override fun deserialize(stream: ByteArrayReader) {
         questType = stream.readByte().toInt()
-        startMap = DofusMapManager.getDofusMap(stream.readDouble())
+        startMap = MapManager.getDofusMap(stream.readDouble())
         for (i in 0 until stream.readUnsignedShort()) {
             val huntStep = TypeManager.getInstance<TreasureHuntStep>(stream.readUnsignedShort())
             huntStep.deserialize(stream)
