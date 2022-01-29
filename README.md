@@ -7,6 +7,4 @@ been implemented here, converted to a Java object, then stored in an EventStore.
 ### How to use
 
 To use the sniffer, you must have an instance of Dofus running on your computer. Then,
-call `DofusMessageReceiver.killAndStartThread()` which will kill previous sniffer thread if needed then start the
-sniffer in a thread. Every successfully parsed `EventStore` from which you can retrieve the last parsed message of a
-given type by using `getLastEvent(eventClass: Class<T>): T?`.
+use a `DofusMessageReceiver`. Every successfully parsed message will be stored in an `EventStore` from which you can retrieve last parsed messages.
