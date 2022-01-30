@@ -95,12 +95,9 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
     override fun run() {
         try {
             handle.loop(-1, packetListener)
-        }
-        catch (ex: PcapNativeException) {
-        }
-        catch (ex: InterruptedException) {
-        }
-        catch (ex: NotOpenException) {
+        } catch (ex: PcapNativeException) {
+        } catch (ex: InterruptedException) {
+        } catch (ex: NotOpenException) {
         }
     }
 
@@ -138,7 +135,7 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
                     t.printStackTrace()
                     val rawDataStr = Hex.encodeHexString(rawData)
                     println("Couldn't receive data (leftover : $leftoverStr) : $rawDataStr")
-                    hostState.logger.error("Couldn't receive data (leftover : $leftoverStr) : $rawDataStr")
+                    hostState.logger.log("ERROR : Couldn't receive data (leftover : $leftoverStr) : $rawDataStr")
                 } finally {
                     lock.unlock()
                 }
@@ -163,7 +160,8 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
                     if (ia.isSiteLocalAddress &&
                         !ia.isLoopbackAddress &&
                         !ni.displayName.contains("VMnet") ||
-                        (networkInterfaceName != null && ni.displayName == networkInterfaceName)) {
+                        (networkInterfaceName != null && ni.displayName == networkInterfaceName)
+                    ) {
                         currentAddress = ia
                     }
                 }
@@ -185,8 +183,8 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
     }
 
     private fun process(messagePremise: DofusMessagePremise, hostState: HostState) {
-        val untreatedStr = if (messagePremise.eventClass == null) "[UNTREATED] " else ""
-        hostState.logger.info("${untreatedStr}Message received : [${messagePremise.eventName}:${messagePremise.eventId}]")
+        val untreatedStr = if (messagePremise.eventClass == null) "[UNTREATED] : " else ""
+        hostState.logger.log("$untreatedStr${messagePremise.eventName}:${messagePremise.eventId}")
         messagePremise.eventClass?.getConstructor()?.newInstance()
             ?.also { it.deserialize(messagePremise.stream) }
             ?.let { hostState.eventStore.addSocketEvent(it, hostState.connection) }
