@@ -1,5 +1,6 @@
 package fr.lewon.dofus.bot.sniffer
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 import fr.lewon.dofus.bot.core.logs.VldbLogger
 import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
@@ -32,6 +33,7 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
     private val packetsToTreat = ArrayBlockingQueue<TcpPacket>(50)
     private val hostStateByConnection = HashMap<DofusConnection, HostState>()
     private val dofusConnectionByHostPort = HashMap<String, DofusConnection>()
+    private val objectMapper = ObjectMapper()
 
     init {
         val nif = findActiveDevice()
@@ -127,15 +129,14 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
                     ?: error("Unknown host state for port : $hostPortStr")
 
                 val rawData = hostState.leftoverBuffer + tcpPacket.payload.rawData
-                val leftoverStr = Hex.encodeHexString(hostState.leftoverBuffer)
                 hostState.leftoverBuffer = ByteArray(0)
                 try {
                     receiveData(hostState, ByteArrayReader(rawData))
                 } catch (t: Throwable) {
                     t.printStackTrace()
                     val rawDataStr = Hex.encodeHexString(rawData)
-                    println("Couldn't receive data (leftover : $leftoverStr) : $rawDataStr")
-                    hostState.logger.log("ERROR : Couldn't receive data (leftover : $leftoverStr) : $rawDataStr")
+                    println("Couldn't receive data : $rawDataStr")
+                    hostState.logger.log("ERROR : Couldn't receive data : $rawDataStr")
                 } finally {
                     lock.unlock()
                 }
@@ -183,11 +184,16 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
     }
 
     private fun process(messagePremise: DofusMessagePremise, hostState: HostState) {
-        val untreatedStr = if (messagePremise.eventClass == null) "[UNTREATED] : " else ""
-        hostState.logger.log("$untreatedStr${messagePremise.eventName}:${messagePremise.eventId}")
-        messagePremise.eventClass?.getConstructor()?.newInstance()
+        val premiseStr = "${messagePremise.eventName}:${messagePremise.eventId}"
+        val message = messagePremise.eventClass?.getConstructor()?.newInstance()
             ?.also { it.deserialize(messagePremise.stream) }
-            ?.let { hostState.eventStore.addSocketEvent(it, hostState.connection) }
+        if (message != null) {
+            hostState.eventStore.addSocketEvent(message, hostState.connection)
+            val messageStr = objectMapper.writeValueAsString(message)
+            hostState.logger.log(premiseStr, description = messageStr)
+        } else {
+            hostState.logger.log("[UNTREATED] : $premiseStr")
+        }
     }
 
     private fun lowReceive(hostState: HostState, src: ByteArrayReader): DofusMessagePremise? {
