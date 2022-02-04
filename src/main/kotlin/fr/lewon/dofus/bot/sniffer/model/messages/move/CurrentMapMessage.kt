@@ -1,17 +1,15 @@
 package fr.lewon.dofus.bot.sniffer.model.messages.move
 
-import fr.lewon.dofus.bot.core.d2o.managers.map.MapManager
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
-import fr.lewon.dofus.bot.core.model.maps.DofusMap
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
 
 class CurrentMapMessage : INetworkMessage {
 
-    lateinit var map: DofusMap
+    var mapId = 0.0
     var mapKey = ""
 
     override fun deserialize(stream: ByteArrayReader) {
-        map = MapManager.getDofusMap(stream.readDouble())
+        mapId = stream.readDouble()
         mapKey = stream.readUTF()
     }
 }

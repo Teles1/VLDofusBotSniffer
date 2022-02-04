@@ -28,7 +28,7 @@ class EventStore {
                 eventQueue.poll()
                 eventQueue.offer(dofusEvent)
             }
-            getMappers(dofusEvent.javaClass).forEach {
+            getHandlers(dofusEvent.javaClass).forEach {
                 it.onEventReceived(dofusEvent, connection)
             }
             messageWaiter?.takeIf { !it.consumed }?.onMessageReceived(dofusEvent)
@@ -154,7 +154,7 @@ class EventStore {
         private val HANDLER_MAPPER = HashMap<Class<out INetworkMessage>, ArrayList<EventHandler<INetworkMessage>>>()
         private val STATIC_LOCK = ReentrantLock()
 
-        fun <T : INetworkMessage> getMappers(eventClass: Class<T>): ArrayList<EventHandler<T>> {
+        fun <T : INetworkMessage> getHandlers(eventClass: Class<T>): ArrayList<EventHandler<T>> {
             try {
                 STATIC_LOCK.lockInterruptibly()
                 return (HANDLER_MAPPER[eventClass] ?: ArrayList()) as ArrayList<EventHandler<T>>
