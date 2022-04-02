@@ -6,6 +6,7 @@ import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
 import fr.lewon.dofus.bot.sniffer.managers.TypeIdByName
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
+import fr.lewon.dofus.export.builder.VldbAbstractExportPackTaskBuilder
 import fr.lewon.dofus.export.builder.VldbIdByNameExportPackTaskBuilder
 import org.reflections.Reflections
 import java.io.File
@@ -21,20 +22,27 @@ object DofusMessageReceiverUtil {
         return DofusMessagePremise(messageName, messageId, messageType, stream)
     }
 
-    fun prepareNetworkManagers() {
+    fun prepareNetworkManagers(additionalBuilders: List<VldbAbstractExportPackTaskBuilder> = emptyList()) {
+        processExport(getExportPackBuilders().union(additionalBuilders).toList())
+        messagesById = Reflections(INetworkMessage::class.java.packageName)
+            .getSubTypesOf(INetworkMessage::class.java)
+            .associateBy { (MessageIdByName.getId(it.simpleName) ?: error("Couldn't find id for [${it.simpleName}]")) }
+    }
+
+    private fun getExportPackBuilders(): List<VldbAbstractExportPackTaskBuilder> {
+        return listOf(
+            VldbIdByNameExportPackTaskBuilder("MessageReceiver", MessageIdByName, "_messagesTypes"),
+            VldbIdByNameExportPackTaskBuilder("ProtocolTypeManager", TypeIdByName, "_typesTypes")
+        )
+    }
+
+    private fun processExport(builders: List<VldbAbstractExportPackTaskBuilder>) {
         val gameDir = VldbFilesUtil.getDofusDirectory()
         val swfFile = File(gameDir, "DofusInvoker.swf")
         if (!swfFile.exists() || !swfFile.isFile) {
             throw RuntimeException("Unable to find DofusInvoker.swf in Dofus directory")
         }
-        val builders = listOf(
-            VldbIdByNameExportPackTaskBuilder("MessageReceiver", MessageIdByName, "_messagesTypes"),
-            VldbIdByNameExportPackTaskBuilder("ProtocolTypeManager", TypeIdByName, "_typesTypes")
-        )
         VldbProtocolUpdater.updateManagers(swfFile, builders)
-        messagesById = Reflections(INetworkMessage::class.java.packageName)
-            .getSubTypesOf(INetworkMessage::class.java)
-            .associateBy { (MessageIdByName.getId(it.simpleName) ?: error("Couldn't find id for [${it.simpleName}]")) }
     }
 
     fun getNetworkInterfaceNames(): List<String> {
