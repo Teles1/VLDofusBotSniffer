@@ -42,7 +42,7 @@ object DofusMessageReceiverUtil {
         if (!swfFile.exists() || !swfFile.isFile) {
             throw RuntimeException("Unable to find DofusInvoker.swf in Dofus directory")
         }
-        VldbProtocolUpdater.updateManagers(swfFile, builders)
+        VldbProtocolUpdater.decompileSwf(swfFile, builders)
     }
 
     fun getNetworkInterfaceNames(): List<String> {

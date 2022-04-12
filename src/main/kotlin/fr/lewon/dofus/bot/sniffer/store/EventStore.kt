@@ -2,10 +2,7 @@ package fr.lewon.dofus.bot.sniffer.store
 
 import fr.lewon.dofus.bot.sniffer.DofusConnection
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
-import fr.lewon.dofus.bot.sniffer.store.waiters.AbstractMessageWaiter
-import fr.lewon.dofus.bot.sniffer.store.waiters.MessageWaiter
-import fr.lewon.dofus.bot.sniffer.store.waiters.MultipleMessagesWaiter
-import fr.lewon.dofus.bot.sniffer.store.waiters.OrderedMessagesWaiter
+import fr.lewon.dofus.bot.sniffer.store.waiters.*
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.TypeVariable
@@ -63,6 +60,10 @@ class EventStore {
 
     fun waitUntilMessagesArrives(messageClass: Class<out INetworkMessage>, timeout: Int): Boolean {
         return waitUntil(timeout) { MessageWaiter(waitLock, messageClass) }
+    }
+
+    fun waitUntilAnyMessageArrives(messageClasses: Array<out Class<out INetworkMessage>>, timeout: Int): Boolean {
+        return waitUntil(timeout) { AnyMessageWaiter(waitLock, messageClasses) }
     }
 
     fun waitUntilMultipleMessagesArrive(messageClasses: Array<out Class<out INetworkMessage>>, timeout: Int): Boolean {
