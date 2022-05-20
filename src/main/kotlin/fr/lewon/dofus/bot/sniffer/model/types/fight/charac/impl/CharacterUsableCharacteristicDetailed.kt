@@ -8,6 +8,6 @@ class CharacterUsableCharacteristicDetailed : CharacterCharacteristicDetailed() 
 
     override fun deserialize(stream: ByteArrayReader) {
         super.deserialize(stream)
-        used = stream.readVarShort()
+        used = stream.readVarInt()
     }
 }

@@ -1,39 +1,23 @@
 package fr.lewon.dofus.bot.sniffer
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 import fr.lewon.dofus.bot.core.logs.VldbLogger
-import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
 import fr.lewon.dofus.bot.sniffer.store.EventStore
-
-import org.apache.commons.codec.binary.Hex
-
 import org.pcap4j.core.*
 import org.pcap4j.core.BpfProgram.BpfCompileMode
 import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode
 import org.pcap4j.packet.TcpPacket
-
 import java.net.InetAddress
 import java.net.NetworkInterface
 import java.util.*
-import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.locks.ReentrantLock
 
 class DofusMessageReceiver(private val networkInterfaceName: String? = null) : Thread() {
 
-    companion object {
-        private const val BIT_RIGHT_SHIFT_LEN_PACKET_ID = 2
-        private const val BIT_MASK = 3
-    }
-
     private val lock = ReentrantLock(true)
     private val handle: PcapHandle
     private val packetListener: PacketListener
-    private val packetTreatmentTimer = Timer()
-    private val packetsToTreat = ArrayBlockingQueue<TcpPacket>(50)
-    private val hostStateByConnection = HashMap<DofusConnection, HostState>()
     private val dofusConnectionByHostPort = HashMap<String, DofusConnection>()
-    private val objectMapper = ObjectMapper()
+    private val characterReceiverByConnection = HashMap<DofusConnection, DofusMessageCharacterReceiver>()
 
     init {
         val nif = findActiveDevice()
@@ -45,8 +29,7 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
                 val tcpPacket = ipV4Packet.payload
                 if (tcpPacket != null) {
                     if (tcpPacket.payload != null) {
-                        packetsToTreat.add(tcpPacket as TcpPacket)
-                        packetTreatmentTimer.schedule(buildReceiveTimerTask(), 250L)
+                        receiveTcpPacket(tcpPacket as TcpPacket)
                     }
                 }
             }
@@ -58,7 +41,8 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
             lock.lockInterruptibly()
             stopListening(dofusConnection.hostPort)
             dofusConnectionByHostPort[dofusConnection.hostPort] = dofusConnection
-            hostStateByConnection[dofusConnection] = HostState(dofusConnection, eventStore, logger)
+            val hostState = HostState(dofusConnection, eventStore, logger)
+            characterReceiverByConnection[dofusConnection] = DofusMessageCharacterReceiver(hostState)
             updateFilter()
         } finally {
             lock.unlock()
@@ -69,7 +53,7 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
         try {
             lock.lockInterruptibly()
             dofusConnectionByHostPort.remove(hostPort)?.let {
-                hostStateByConnection.remove(it)
+                characterReceiverByConnection.remove(it)
             }
             updateFilter()
         } finally {
@@ -106,41 +90,23 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
     override fun interrupt() {
         handle.breakLoop()
         handle.close()
-        packetTreatmentTimer.cancel()
-        packetsToTreat.clear()
     }
 
     fun isSnifferRunning(): Boolean {
         return isAlive && handle.isOpen
     }
 
-    private fun buildReceiveTimerTask(): TimerTask {
-        return object : TimerTask() {
-            override fun run() {
-                lock.lockInterruptibly()
-                val tcpPacket = packetsToTreat.minByOrNull { it.header.sequenceNumberAsLong }
-                    ?: error("No TCP packet to treat")
-                packetsToTreat.remove(tcpPacket)
-
-                val hostPortStr = tcpPacket.header.dstPort.valueAsString()
-                val dofusConnection = dofusConnectionByHostPort[hostPortStr]
-                    ?: error("Unknown connection for port : $hostPortStr")
-                val hostState = hostStateByConnection[dofusConnection]
-                    ?: error("Unknown host state for port : $hostPortStr")
-
-                val rawData = hostState.leftoverBuffer + tcpPacket.payload.rawData
-                hostState.leftoverBuffer = ByteArray(0)
-                try {
-                    receiveData(hostState, ByteArrayReader(rawData))
-                } catch (t: Throwable) {
-                    t.printStackTrace()
-                    val rawDataStr = Hex.encodeHexString(rawData)
-                    println("Couldn't receive data : $rawDataStr")
-                    hostState.logger.log("ERROR : Couldn't receive data : $rawDataStr")
-                } finally {
-                    lock.unlock()
-                }
-            }
+    private fun receiveTcpPacket(tcpPacket: TcpPacket) {
+        try {
+            lock.lockInterruptibly()
+            val hostPortStr = tcpPacket.header.dstPort.valueAsString()
+            val dofusConnection = dofusConnectionByHostPort[hostPortStr]
+                ?: error("Unknown connection for port : $hostPortStr")
+            val characterReceiver = characterReceiverByConnection[dofusConnection]
+                ?: error("Unknown character receiver for port : $hostPortStr")
+            characterReceiver.receiveTcpPacket(tcpPacket)
+        } finally {
+            lock.unlock()
         }
     }
 
@@ -171,90 +137,6 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
         currentAddress ?: error("No active address found. Make sure you have an internet connection.")
         return Pcaps.getDevByAddress(currentAddress)
             ?: error("No active device found. Make sure WinPcap or libpcap is installed.")
-    }
-
-    fun receiveData(hostState: HostState, data: ByteArrayReader) {
-        if (data.available() > 0) {
-            var messagePremise = lowReceive(hostState, data)
-            while (messagePremise != null) {
-                process(messagePremise, hostState)
-                messagePremise = lowReceive(hostState, data)
-            }
-        }
-    }
-
-    private fun process(messagePremise: DofusMessagePremise, hostState: HostState) {
-        val premiseStr = "${messagePremise.eventName}:${messagePremise.eventId}"
-        val message = messagePremise.eventClass?.getConstructor()?.newInstance()
-            ?.also { it.deserialize(messagePremise.stream) }
-        if (message != null) {
-            hostState.eventStore.addSocketEvent(message, hostState.connection)
-            val messageStr = objectMapper.writeValueAsString(message)
-            hostState.logger.log(premiseStr, description = messageStr)
-        } else {
-            hostState.logger.log("[UNTREATED] : $premiseStr")
-        }
-    }
-
-    private fun lowReceive(hostState: HostState, src: ByteArrayReader): DofusMessagePremise? {
-        if (!hostState.splitPacket) {
-            if (src.available() < 2) {
-                hostState.leftoverBuffer = src.readAllBytes()
-                return null
-            }
-            val header = src.readUnsignedShort()
-            val messageId = header shr BIT_RIGHT_SHIFT_LEN_PACKET_ID
-            if (src.available() >= (header and BIT_MASK)) {
-                val messageLength = readMessageLength(header, src)
-                if (MessageIdByName.getName(messageId) == null) {
-                    error("No message for messageId $messageId / header : $header / length : $messageLength")
-                }
-                if (src.available() >= messageLength) {
-                    return DofusMessageReceiverUtil.parseMessagePremise(
-                        ByteArrayReader(src.readNBytes(messageLength)),
-                        messageId
-                    )
-                }
-                hostState.staticHeader = -1
-                hostState.splitPacketLength = messageLength
-                hostState.splitPacketId = messageId
-                hostState.splitPacket = true
-                hostState.inputBuffer = src.readNBytes(src.available())
-                return null
-            }
-            if (MessageIdByName.getName(messageId) == null) {
-                error("No message for messageId $messageId / header : $header")
-            }
-            hostState.staticHeader = header
-            hostState.splitPacketLength = 0
-            hostState.splitPacketId = messageId
-            hostState.splitPacket = true
-            return null
-        }
-        if (hostState.staticHeader != -1) {
-            hostState.splitPacketLength = readMessageLength(hostState.staticHeader, src)
-            hostState.staticHeader = -1
-        }
-        if (src.available() + hostState.inputBuffer.size >= hostState.splitPacketLength) {
-            hostState.inputBuffer += src.readNBytes(hostState.splitPacketLength - hostState.inputBuffer.size)
-            val inputBufferReader = ByteArrayReader(hostState.inputBuffer)
-            val msg = DofusMessageReceiverUtil.parseMessagePremise(inputBufferReader, hostState.splitPacketId)
-            hostState.splitPacket = false
-            hostState.inputBuffer = ByteArray(0)
-            return msg
-        }
-        hostState.inputBuffer += src.readAllBytes()
-        return null
-    }
-
-    private fun readMessageLength(staticHeader: Int, src: ByteArrayReader): Int {
-        return when (staticHeader and BIT_MASK) {
-            0 -> 0
-            1 -> src.readUnsignedByte()
-            2 -> src.readUnsignedShort()
-            3 -> ((src.readUnsignedByte() and 255) shl 16) + ((src.readUnsignedByte() and 255) shl 8) + (src.readUnsignedByte() and 255)
-            else -> error("Invalid length")
-        }
     }
 
 }

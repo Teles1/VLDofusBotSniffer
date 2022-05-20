@@ -3,8 +3,10 @@ package fr.lewon.dofus.bot.sniffer.model.types.fight.fighter
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 import fr.lewon.dofus.bot.sniffer.model.TypeManager
 import fr.lewon.dofus.bot.sniffer.model.types.actor.GameContextActorInformations
+import fr.lewon.dofus.bot.sniffer.model.types.actor.entity.EntityLook
 import fr.lewon.dofus.bot.sniffer.model.types.fight.GameContextBasicSpawnInformation
 import fr.lewon.dofus.bot.sniffer.model.types.fight.charac.GameFightCharacteristics
+import fr.lewon.dofus.bot.sniffer.model.types.fight.disposition.EntityDispositionInformations
 
 open class GameFightFighterInformations : GameContextActorInformations() {
 
@@ -24,6 +26,22 @@ open class GameFightFighterInformations : GameContextActorInformations() {
             previousPositions.add(previousPos)
         }
 
+    }
+
+    fun initGameFightFighterInformations(
+        contextualId: Double,
+        disposition: EntityDispositionInformations,
+        look: EntityLook,
+        spawnInfo: GameContextBasicSpawnInformation,
+        wave: Int,
+        stats: GameFightCharacteristics,
+        previousPositions: ArrayList<Int>
+    ) {
+        initGameContextActorInformations(contextualId, disposition, look)
+        this.spawnInfo = spawnInfo
+        this.wave = wave
+        this.stats = stats
+        this.previousPositions = previousPositions
     }
 
 }

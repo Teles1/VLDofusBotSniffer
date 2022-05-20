@@ -13,10 +13,10 @@ open class CharacterCharacteristicDetailed : CharacterCharacteristic() {
 
     override fun deserialize(stream: ByteArrayReader) {
         super.deserialize(stream)
-        base = stream.readVarShort()
-        additional = stream.readVarShort()
-        objectsAndMountBonus = stream.readVarShort()
-        alignGiftBonus = stream.readVarShort()
-        contextModif = stream.readVarShort()
+        base = stream.readVarInt()
+        additional = stream.readVarInt()
+        objectsAndMountBonus = stream.readVarInt()
+        alignGiftBonus = stream.readVarInt()
+        contextModif = stream.readVarInt()
     }
 }
