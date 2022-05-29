@@ -85,10 +85,8 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
                     error("No message for messageId $messageId / header : $header / length : $messageLength")
                 }
                 if (src.available() >= messageLength) {
-                    return DofusMessageReceiverUtil.parseMessagePremise(
-                        ByteArrayReader(src.readNBytes(messageLength)),
-                        messageId
-                    )
+                    val stream = ByteArrayReader(src.readNBytes(messageLength))
+                    return DofusMessageReceiverUtil.parseMessagePremise(stream, messageId)
                 }
                 hostState.staticHeader = -1
                 hostState.splitPacketLength = messageLength
