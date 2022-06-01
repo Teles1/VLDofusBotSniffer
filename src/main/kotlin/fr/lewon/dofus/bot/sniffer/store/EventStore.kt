@@ -152,33 +152,33 @@ class EventStore {
 
     companion object {
         private const val QUEUE_SIZE = 500
-        private val HANDLER_MAPPER = HashMap<Class<out INetworkMessage>, ArrayList<EventHandler<INetworkMessage>>>()
+        private val HANDLER_MAPPER = HashMap<Class<out INetworkMessage>, ArrayList<IEventHandler<INetworkMessage>>>()
         private val STATIC_LOCK = ReentrantLock()
 
-        fun <T : INetworkMessage> getHandlers(eventClass: Class<T>): ArrayList<EventHandler<T>> {
+        fun <T : INetworkMessage> getHandlers(eventClass: Class<T>): ArrayList<IEventHandler<T>> {
             try {
                 STATIC_LOCK.lockInterruptibly()
-                return (HANDLER_MAPPER[eventClass] ?: ArrayList()) as ArrayList<EventHandler<T>>
+                return (HANDLER_MAPPER[eventClass] ?: ArrayList()) as ArrayList<IEventHandler<T>>
             } finally {
                 STATIC_LOCK.unlock()
             }
         }
 
         @Synchronized
-        fun <T : INetworkMessage> addEventHandler(eventClass: Class<T>, eventHandler: EventHandler<T>) {
+        fun <T : INetworkMessage> addEventHandler(eventClass: Class<T>, eventHandler: IEventHandler<T>) {
             val eventHandlers = HANDLER_MAPPER.computeIfAbsent(eventClass) { ArrayList() }
-            eventHandlers.add(eventHandler as EventHandler<INetworkMessage>)
+            eventHandlers.add(eventHandler as IEventHandler<INetworkMessage>)
         }
 
-        fun <T : INetworkMessage> addEventHandler(eventHandler: EventHandler<T>) {
+        fun <T : INetworkMessage> addEventHandler(eventHandler: IEventHandler<T>) {
             val eventHandlerInterface = getAllGenericInterfaces(eventHandler::class.java)
                 .filterIsInstance<ParameterizedType>()
-                .firstOrNull { EventHandler::class.java.isAssignableFrom(it.rawType as Class<*>) }
+                .firstOrNull { IEventHandler::class.java.isAssignableFrom(it.rawType as Class<*>) }
                 ?: return
             val actualTypeArgument = eventHandlerInterface.actualTypeArguments[0]
             if (actualTypeArgument is TypeVariable<*>) {
                 val argumentClass = actualTypeArgument.bounds[0] as Class<*>
-                val realType = getRealType(argumentClass, eventHandler::class.java, EventHandler::class.java)
+                val realType = getRealType(argumentClass, eventHandler::class.java, IEventHandler::class.java)
                 addEventHandler(realType as Class<T>, eventHandler)
             } else if (actualTypeArgument is Class<*>) {
                 addEventHandler(actualTypeArgument as Class<T>, eventHandler)

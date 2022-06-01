@@ -1,13 +1,13 @@
-package fr.lewon.dofus.bot.sniffer.model.messages.interactive
+package fr.lewon.dofus.bot.sniffer.model.messages.exchange
 
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
 
-open class LeaveDialogMessage : INetworkMessage {
+open class ExchangeStartedMessage : INetworkMessage {
 
-    var dialogType = 0
+    var exchangeType = 0
 
     override fun deserialize(stream: ByteArrayReader) {
-        dialogType = stream.readUnsignedByte()
+        exchangeType = stream.readUnsignedByte()
     }
 }
