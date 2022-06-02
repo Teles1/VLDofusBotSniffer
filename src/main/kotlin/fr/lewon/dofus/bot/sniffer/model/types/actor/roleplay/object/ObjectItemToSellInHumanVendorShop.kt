@@ -4,17 +4,17 @@ import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 import fr.lewon.dofus.bot.sniffer.model.TypeManager
 import fr.lewon.dofus.bot.sniffer.model.types.actor.roleplay.`object`.effect.ObjectEffect
 
-class ObjectItem : Item() {
+class ObjectItemToSellInHumanVendorShop : Item() {
 
-    var position = 0
     var objectGID = 0
     var effects = ArrayList<ObjectEffect>()
     var objectUID = 0
     var quantity = 0
+    var objectPrice = 0L
+    var publicPrice = 0L
 
     override fun deserialize(stream: ByteArrayReader) {
         super.deserialize(stream)
-        position = stream.readUnsignedShort()
         objectGID = stream.readVarShort()
         for (i in 0 until stream.readUnsignedShort()) {
             val objectEffect = TypeManager.getInstance<ObjectEffect>(stream.readUnsignedShort())
@@ -23,5 +23,7 @@ class ObjectItem : Item() {
         }
         objectUID = stream.readVarInt()
         quantity = stream.readVarInt()
+        objectPrice = stream.readVarLong()
+        publicPrice = stream.readVarLong()
     }
 }
