@@ -29,7 +29,7 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
                 val tcpPacket = ipV4Packet.payload
                 if (tcpPacket != null) {
                     if (tcpPacket.payload != null) {
-                        receiveTcpPacket(tcpPacket as TcpPacket)
+                        getCharacterReceiver(tcpPacket as TcpPacket).receiveTcpPacket(tcpPacket)
                     }
                 }
             }
@@ -52,9 +52,8 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
     fun stopListening(hostPort: String) {
         try {
             lock.lockInterruptibly()
-            dofusConnectionByHostPort.remove(hostPort)?.let {
-                characterReceiverByConnection.remove(it)
-            }
+            val connection = dofusConnectionByHostPort.remove(hostPort)
+            characterReceiverByConnection.remove(connection)?.stopAll()
             updateFilter()
         } finally {
             lock.unlock()
@@ -96,15 +95,14 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
         return isAlive && handle.isOpen
     }
 
-    private fun receiveTcpPacket(tcpPacket: TcpPacket) {
+    private fun getCharacterReceiver(tcpPacket: TcpPacket): DofusMessageCharacterReceiver {
         try {
             lock.lockInterruptibly()
             val hostPortStr = tcpPacket.header.dstPort.valueAsString()
             val dofusConnection = dofusConnectionByHostPort[hostPortStr]
                 ?: error("Unknown connection for port : $hostPortStr")
-            val characterReceiver = characterReceiverByConnection[dofusConnection]
-                ?: error("Unknown character receiver for port : $hostPortStr")
-            characterReceiver.receiveTcpPacket(tcpPacket)
+            return characterReceiverByConnection[dofusConnection]
+                ?: error("Unknown character receiver for port : ${dofusConnection.hostPort}")
         } finally {
             lock.unlock()
         }

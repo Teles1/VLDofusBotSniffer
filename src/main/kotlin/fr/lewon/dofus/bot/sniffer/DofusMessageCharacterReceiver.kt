@@ -2,10 +2,14 @@ package fr.lewon.dofus.bot.sniffer
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.core.utils.LockUtils
 import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
 import org.apache.commons.codec.binary.Hex
 import org.pcap4j.packet.TcpPacket
+import java.util.*
+import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.locks.ReentrantLock
 
 class DofusMessageCharacterReceiver(private val hostState: HostState) {
 
@@ -14,10 +18,33 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
         private const val BIT_MASK = 3
     }
 
+    private val lock = ReentrantLock()
     private val objectMapper = ObjectMapper()
+    private val packetsData = LinkedBlockingDeque<ByteArray>()
+    private val timer = Timer()
 
     fun receiveTcpPacket(tcpPacket: TcpPacket) {
-        val rawData = hostState.leftoverBuffer + tcpPacket.payload.rawData
+        packetsData.add(tcpPacket.payload.rawData)
+        timer.schedule(object : TimerTask() {
+            override fun run() {
+                handleNextPacket()
+            }
+        }, 0)
+    }
+
+    fun stopAll() {
+        timer.cancel()
+    }
+
+    private fun handleNextPacket() {
+        LockUtils.executeSyncOperation(lock) {
+            val packetData = packetsData.pollFirst()
+            handlePacketData(packetData)
+        }
+    }
+
+    private fun handlePacketData(packetData: ByteArray) {
+        val rawData = hostState.leftoverBuffer + packetData
         hostState.leftoverBuffer = ByteArray(0)
         try {
             receiveData(hostState, ByteArrayReader(rawData))
