@@ -5,12 +5,14 @@ import fr.lewon.dofus.bot.sniffer.model.INetworkType
 
 class FightLoot : INetworkType {
 
-    val objects = ArrayList<Int>()
+    val objects = ArrayList<FightLootObject>()
     var kamas = 0L
 
     override fun deserialize(stream: ByteArrayReader) {
         for (i in 0 until stream.readUnsignedShort()) {
-            objects.add(stream.readVarInt())
+            val fightLootObject = FightLootObject()
+            fightLootObject.deserialize(stream)
+            objects.add(fightLootObject)
         }
         kamas = stream.readVarLong()
     }
