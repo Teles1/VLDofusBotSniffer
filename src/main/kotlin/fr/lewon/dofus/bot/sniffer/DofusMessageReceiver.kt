@@ -6,12 +6,9 @@ import org.pcap4j.core.*
 import org.pcap4j.core.BpfProgram.BpfCompileMode
 import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode
 import org.pcap4j.packet.TcpPacket
-import java.net.InetAddress
-import java.net.NetworkInterface
-import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 
-class DofusMessageReceiver(private val networkInterfaceName: String? = null) : Thread() {
+class DofusMessageReceiver(networkInterfaceName: String? = null) : Thread() {
 
     private val lock = ReentrantLock(true)
     private val handle: PcapHandle
@@ -20,7 +17,7 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
     private val characterReceiverByConnection = HashMap<DofusConnection, DofusMessageCharacterReceiver>()
 
     init {
-        val nif = findActiveDevice()
+        val nif = findActiveDevice(networkInterfaceName)
         handle = nif.openLive(65536, PromiscuousMode.PROMISCUOUS, -1)
         updateFilter()
         packetListener = PacketListener { ethernetPacket ->
@@ -111,29 +108,10 @@ class DofusMessageReceiver(private val networkInterfaceName: String? = null) : T
     /** Find the current active pcap network interface.
      * @return The active pcap network interface
      */
-    private fun findActiveDevice(): PcapNetworkInterface {
-        var currentAddress: InetAddress? = null
-        val nis = NetworkInterface.getNetworkInterfaces()
-        while (nis.hasMoreElements() && currentAddress == null) {
-            val ni = nis.nextElement()
-            if (ni.isUp && !ni.isLoopback) {
-                val ias = ni.inetAddresses
-
-                while (ias.hasMoreElements() && currentAddress == null) {
-                    val ia = ias.nextElement()
-
-                    if (ia.isSiteLocalAddress &&
-                        !ia.isLoopbackAddress &&
-                        !ni.displayName.contains("VMnet") ||
-                        (networkInterfaceName != null && ni.displayName == networkInterfaceName)
-                    ) {
-                        currentAddress = ia
-                    }
-                }
-            }
-        }
-        currentAddress ?: error("No active address found. Make sure you have an internet connection.")
-        return Pcaps.getDevByAddress(currentAddress)
+    private fun findActiveDevice(networkInterfaceName: String?): PcapNetworkInterface {
+        val inetAddress = DofusMessageReceiverUtil.findInetAddress(networkInterfaceName)
+            ?: error("No active address found. Make sure you have an internet connection.")
+        return Pcaps.getDevByAddress(inetAddress)
             ?: error("No active device found. Make sure WinPcap or libpcap is installed.")
     }
 

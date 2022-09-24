@@ -10,6 +10,7 @@ import fr.lewon.dofus.export.builder.VldbAbstractExportPackTaskBuilder
 import fr.lewon.dofus.export.builder.VldbIdByNameExportPackTaskBuilder
 import org.reflections.Reflections
 import java.io.File
+import java.net.InetAddress
 import java.net.NetworkInterface
 
 object DofusMessageReceiverUtil {
@@ -45,17 +46,24 @@ object DofusMessageReceiverUtil {
         VldbProtocolUpdater.decompileSwf(swfFile, builders)
     }
 
+    fun findInetAddress(networkInterfaceName: String?): InetAddress? {
+        return getNetworkInterfaces().firstOrNull { networkInterfaceName == null || networkInterfaceName == it.displayName }
+            ?.inetAddresses
+            ?.asSequence()
+            ?.firstOrNull(this::isAddressValid)
+    }
+
+    private fun isAddressValid(inetAddress: InetAddress): Boolean {
+        return inetAddress.isSiteLocalAddress && !inetAddress.isLoopbackAddress
+    }
+
+    private fun getNetworkInterfaces(): List<NetworkInterface> {
+        return NetworkInterface.getNetworkInterfaces().asSequence()
+            .filter { it.isUp && !it.isLoopback && !it.displayName.contains("VMnet") }
+            .toList()
+    }
+
     fun getNetworkInterfaceNames(): List<String> {
-        val result = mutableListOf<String>()
-        val nis = NetworkInterface.getNetworkInterfaces()
-
-        while (nis.hasMoreElements()) {
-            val ni = nis.nextElement()
-            if (ni.isUp && !ni.isLoopback) {
-                result.add(ni.displayName)
-            }
-        }
-
-        return result
+        return getNetworkInterfaces().map { it.displayName }
     }
 }
