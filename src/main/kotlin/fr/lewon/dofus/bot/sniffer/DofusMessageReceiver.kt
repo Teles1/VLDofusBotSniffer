@@ -8,7 +8,7 @@ import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode
 import org.pcap4j.packet.TcpPacket
 import java.util.concurrent.locks.ReentrantLock
 
-class DofusMessageReceiver(networkInterfaceName: String? = null) : Thread() {
+class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
 
     private val lock = ReentrantLock(true)
     private val handle: PcapHandle
@@ -108,7 +108,7 @@ class DofusMessageReceiver(networkInterfaceName: String? = null) : Thread() {
     /** Find the current active pcap network interface.
      * @return The active pcap network interface
      */
-    private fun findActiveDevice(networkInterfaceName: String?): PcapNetworkInterface {
+    private fun findActiveDevice(networkInterfaceName: String): PcapNetworkInterface {
         val inetAddress = DofusMessageReceiverUtil.findInetAddress(networkInterfaceName)
             ?: error("No active address found. Make sure you have an internet connection.")
         return Pcaps.getDevByAddress(inetAddress)

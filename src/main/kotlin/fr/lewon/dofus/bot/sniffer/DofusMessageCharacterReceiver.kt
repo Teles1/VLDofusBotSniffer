@@ -27,20 +27,15 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
         packetsData.add(tcpPacket.payload.rawData)
         timer.schedule(object : TimerTask() {
             override fun run() {
-                handleNextPacket()
+                LockUtils.executeSyncOperation(lock) {
+                    handlePacketData(packetsData.pollFirst())
+                }
             }
         }, 0)
     }
 
     fun stopAll() {
         timer.cancel()
-    }
-
-    private fun handleNextPacket() {
-        LockUtils.executeSyncOperation(lock) {
-            val packetData = packetsData.pollFirst()
-            handlePacketData(packetData)
-        }
     }
 
     private fun handlePacketData(packetData: ByteArray) {

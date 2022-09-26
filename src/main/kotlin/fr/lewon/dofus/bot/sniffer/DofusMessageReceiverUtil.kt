@@ -46,8 +46,8 @@ object DofusMessageReceiverUtil {
         VldbProtocolUpdater.decompileSwf(swfFile, builders)
     }
 
-    fun findInetAddress(networkInterfaceName: String?): InetAddress? {
-        return getNetworkInterfaces().firstOrNull { networkInterfaceName == null || networkInterfaceName == it.displayName }
+    fun findInetAddress(networkInterfaceName: String): InetAddress? {
+        return getNetworkInterfaces().firstOrNull { networkInterfaceName == it.displayName }
             ?.inetAddresses
             ?.asSequence()
             ?.firstOrNull(this::isAddressValid)
