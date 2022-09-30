@@ -2,14 +2,13 @@ package fr.lewon.dofus.bot.sniffer
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
-import fr.lewon.dofus.bot.core.utils.LockUtils
+import fr.lewon.dofus.bot.sniffer.exceptions.AddToStoreFailedException
+import fr.lewon.dofus.bot.sniffer.exceptions.IncompleteMessageException
+import fr.lewon.dofus.bot.sniffer.exceptions.MessageIdNotFoundException
+import fr.lewon.dofus.bot.sniffer.exceptions.ParseFailedException
 import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
-import org.apache.commons.codec.binary.Hex
 import org.pcap4j.packet.TcpPacket
-import java.util.*
-import java.util.concurrent.LinkedBlockingDeque
-import java.util.concurrent.locks.ReentrantLock
 
 class DofusMessageCharacterReceiver(private val hostState: HostState) {
 
@@ -18,47 +17,49 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
         private const val BIT_MASK = 3
     }
 
-    private val lock = ReentrantLock()
     private val objectMapper = ObjectMapper()
-    private val packetsData = LinkedBlockingDeque<ByteArray>()
-    private val timer = Timer()
+    private val packets = ArrayList<TcpPacket>()
 
     fun receiveTcpPacket(tcpPacket: TcpPacket) {
-        packetsData.add(tcpPacket.payload.rawData)
-        timer.schedule(object : TimerTask() {
-            override fun run() {
-                LockUtils.executeSyncOperation(lock) {
-                    handlePacketData(packetsData.pollFirst())
-                }
-            }
-        }, 0)
+        packets.add(tcpPacket)
+        readPackets()
     }
 
-    fun stopAll() {
-        timer.cancel()
-    }
-
-    private fun handlePacketData(packetData: ByteArray) {
-        val rawData = hostState.leftoverBuffer + packetData
-        hostState.leftoverBuffer = ByteArray(0)
+    private fun readPackets() {
         try {
-            receiveData(hostState, ByteArrayReader(rawData))
-        } catch (t: Throwable) {
-            t.printStackTrace()
-            val rawDataStr = Hex.encodeHexString(rawData)
-            println("Couldn't receive data : $rawDataStr")
-            hostState.logger.log("ERROR : Couldn't receive data : $rawDataStr")
+            handlePackets()
+        } catch (e: IncompleteMessageException) {
+            // Nothing
+        } catch (e: Exception) {
+            println("Port ${hostState.connection.hostPort} : Couldn't read message - ${e.message}")
+            e.printStackTrace()
         }
     }
 
-    private fun receiveData(hostState: HostState, data: ByteArrayReader) {
+    private fun handlePackets() {
+        val rawData = packets.sortedBy { it.header.sequenceNumberAsLong }
+            .flatMap { it.payload.rawData.toList() }
+            .toByteArray()
+        val bar = ByteArrayReader(rawData)
+        val premises = receiveData(bar)
+        if (bar.available() == 0) {
+            for (premise in premises) {
+                process(premise, hostState)
+            }
+            packets.clear()
+        }
+    }
+
+    private fun receiveData(data: ByteArrayReader): List<DofusMessagePremise> {
+        val premises = ArrayList<DofusMessagePremise>()
         if (data.available() > 0) {
-            var messagePremise = lowReceive(hostState, data)
+            var messagePremise = lowReceive(data)
             while (messagePremise != null) {
-                process(messagePremise, hostState)
-                messagePremise = lowReceive(hostState, data)
+                premises.add(messagePremise)
+                messagePremise = lowReceive(data)
             }
         }
+        return premises
     }
 
     private fun process(messagePremise: DofusMessagePremise, hostState: HostState) {
@@ -75,12 +76,9 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
 
     private fun deserializeMessage(messagePremise: DofusMessagePremise): INetworkMessage? {
         return try {
-            messagePremise.eventClass?.getConstructor()?.newInstance()
-                ?.also { it.deserialize(messagePremise.stream) }
+            messagePremise.eventClass?.getConstructor()?.newInstance()?.also { it.deserialize(messagePremise.stream) }
         } catch (t: Throwable) {
-            println("ERROR deserializing message ${messagePremise.eventClass} :")
-            t.printStackTrace()
-            null
+            throw ParseFailedException(messagePremise.eventName, messagePremise.eventId, t)
         }
     }
 
@@ -88,58 +86,27 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
         try {
             hostState.eventStore.addSocketEvent(message, hostState.connection)
         } catch (t: Throwable) {
-            println("ERROR adding event to store :")
-            t.printStackTrace()
+            throw AddToStoreFailedException(message::class.java.toString(), t)
         }
     }
 
-    private fun lowReceive(hostState: HostState, src: ByteArrayReader): DofusMessagePremise? {
-        if (!hostState.splitPacket) {
-            if (src.available() < 2) {
-                hostState.leftoverBuffer = src.readAllBytes()
-                return null
-            }
-            val header = src.readUnsignedShort()
-            val messageId = header shr BIT_RIGHT_SHIFT_LEN_PACKET_ID
-            if (src.available() >= (header and BIT_MASK)) {
-                val messageLength = readMessageLength(header, src)
-                if (MessageIdByName.getName(messageId) == null) {
-                    error("No message for messageId $messageId / header : $header / length : $messageLength")
-                }
-                if (src.available() >= messageLength) {
-                    val stream = ByteArrayReader(src.readNBytes(messageLength))
-                    return DofusMessageReceiverUtil.parseMessagePremise(stream, messageId)
-                }
-                hostState.staticHeader = -1
-                hostState.splitPacketLength = messageLength
-                hostState.splitPacketId = messageId
-                hostState.splitPacket = true
-                hostState.inputBuffer = src.readNBytes(src.available())
-                return null
-            }
-            if (MessageIdByName.getName(messageId) == null) {
-                error("No message for messageId $messageId / header : $header")
-            }
-            hostState.staticHeader = header
-            hostState.splitPacketLength = 0
-            hostState.splitPacketId = messageId
-            hostState.splitPacket = true
+    private fun lowReceive(src: ByteArrayReader): DofusMessagePremise? {
+        if (src.available() < 2) {
             return null
         }
-        if (hostState.staticHeader != -1) {
-            hostState.splitPacketLength = readMessageLength(hostState.staticHeader, src)
-            hostState.staticHeader = -1
+        val header = src.readUnsignedShort()
+        val messageId = header shr BIT_RIGHT_SHIFT_LEN_PACKET_ID
+        if (src.available() >= (header and BIT_MASK)) {
+            val messageLength = readMessageLength(header, src)
+            if (MessageIdByName.getName(messageId) == null) {
+                throw MessageIdNotFoundException(messageId)
+            }
+            if (src.available() >= messageLength) {
+                val stream = ByteArrayReader(src.readNBytes(messageLength))
+                return DofusMessageReceiverUtil.parseMessagePremise(stream, messageId)
+            }
         }
-        if (src.available() + hostState.inputBuffer.size >= hostState.splitPacketLength) {
-            hostState.inputBuffer += src.readNBytes(hostState.splitPacketLength - hostState.inputBuffer.size)
-            val inputBufferReader = ByteArrayReader(hostState.inputBuffer)
-            val msg = DofusMessageReceiverUtil.parseMessagePremise(inputBufferReader, hostState.splitPacketId)
-            hostState.splitPacket = false
-            hostState.inputBuffer = ByteArray(0)
-            return msg
-        }
-        hostState.inputBuffer += src.readAllBytes()
-        return null
+        throw IncompleteMessageException()
     }
 
     private fun readMessageLength(staticHeader: Int, src: ByteArrayReader): Int {

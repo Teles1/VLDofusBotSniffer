@@ -1,6 +1,7 @@
 package fr.lewon.dofus.bot.sniffer
 
 import fr.lewon.dofus.bot.core.logs.VldbLogger
+import fr.lewon.dofus.bot.core.utils.LockUtils
 import fr.lewon.dofus.bot.sniffer.store.EventStore
 import org.pcap4j.core.*
 import org.pcap4j.core.BpfProgram.BpfCompileMode
@@ -26,7 +27,9 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
                 val tcpPacket = ipV4Packet.payload
                 if (tcpPacket != null) {
                     if (tcpPacket.payload != null) {
-                        getCharacterReceiver(tcpPacket as TcpPacket).receiveTcpPacket(tcpPacket)
+                        LockUtils.executeSyncOperation(lock) {
+                            getCharacterReceiver(tcpPacket as TcpPacket).receiveTcpPacket(tcpPacket)
+                        }
                     }
                 }
             }
@@ -34,26 +37,20 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
     }
 
     fun startListening(dofusConnection: DofusConnection, eventStore: EventStore, logger: VldbLogger) {
-        try {
-            lock.lockInterruptibly()
+        LockUtils.executeSyncOperation(lock) {
             stopListening(dofusConnection.hostPort)
             dofusConnectionByHostPort[dofusConnection.hostPort] = dofusConnection
             val hostState = HostState(dofusConnection, eventStore, logger)
             characterReceiverByConnection[dofusConnection] = DofusMessageCharacterReceiver(hostState)
             updateFilter()
-        } finally {
-            lock.unlock()
         }
     }
 
     fun stopListening(hostPort: String) {
-        try {
-            lock.lockInterruptibly()
+        LockUtils.executeSyncOperation(lock) {
             val connection = dofusConnectionByHostPort.remove(hostPort)
-            characterReceiverByConnection.remove(connection)?.stopAll()
+            characterReceiverByConnection.remove(connection)
             updateFilter()
-        } finally {
-            lock.unlock()
         }
     }
 
@@ -78,8 +75,11 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
         try {
             handle.loop(-1, packetListener)
         } catch (ex: PcapNativeException) {
+            println(ex.message)
         } catch (ex: InterruptedException) {
+            println(ex.message)
         } catch (ex: NotOpenException) {
+            println(ex.message)
         }
     }
 
@@ -93,15 +93,12 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
     }
 
     private fun getCharacterReceiver(tcpPacket: TcpPacket): DofusMessageCharacterReceiver {
-        try {
-            lock.lockInterruptibly()
+        return LockUtils.executeSyncOperation(lock) {
             val hostPortStr = tcpPacket.header.dstPort.valueAsString()
             val dofusConnection = dofusConnectionByHostPort[hostPortStr]
                 ?: error("Unknown connection for port : $hostPortStr")
-            return characterReceiverByConnection[dofusConnection]
+            characterReceiverByConnection[dofusConnection]
                 ?: error("Unknown character receiver for port : ${dofusConnection.hostPort}")
-        } finally {
-            lock.unlock()
         }
     }
 
