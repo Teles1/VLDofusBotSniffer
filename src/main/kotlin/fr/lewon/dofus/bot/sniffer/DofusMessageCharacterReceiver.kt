@@ -8,7 +8,6 @@ import fr.lewon.dofus.bot.sniffer.exceptions.MessageIdNotFoundException
 import fr.lewon.dofus.bot.sniffer.exceptions.ParseFailedException
 import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
-import org.apache.commons.codec.binary.Hex
 import org.pcap4j.packet.TcpPacket
 
 class DofusMessageCharacterReceiver(private val hostState: HostState) {
@@ -33,7 +32,7 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
             // Nothing
         } catch (e: Exception) {
             println("Port ${hostState.connection.hostPort} : Couldn't read message - ${e.message}")
-            packets.forEach { println(Hex.encodeHexString(it.payload.rawData)) }
+            packets.clear()
             e.printStackTrace()
         }
     }
