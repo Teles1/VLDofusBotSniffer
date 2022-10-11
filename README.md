@@ -7,4 +7,4 @@ been implemented here, converted to a Java object, then stored in an EventStore.
 ### How to use
 
 To use the sniffer, you must have an instance of Dofus running on your computer. Then,
-use a `DofusMessageReceiver`. Every successfully parsed message will be stored in an `EventStore` from which you can retrieve last parsed messages.
+use a `DofusMessageReceiver`. It will split received messages in different `DofusMessageCharacterReceiver` and every successfully parsed message will be stored in an `EventStore` from which you can retrieve last parsed messages.
