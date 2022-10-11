@@ -32,15 +32,20 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
             // Nothing
         } catch (e: Exception) {
             println("Port ${hostState.connection.hostPort} : Couldn't read message - ${e.message}")
-            packets.clear()
+            if (packets.size > 6) {
+                packets.remove(getSortedPackets().first())
+                handlePackets()
+            }
             e.printStackTrace()
         }
     }
 
+    private fun getSortedPackets(): List<TcpPacket> {
+        return packets.sortedBy { it.header.sequenceNumberAsLong }
+    }
+
     private fun handlePackets() {
-        val rawData = packets.sortedBy { it.header.sequenceNumberAsLong }
-            .flatMap { it.payload.rawData.toList() }
-            .toByteArray()
+        val rawData = getSortedPackets().flatMap { it.payload.rawData.toList() }.toByteArray()
         val bar = ByteArrayReader(rawData)
         val premises = receiveData(bar)
         if (bar.available() == 0) {

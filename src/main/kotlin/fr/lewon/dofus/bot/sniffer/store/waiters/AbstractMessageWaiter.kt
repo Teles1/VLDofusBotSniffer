@@ -1,5 +1,6 @@
 package fr.lewon.dofus.bot.sniffer.store.waiters
 
+import fr.lewon.dofus.bot.core.utils.LockUtils
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
@@ -12,12 +13,9 @@ abstract class AbstractMessageWaiter(val lock: ReentrantLock) {
 
     protected fun notifyWaitingThread() {
         if (!consumed) {
-            try {
-                lock.lockInterruptibly()
+            LockUtils.executeSyncOperation(lock) {
                 condition.signal()
                 consumed = true
-            } finally {
-                lock.unlock()
             }
         }
     }

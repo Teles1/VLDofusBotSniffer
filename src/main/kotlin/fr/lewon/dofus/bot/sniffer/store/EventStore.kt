@@ -1,5 +1,6 @@
 package fr.lewon.dofus.bot.sniffer.store
 
+import fr.lewon.dofus.bot.core.utils.LockUtils
 import fr.lewon.dofus.bot.sniffer.DofusConnection
 import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
 import fr.lewon.dofus.bot.sniffer.store.waiters.*
@@ -19,8 +20,7 @@ class EventStore {
 
 
     fun addSocketEvent(dofusEvent: INetworkMessage, connection: DofusConnection) {
-        try {
-            lock.lockInterruptibly()
+        LockUtils.executeSyncOperation(lock) {
             getHandlers(dofusEvent.javaClass).forEach {
                 it.onEventReceived(dofusEvent, connection)
             }
@@ -29,19 +29,12 @@ class EventStore {
                 eventQueue.offer(dofusEvent)
             }
             messageWaiter?.takeIf { !it.consumed }?.onMessageReceived(dofusEvent)
-        } finally {
-            lock.unlock()
         }
     }
 
     fun <T : INetworkMessage> getAllEvents(eventClass: Class<T>): List<T> {
-        try {
-            lock.lockInterruptibly()
-            return eventQueue
-                .filter { it::class.java == eventClass }
-                .map { eventClass.cast(it) }
-        } finally {
-            lock.unlock()
+        return LockUtils.executeSyncOperation(lock) {
+            eventQueue.filter { it::class.java == eventClass }.map { eventClass.cast(it) }
         }
     }
 
@@ -75,78 +68,54 @@ class EventStore {
     }
 
     private fun waitUntil(timeout: Int, buildWaiter: () -> AbstractMessageWaiter): Boolean {
-        try {
-            waitLock.lockInterruptibly()
+        return LockUtils.executeSyncOperation(waitLock) {
             val newMessageWaiter = buildWaiter()
             messageWaiter = newMessageWaiter
-            return newMessageWaiter.waitUntilNotify(timeout.toLong())
-        } finally {
-            waitLock.unlock()
+            newMessageWaiter.waitUntilNotify(timeout.toLong())
         }
     }
 
     fun <T : INetworkMessage> getLastEvent(eventClass: Class<T>, filterFunction: (T) -> Boolean = { true }): T? {
-        try {
-            lock.lockInterruptibly()
-            return getAllEvents(eventClass).lastOrNull(filterFunction)
-        } finally {
-            lock.unlock()
+        return LockUtils.executeSyncOperation(lock) {
+            getAllEvents(eventClass).lastOrNull(filterFunction)
         }
     }
 
     fun <T : INetworkMessage> getFirstEvent(eventClass: Class<T>, filterFunction: (T) -> Boolean = { true }): T? {
-        try {
-            lock.lockInterruptibly()
-            return getAllEvents(eventClass).firstOrNull(filterFunction)
-        } finally {
-            lock.unlock()
+        return LockUtils.executeSyncOperation(lock) {
+            getAllEvents(eventClass).firstOrNull(filterFunction)
         }
     }
 
     fun clear() {
-        try {
-            lock.lockInterruptibly()
+        LockUtils.executeSyncOperation(lock) {
             eventQueue.clear()
-        } finally {
-            lock.unlock()
         }
     }
 
     fun <T : INetworkMessage> clear(eventClass: Class<T>) {
-        try {
-            lock.lockInterruptibly()
+        LockUtils.executeSyncOperation(lock) {
             eventQueue.removeIf { it::class.java == eventClass }
-        } finally {
-            lock.unlock()
         }
     }
 
     fun clearUntilFirst(eventClass: Class<out INetworkMessage>) {
-        try {
-            lock.lockInterruptibly()
+        LockUtils.executeSyncOperation(lock) {
             clearUntil(getFirstEvent(eventClass))
-        } finally {
-            lock.unlock()
         }
     }
 
     fun clearUntilLast(eventClass: Class<out INetworkMessage>) {
-        try {
-            lock.lockInterruptibly()
+        LockUtils.executeSyncOperation(lock) {
             clearUntil(getLastEvent(eventClass))
-        } finally {
-            lock.unlock()
         }
     }
 
     private fun clearUntil(event: INetworkMessage?) {
-        try {
-            lock.lockInterruptibly()
+        LockUtils.executeSyncOperation(lock) {
             while (eventQueue.firstOrNull() != event) {
                 eventQueue.poll()
             }
-        } finally {
-            lock.unlock()
         }
     }
 
@@ -156,11 +125,8 @@ class EventStore {
         private val STATIC_LOCK = ReentrantLock()
 
         fun <T : INetworkMessage> getHandlers(eventClass: Class<T>): ArrayList<IEventHandler<T>> {
-            try {
-                STATIC_LOCK.lockInterruptibly()
-                return (HANDLER_MAPPER[eventClass] ?: ArrayList()) as ArrayList<IEventHandler<T>>
-            } finally {
-                STATIC_LOCK.unlock()
+            return LockUtils.executeSyncOperation(STATIC_LOCK) {
+                (HANDLER_MAPPER[eventClass] ?: ArrayList()) as ArrayList<IEventHandler<T>>
             }
         }
 
