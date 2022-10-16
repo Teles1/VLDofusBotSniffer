@@ -50,12 +50,11 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
         val premises = receiveData(bar)
         if (bar.available() == 0) {
             for (premise in premises) {
-                process(premise, hostState)
+                process(premise)
             }
             packets.clear()
         }
     }
-
     private fun receiveData(data: ByteArrayReader): List<DofusMessagePremise> {
         val premises = ArrayList<DofusMessagePremise>()
         if (data.available() > 0) {
@@ -68,11 +67,11 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
         return premises
     }
 
-    private fun process(messagePremise: DofusMessagePremise, hostState: HostState) {
+    private fun process(messagePremise: DofusMessagePremise) {
         val premiseStr = "${messagePremise.eventName}:${messagePremise.eventId}"
         val message = deserializeMessage(messagePremise)
         if (message != null) {
-            addMessageToStore(message, hostState)
+            addMessageToStore(message)
             val messageStr = objectMapper.writeValueAsString(message)
             hostState.logger.log(premiseStr, description = messageStr)
         } else {
@@ -88,7 +87,7 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
         }
     }
 
-    private fun addMessageToStore(message: INetworkMessage, hostState: HostState) {
+    private fun addMessageToStore(message: INetworkMessage) {
         try {
             hostState.eventStore.addSocketEvent(message, hostState.connection)
         } catch (t: Throwable) {
