@@ -1,7 +1,7 @@
 package fr.lewon.dofus.bot.sniffer.store.waiters
 
 import fr.lewon.dofus.bot.core.utils.LockUtils
-import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
+import fr.lewon.dofus.bot.sniffer.model.messages.NetworkMessage
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 
@@ -20,7 +20,7 @@ abstract class AbstractMessageWaiter(val lock: ReentrantLock) {
         }
     }
 
-    abstract fun onMessageReceived(message: INetworkMessage)
+    abstract fun onMessageReceived(message: NetworkMessage)
 
     fun waitUntilNotify(timeoutMillis: Long): Boolean {
         return condition.await(timeoutMillis, TimeUnit.MILLISECONDS)

@@ -5,7 +5,7 @@ import fr.lewon.dofus.bot.core.io.gamefiles.VldbFilesUtil
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
 import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
 import fr.lewon.dofus.bot.sniffer.managers.TypeIdByName
-import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
+import fr.lewon.dofus.bot.sniffer.model.messages.NetworkMessage
 import fr.lewon.dofus.export.builder.VldbAbstractExportPackTaskBuilder
 import fr.lewon.dofus.export.builder.VldbIdByNameExportPackTaskBuilder
 import org.reflections.Reflections
@@ -15,7 +15,7 @@ import java.net.NetworkInterface
 
 object DofusMessageReceiverUtil {
 
-    private lateinit var messagesById: Map<Int, Class<out INetworkMessage>>
+    private lateinit var messagesById: Map<Int, Class<out NetworkMessage>>
 
     fun parseMessagePremise(stream: ByteArrayReader, messageId: Int): DofusMessagePremise {
         val messageType = messagesById[messageId]
@@ -25,9 +25,11 @@ object DofusMessageReceiverUtil {
 
     fun prepareNetworkManagers(additionalBuilders: List<VldbAbstractExportPackTaskBuilder> = emptyList()) {
         processExport(getExportPackBuilders().union(additionalBuilders).toList())
-        messagesById = Reflections(INetworkMessage::class.java.packageName)
-            .getSubTypesOf(INetworkMessage::class.java)
-            .associateBy { (MessageIdByName.getId(it.simpleName) ?: error("Couldn't find id for [${it.simpleName}]")) }
+        messagesById = Reflections(NetworkMessage::class.java.packageName)
+            .getSubTypesOf(NetworkMessage::class.java)
+            .map { (MessageIdByName.getId(it.simpleName) ?: null) to it }
+            .filter { it.first != null }
+            .associate { it.first!! to it.second }
     }
 
     private fun getExportPackBuilders(): List<VldbAbstractExportPackTaskBuilder> {

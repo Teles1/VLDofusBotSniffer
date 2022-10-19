@@ -19,15 +19,15 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
 
     init {
         val nif = findActiveDevice(networkInterfaceName)
-        handle = nif.openLive(65536, PromiscuousMode.PROMISCUOUS, -1)
+        handle = nif.openLive(65536000, PromiscuousMode.PROMISCUOUS, -1)
         updateFilter()
         packetListener = PacketListener { ethernetPacket ->
-            val ipV4Packet = ethernetPacket.payload
-            if (ipV4Packet != null) {
-                val tcpPacket = ipV4Packet.payload
-                if (tcpPacket != null) {
-                    if (tcpPacket.payload != null) {
-                        LockUtils.executeSyncOperation(lock) {
+            LockUtils.executeSyncOperation(lock) {
+                val ipV4Packet = ethernetPacket.payload
+                if (ipV4Packet != null) {
+                    val tcpPacket = ipV4Packet.payload
+                    if (tcpPacket != null) {
+                        if (tcpPacket.payload != null) {
                             getCharacterReceiver(tcpPacket as TcpPacket).receiveTcpPacket(tcpPacket)
                         }
                     }

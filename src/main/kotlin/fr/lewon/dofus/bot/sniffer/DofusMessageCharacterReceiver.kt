@@ -7,7 +7,8 @@ import fr.lewon.dofus.bot.sniffer.exceptions.IncompleteMessageException
 import fr.lewon.dofus.bot.sniffer.exceptions.MessageIdNotFoundException
 import fr.lewon.dofus.bot.sniffer.exceptions.ParseFailedException
 import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
-import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
+import fr.lewon.dofus.bot.sniffer.model.messages.NetworkMessage
+import org.apache.commons.codec.binary.Hex
 import org.pcap4j.packet.TcpPacket
 
 class DofusMessageCharacterReceiver(private val hostState: HostState) {
@@ -30,12 +31,15 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
             handlePackets()
         } catch (e: IncompleteMessageException) {
             // Nothing
-        } catch (e: Exception) {
-            println("Port ${hostState.connection.hostPort} : Couldn't read message - ${e.message}")
-            if (packets.size > 6) {
-                packets.remove(getSortedPackets().first())
+        } catch (e: MessageIdNotFoundException) {
+            println("Port ${hostState.connection.hostPort} : Couldn't read message - ${e.message} (packets count : ${packets.size})")
+            if (packets.size > 10) {
+                println(getSortedPackets().joinToString("\n---\n") { Hex.encodeHexString(it.payload.rawData) })
+                packets.removeAt(0)
                 handlePackets()
             }
+        } catch (e: Exception) {
+            println("Port ${hostState.connection.hostPort} : Couldn't read message - ${e.message} (packets count : ${packets.size})")
             e.printStackTrace()
         }
     }
@@ -55,6 +59,7 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
             packets.clear()
         }
     }
+
     private fun receiveData(data: ByteArrayReader): List<DofusMessagePremise> {
         val premises = ArrayList<DofusMessagePremise>()
         if (data.available() > 0) {
@@ -79,7 +84,7 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
         }
     }
 
-    private fun deserializeMessage(messagePremise: DofusMessagePremise): INetworkMessage? {
+    private fun deserializeMessage(messagePremise: DofusMessagePremise): NetworkMessage? {
         return try {
             messagePremise.eventClass?.getConstructor()?.newInstance()?.also { it.deserialize(messagePremise.stream) }
         } catch (t: Throwable) {
@@ -87,7 +92,7 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
         }
     }
 
-    private fun addMessageToStore(message: INetworkMessage) {
+    private fun addMessageToStore(message: NetworkMessage) {
         try {
             hostState.eventStore.addSocketEvent(message, hostState.connection)
         } catch (t: Throwable) {

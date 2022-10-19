@@ -2,7 +2,7 @@ package fr.lewon.dofus.bot.sniffer.store
 
 import fr.lewon.dofus.bot.core.utils.LockUtils
 import fr.lewon.dofus.bot.sniffer.DofusConnection
-import fr.lewon.dofus.bot.sniffer.model.messages.INetworkMessage
+import fr.lewon.dofus.bot.sniffer.model.messages.NetworkMessage
 import fr.lewon.dofus.bot.sniffer.store.waiters.*
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -12,14 +12,14 @@ import java.util.concurrent.locks.ReentrantLock
 
 class EventStore {
 
-    private val eventQueue = ArrayBlockingQueue<INetworkMessage>(QUEUE_SIZE)
+    private val eventQueue = ArrayBlockingQueue<NetworkMessage>(QUEUE_SIZE)
     private val lock = ReentrantLock(true)
     private val waitLock = ReentrantLock()
 
     private var messageWaiter: AbstractMessageWaiter? = null
 
 
-    fun addSocketEvent(dofusEvent: INetworkMessage, connection: DofusConnection) {
+    fun addSocketEvent(dofusEvent: NetworkMessage, connection: DofusConnection) {
         LockUtils.executeSyncOperation(lock) {
             getHandlers(dofusEvent.javaClass).forEach {
                 it.onEventReceived(dofusEvent, connection)
@@ -32,17 +32,17 @@ class EventStore {
         }
     }
 
-    fun <T : INetworkMessage> getAllEvents(eventClass: Class<T>): List<T> {
+    fun <T : NetworkMessage> getAllEvents(eventClass: Class<T>): List<T> {
         return LockUtils.executeSyncOperation(lock) {
             eventQueue.filter { it::class.java == eventClass }.map { eventClass.cast(it) }
         }
     }
 
-    fun isAllEventsPresent(vararg messageClasses: Class<out INetworkMessage>): Boolean {
+    fun isAllEventsPresent(vararg messageClasses: Class<out NetworkMessage>): Boolean {
         return isAllEventsPresent(messageClasses.groupingBy { it }.eachCount())
     }
 
-    fun isAllEventsPresent(messageClassByCount: Map<Class<out INetworkMessage>, Int>): Boolean {
+    fun isAllEventsPresent(messageClassByCount: Map<Class<out NetworkMessage>, Int>): Boolean {
         for (entry in messageClassByCount.entries) {
             if (getAllEvents(entry.key).size < entry.value) {
                 return false
@@ -51,19 +51,19 @@ class EventStore {
         return true
     }
 
-    fun waitUntilMessagesArrives(messageClass: Class<out INetworkMessage>, timeout: Int): Boolean {
+    fun waitUntilMessagesArrives(messageClass: Class<out NetworkMessage>, timeout: Int): Boolean {
         return waitUntil(timeout) { MessageWaiter(waitLock, messageClass) }
     }
 
-    fun waitUntilAnyMessageArrives(messageClasses: Array<out Class<out INetworkMessage>>, timeout: Int): Boolean {
+    fun waitUntilAnyMessageArrives(messageClasses: Array<out Class<out NetworkMessage>>, timeout: Int): Boolean {
         return waitUntil(timeout) { AnyMessageWaiter(waitLock, messageClasses) }
     }
 
-    fun waitUntilMultipleMessagesArrive(messageClasses: Array<out Class<out INetworkMessage>>, timeout: Int): Boolean {
+    fun waitUntilMultipleMessagesArrive(messageClasses: Array<out Class<out NetworkMessage>>, timeout: Int): Boolean {
         return waitUntil(timeout) { MultipleMessagesWaiter(waitLock, messageClasses) }
     }
 
-    fun waitUntilOrderedMessagesArrive(messageClasses: Array<out Class<out INetworkMessage>>, timeout: Int): Boolean {
+    fun waitUntilOrderedMessagesArrive(messageClasses: Array<out Class<out NetworkMessage>>, timeout: Int): Boolean {
         return waitUntil(timeout) { OrderedMessagesWaiter(waitLock, messageClasses) }
     }
 
@@ -75,13 +75,13 @@ class EventStore {
         }
     }
 
-    fun <T : INetworkMessage> getLastEvent(eventClass: Class<T>, filterFunction: (T) -> Boolean = { true }): T? {
+    fun <T : NetworkMessage> getLastEvent(eventClass: Class<T>, filterFunction: (T) -> Boolean = { true }): T? {
         return LockUtils.executeSyncOperation(lock) {
             getAllEvents(eventClass).lastOrNull(filterFunction)
         }
     }
 
-    fun <T : INetworkMessage> getFirstEvent(eventClass: Class<T>, filterFunction: (T) -> Boolean = { true }): T? {
+    fun <T : NetworkMessage> getFirstEvent(eventClass: Class<T>, filterFunction: (T) -> Boolean = { true }): T? {
         return LockUtils.executeSyncOperation(lock) {
             getAllEvents(eventClass).firstOrNull(filterFunction)
         }
@@ -93,25 +93,25 @@ class EventStore {
         }
     }
 
-    fun <T : INetworkMessage> clear(eventClass: Class<T>) {
+    fun <T : NetworkMessage> clear(eventClass: Class<T>) {
         LockUtils.executeSyncOperation(lock) {
             eventQueue.removeIf { it::class.java == eventClass }
         }
     }
 
-    fun clearUntilFirst(eventClass: Class<out INetworkMessage>) {
+    fun clearUntilFirst(eventClass: Class<out NetworkMessage>) {
         LockUtils.executeSyncOperation(lock) {
             clearUntil(getFirstEvent(eventClass))
         }
     }
 
-    fun clearUntilLast(eventClass: Class<out INetworkMessage>) {
+    fun clearUntilLast(eventClass: Class<out NetworkMessage>) {
         LockUtils.executeSyncOperation(lock) {
             clearUntil(getLastEvent(eventClass))
         }
     }
 
-    private fun clearUntil(event: INetworkMessage?) {
+    private fun clearUntil(event: NetworkMessage?) {
         LockUtils.executeSyncOperation(lock) {
             while (eventQueue.firstOrNull() != event) {
                 eventQueue.poll()
@@ -121,22 +121,22 @@ class EventStore {
 
     companion object {
         private const val QUEUE_SIZE = 500
-        private val HANDLER_MAPPER = HashMap<Class<out INetworkMessage>, ArrayList<IEventHandler<INetworkMessage>>>()
+        private val HANDLER_MAPPER = HashMap<Class<out NetworkMessage>, ArrayList<IEventHandler<NetworkMessage>>>()
         private val STATIC_LOCK = ReentrantLock()
 
-        fun <T : INetworkMessage> getHandlers(eventClass: Class<T>): ArrayList<IEventHandler<T>> {
+        fun <T : NetworkMessage> getHandlers(eventClass: Class<T>): ArrayList<IEventHandler<T>> {
             return LockUtils.executeSyncOperation(STATIC_LOCK) {
                 (HANDLER_MAPPER[eventClass] ?: ArrayList()) as ArrayList<IEventHandler<T>>
             }
         }
 
         @Synchronized
-        fun <T : INetworkMessage> addEventHandler(eventClass: Class<T>, eventHandler: IEventHandler<T>) {
+        fun <T : NetworkMessage> addEventHandler(eventClass: Class<T>, eventHandler: IEventHandler<T>) {
             val eventHandlers = HANDLER_MAPPER.computeIfAbsent(eventClass) { ArrayList() }
-            eventHandlers.add(eventHandler as IEventHandler<INetworkMessage>)
+            eventHandlers.add(eventHandler as IEventHandler<NetworkMessage>)
         }
 
-        fun <T : INetworkMessage> addEventHandler(eventHandler: IEventHandler<T>) {
+        fun <T : NetworkMessage> addEventHandler(eventHandler: IEventHandler<T>) {
             val eventHandlerInterface = getAllGenericInterfaces(eventHandler::class.java)
                 .filterIsInstance<ParameterizedType>()
                 .firstOrNull { IEventHandler::class.java.isAssignableFrom(it.rawType as Class<*>) }
