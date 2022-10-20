@@ -6,7 +6,6 @@ import fr.lewon.dofus.bot.sniffer.exceptions.AddToStoreFailedException
 import fr.lewon.dofus.bot.sniffer.exceptions.IncompleteMessageException
 import fr.lewon.dofus.bot.sniffer.exceptions.MessageIdNotFoundException
 import fr.lewon.dofus.bot.sniffer.exceptions.ParseFailedException
-import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
 import fr.lewon.dofus.bot.sniffer.model.messages.NetworkMessage
 import org.apache.commons.codec.binary.Hex
 import org.pcap4j.packet.TcpPacket
@@ -53,23 +52,16 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
     private fun handlePackets() {
         val rawData = getSortedPackets().flatMap { it.payload.rawData.toList() }.toByteArray()
         val bar = ByteArrayReader(rawData)
-        val premises = receiveData(bar)
-        if (bar.available() == 0) {
-            for (premise in premises) {
-                process(premise)
-            }
-            packets.clear()
+        for (premise in receiveData(bar)) {
+            process(premise)
         }
+        packets.clear()
     }
 
     private fun receiveData(data: ByteArrayReader): List<DofusMessagePremise> {
         val premises = ArrayList<DofusMessagePremise>()
-        if (data.available() > 0) {
-            var messagePremise = lowReceive(data)
-            while (messagePremise != null) {
-                premises.add(messagePremise)
-                messagePremise = lowReceive(data)
-            }
+        while (data.available() > 0) {
+            premises.add(lowReceive(data))
         }
         return premises
     }
@@ -77,18 +69,13 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
     private fun process(messagePremise: DofusMessagePremise) {
         val premiseStr = "${messagePremise.eventName}:${messagePremise.eventId}"
         val message = deserializeMessage(messagePremise)
-        if (message != null) {
-            addMessageToStore(message)
-            val messageStr = objectMapper.writeValueAsString(message)
-            hostState.logger.log(premiseStr, description = messageStr)
-        } else {
-            hostState.logger.log("[UNTREATED] : $premiseStr")
-        }
+        addMessageToStore(message)
+        hostState.logger.log(premiseStr, description = objectMapper.writeValueAsString(message))
     }
 
-    private fun deserializeMessage(messagePremise: DofusMessagePremise): NetworkMessage? {
+    private fun deserializeMessage(messagePremise: DofusMessagePremise): NetworkMessage {
         return try {
-            messagePremise.eventClass?.getConstructor()?.newInstance()?.also { it.deserialize(messagePremise.stream) }
+            messagePremise.eventClass.getConstructor().newInstance().also { it.deserialize(messagePremise.stream) }
         } catch (t: Throwable) {
             throw ParseFailedException(messagePremise.eventName, messagePremise.eventId, t)
         }
@@ -102,20 +89,16 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
         }
     }
 
-    private fun lowReceive(src: ByteArrayReader): DofusMessagePremise? {
-        if (src.available() < 2) {
-            return null
-        }
-        val header = src.readUnsignedShort()
-        val messageId = header shr BIT_RIGHT_SHIFT_LEN_PACKET_ID
-        if (src.available() >= (header and BIT_MASK)) {
-            val messageLength = readMessageLength(header, src)
-            if (MessageIdByName.getName(messageId) == null) {
-                throw MessageIdNotFoundException(messageId)
-            }
-            if (src.available() >= messageLength) {
-                val stream = ByteArrayReader(src.readNBytes(messageLength))
-                return DofusMessageReceiverUtil.parseMessagePremise(stream, messageId)
+    private fun lowReceive(src: ByteArrayReader): DofusMessagePremise {
+        if (src.available() >= 2) {
+            val header = src.readUnsignedShort()
+            val messageId = header shr BIT_RIGHT_SHIFT_LEN_PACKET_ID
+            if (src.available() >= (header and BIT_MASK)) {
+                val messageLength = readMessageLength(header, src)
+                if (src.available() >= messageLength) {
+                    val stream = ByteArrayReader(src.readNBytes(messageLength))
+                    return DofusMessageReceiverUtil.parseMessagePremise(stream, messageId)
+                }
             }
         }
         throw IncompleteMessageException()

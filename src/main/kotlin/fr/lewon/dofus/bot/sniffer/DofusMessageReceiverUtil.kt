@@ -3,6 +3,7 @@ package fr.lewon.dofus.bot.sniffer
 import fr.lewon.dofus.VldbProtocolUpdater
 import fr.lewon.dofus.bot.core.io.gamefiles.VldbFilesUtil
 import fr.lewon.dofus.bot.core.io.stream.ByteArrayReader
+import fr.lewon.dofus.bot.sniffer.exceptions.MessageIdNotFoundException
 import fr.lewon.dofus.bot.sniffer.managers.MessageIdByName
 import fr.lewon.dofus.bot.sniffer.managers.TypeIdByName
 import fr.lewon.dofus.bot.sniffer.model.messages.NetworkMessage
@@ -19,7 +20,9 @@ object DofusMessageReceiverUtil {
 
     fun parseMessagePremise(stream: ByteArrayReader, messageId: Int): DofusMessagePremise {
         val messageType = messagesById[messageId]
-        val messageName = MessageIdByName.getName(messageId) ?: error("No message for id : $messageId")
+            ?: throw MessageIdNotFoundException(messageId)
+        val messageName = MessageIdByName.getName(messageId)
+            ?: throw MessageIdNotFoundException(messageId)
         return DofusMessagePremise(messageName, messageId, messageType, stream)
     }
 
@@ -27,9 +30,8 @@ object DofusMessageReceiverUtil {
         processExport(getExportPackBuilders().union(additionalBuilders).toList())
         messagesById = Reflections(NetworkMessage::class.java.packageName)
             .getSubTypesOf(NetworkMessage::class.java)
-            .map { (MessageIdByName.getId(it.simpleName) ?: null) to it }
-            .filter { it.first != null }
-            .associate { it.first!! to it.second }
+            .mapNotNull { msgClass -> (MessageIdByName.getId(msgClass.simpleName)?.let { id -> id to msgClass }) }
+            .toMap()
     }
 
     private fun getExportPackBuilders(): List<VldbAbstractExportPackTaskBuilder> {
