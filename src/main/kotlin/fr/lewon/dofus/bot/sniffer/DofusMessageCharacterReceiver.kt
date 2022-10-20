@@ -31,16 +31,18 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
             handlePackets()
         } catch (e: IncompleteMessageException) {
             // Nothing
-        } catch (e: MessageIdNotFoundException) {
-            println("Port ${hostState.connection.hostPort} : Couldn't read message - ${e.message} (packets count : ${packets.size})")
-            if (packets.size > 10) {
-                println(getSortedPackets().joinToString("\n---\n") { Hex.encodeHexString(it.payload.rawData) })
-                packets.removeAt(0)
-                handlePackets()
-            }
         } catch (e: Exception) {
             println("Port ${hostState.connection.hostPort} : Couldn't read message - ${e.message} (packets count : ${packets.size})")
-            e.printStackTrace()
+            if (e !is MessageIdNotFoundException) {
+                e.printStackTrace()
+            }
+        }
+        if (packets.size > 10) {
+            println("####")
+            println(getSortedPackets().joinToString("\n---\n") { Hex.encodeHexString(it.payload.rawData) })
+            println("####")
+            packets.removeAt(0)
+            handlePackets()
         }
     }
 
