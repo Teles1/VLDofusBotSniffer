@@ -7,7 +7,6 @@ import fr.lewon.dofus.bot.sniffer.exceptions.IncompleteMessageException
 import fr.lewon.dofus.bot.sniffer.exceptions.MessageIdNotFoundException
 import fr.lewon.dofus.bot.sniffer.exceptions.ParseFailedException
 import fr.lewon.dofus.bot.sniffer.model.messages.NetworkMessage
-import org.apache.commons.codec.binary.Hex
 import org.pcap4j.packet.TcpPacket
 
 class DofusMessageCharacterReceiver(private val hostState: HostState) {
@@ -37,11 +36,8 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
             }
         }
         if (packets.size > 10) {
-            println("####")
-            println(getSortedPackets().joinToString("\n---\n") { Hex.encodeHexString(it.payload.rawData) })
-            println("####")
-            packets.removeAt(0)
-            handlePackets()
+            packets.remove(getSortedPackets().first())
+            readPackets()
         }
     }
 
