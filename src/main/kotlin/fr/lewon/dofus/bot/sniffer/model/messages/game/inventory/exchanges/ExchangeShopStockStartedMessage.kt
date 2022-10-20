@@ -12,7 +12,7 @@ open class ExchangeShopStockStartedMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		objectsInfos = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItemToSell()
 			item.deserialize(stream)
 			objectsInfos.add(item)

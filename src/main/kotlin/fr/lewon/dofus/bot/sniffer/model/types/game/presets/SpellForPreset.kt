@@ -13,7 +13,7 @@ open class SpellForPreset : NetworkType() {
 		super.deserialize(stream)
 		spellId = stream.readVarShort().toInt()
 		shortcuts = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUnsignedShort().toInt()
 			shortcuts.add(item)
 		}

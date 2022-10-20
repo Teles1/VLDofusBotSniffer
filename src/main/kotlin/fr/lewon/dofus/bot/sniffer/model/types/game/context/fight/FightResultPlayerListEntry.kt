@@ -13,7 +13,7 @@ open class FightResultPlayerListEntry : FightResultFighterListEntry() {
 		super.deserialize(stream)
 		level = stream.readVarShort().toInt()
 		additional = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<FightResultAdditionalData>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			additional.add(item)

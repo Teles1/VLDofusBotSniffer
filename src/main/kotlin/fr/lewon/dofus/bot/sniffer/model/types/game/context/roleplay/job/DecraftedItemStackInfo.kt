@@ -18,12 +18,12 @@ open class DecraftedItemStackInfo : NetworkType() {
 		bonusMin = stream.readFloat().toDouble()
 		bonusMax = stream.readFloat().toDouble()
 		runesId = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			runesId.add(item)
 		}
 		runesQty = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			runesQty.add(item)
 		}

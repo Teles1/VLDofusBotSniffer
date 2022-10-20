@@ -12,7 +12,7 @@ open class HumanOptionFollowers : HumanOption() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		followingCharactersLook = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = IndexedEntityLook()
 			item.deserialize(stream)
 			followingCharactersLook.add(item)

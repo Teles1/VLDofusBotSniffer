@@ -20,7 +20,7 @@ open class AllianceInsiderPrismInformation : PrismInformation() {
 		lastTimeSlotModificationAuthorId = stream.readVarLong().toDouble()
 		lastTimeSlotModificationAuthorName = stream.readUTF()
 		modulesObjects = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItem()
 			item.deserialize(stream)
 			modulesObjects.add(item)

@@ -13,7 +13,7 @@ open class ServersListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		servers = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GameServerInformations()
 			item.deserialize(stream)
 			servers.add(item)

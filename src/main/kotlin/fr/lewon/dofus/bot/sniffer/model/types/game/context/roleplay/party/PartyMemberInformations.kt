@@ -38,7 +38,7 @@ open class PartyMemberInformations : CharacterBaseInformations() {
 		status = ProtocolTypeManager.getInstance<PlayerStatus>(stream.readUnsignedShort())
 		status.deserialize(stream)
 		entities = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<PartyEntityBaseInformation>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			entities.add(item)

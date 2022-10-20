@@ -14,7 +14,7 @@ open class ItemsPreset : Preset() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		items = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ItemForPreset()
 			item.deserialize(stream)
 			items.add(item)

@@ -20,13 +20,13 @@ open class GameFightEndMessage : NetworkMessage() {
 		rewardRate = stream.readVarShort().toInt()
 		lootShareLimitMalus = stream.readUnsignedShort().toInt()
 		results = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<FightResultListEntry>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			results.add(item)
 		}
 		namedPartyTeamsOutcomes = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = NamedPartyTeamWithOutcome()
 			item.deserialize(stream)
 			namedPartyTeamsOutcomes.add(item)

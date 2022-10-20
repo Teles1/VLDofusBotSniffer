@@ -15,12 +15,12 @@ open class SetUpdateMessage : NetworkMessage() {
 		super.deserialize(stream)
 		setId = stream.readVarShort().toInt()
 		setObjects = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			setObjects.add(item)
 		}
 		setEffects = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<ObjectEffect>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			setEffects.add(item)

@@ -28,12 +28,12 @@ open class GuildInfosUpgradeMessage : NetworkMessage() {
 		taxCollectorWisdom = stream.readVarShort().toInt()
 		boostPoints = stream.readVarShort().toInt()
 		spellId = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			spellId.add(item)
 		}
 		spellLevel = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUnsignedShort().toInt()
 			spellLevel.add(item)
 		}

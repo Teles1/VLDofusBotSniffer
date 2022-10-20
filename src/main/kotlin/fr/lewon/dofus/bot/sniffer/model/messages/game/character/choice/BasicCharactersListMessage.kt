@@ -12,7 +12,7 @@ open class BasicCharactersListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		characters = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<CharacterBaseInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			characters.add(item)

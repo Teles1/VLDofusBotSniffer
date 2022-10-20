@@ -14,7 +14,7 @@ open class SpellListMessage : NetworkMessage() {
 		super.deserialize(stream)
 		spellPrevisualization = stream.readBoolean()
 		spells = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = SpellItem()
 			item.deserialize(stream)
 			spells.add(item)

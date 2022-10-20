@@ -19,13 +19,13 @@ open class AllianceFactsMessage : NetworkMessage() {
 		infos = ProtocolTypeManager.getInstance<AllianceFactSheetInformations>(stream.readUnsignedShort())
 		infos.deserialize(stream)
 		guilds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GuildInAllianceInformations()
 			item.deserialize(stream)
 			guilds.add(item)
 		}
 		controlledSubareaIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			controlledSubareaIds.add(item)
 		}

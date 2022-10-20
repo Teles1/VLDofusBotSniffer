@@ -12,12 +12,12 @@ open class DungeonKeyRingMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		availables = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			availables.add(item)
 		}
 		unavailables = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			unavailables.add(item)
 		}

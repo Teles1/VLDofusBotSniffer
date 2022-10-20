@@ -12,12 +12,12 @@ open class GameRolePlayNpcQuestFlag : NetworkType() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		questsToValidId = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			questsToValidId.add(item)
 		}
 		questsToStartId = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			questsToStartId.add(item)
 		}

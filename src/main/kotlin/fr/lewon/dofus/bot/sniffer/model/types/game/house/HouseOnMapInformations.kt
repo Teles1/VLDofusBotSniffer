@@ -12,12 +12,12 @@ open class HouseOnMapInformations : HouseInformations() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		doorsOnMap = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readInt().toInt()
 			doorsOnMap.add(item)
 		}
 		houseInstances = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = HouseInstanceInformations()
 			item.deserialize(stream)
 			houseInstances.add(item)

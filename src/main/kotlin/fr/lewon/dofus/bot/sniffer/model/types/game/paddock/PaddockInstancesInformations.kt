@@ -11,7 +11,7 @@ open class PaddockInstancesInformations : PaddockInformations() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		paddocks = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<PaddockBuyableInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			paddocks.add(item)

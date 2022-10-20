@@ -12,7 +12,7 @@ open class ExchangeMountsPaddockAddMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		mountDescription = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = MountClientData()
 			item.deserialize(stream)
 			mountDescription.add(item)

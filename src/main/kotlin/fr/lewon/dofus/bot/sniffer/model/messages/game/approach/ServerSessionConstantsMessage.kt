@@ -12,7 +12,7 @@ open class ServerSessionConstantsMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		variables = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<ServerSessionConstant>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			variables.add(item)

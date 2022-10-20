@@ -23,7 +23,7 @@ open class GameContextSummonsInformation : NetworkType() {
 		stats = ProtocolTypeManager.getInstance<GameFightCharacteristics>(stream.readUnsignedShort())
 		stats.deserialize(stream)
 		summons = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<GameContextBasicSpawnInformation>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			summons.add(item)

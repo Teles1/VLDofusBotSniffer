@@ -15,13 +15,13 @@ open class DungeonPartyFinderRoomContentUpdateMessage : NetworkMessage() {
 		super.deserialize(stream)
 		dungeonId = stream.readVarShort().toInt()
 		addedPlayers = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = DungeonPartyFinderPlayer()
 			item.deserialize(stream)
 			addedPlayers.add(item)
 		}
 		removedPlayersIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarLong().toDouble()
 			removedPlayersIds.add(item)
 		}

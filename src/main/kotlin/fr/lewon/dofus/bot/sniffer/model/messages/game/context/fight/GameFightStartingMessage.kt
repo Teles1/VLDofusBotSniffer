@@ -21,7 +21,7 @@ open class GameFightStartingMessage : NetworkMessage() {
 		defenderId = stream.readDouble().toDouble()
 		containsBoss = stream.readBoolean()
 		monsters = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readInt().toInt()
 			monsters.add(item)
 		}

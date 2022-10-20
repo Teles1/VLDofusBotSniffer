@@ -15,7 +15,7 @@ open class GameRolePlayMerchantInformations : GameRolePlayNamedActorInformations
 		super.deserialize(stream)
 		sellType = stream.readUnsignedByte().toInt()
 		options = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<HumanOption>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			options.add(item)

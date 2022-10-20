@@ -22,7 +22,7 @@ open class GameFightFighterInformations : GameContextActorInformations() {
 		stats = ProtocolTypeManager.getInstance<GameFightCharacteristics>(stream.readUnsignedShort())
 		stats.deserialize(stream)
 		previousPositions = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			previousPositions.add(item)
 		}

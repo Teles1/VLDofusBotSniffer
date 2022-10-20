@@ -13,12 +13,12 @@ open class GameRolePlayArenaPlayerBehavioursMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		flags = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUTF()
 			flags.add(item)
 		}
 		sanctions = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUTF()
 			sanctions.add(item)
 		}

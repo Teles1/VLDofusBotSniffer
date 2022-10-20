@@ -15,23 +15,23 @@ open class QuestListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		finishedQuestsIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			finishedQuestsIds.add(item)
 		}
 		finishedQuestsCounts = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			finishedQuestsCounts.add(item)
 		}
 		activeQuests = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<QuestActiveInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			activeQuests.add(item)
 		}
 		reinitDoneQuestsIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			reinitDoneQuestsIds.add(item)
 		}

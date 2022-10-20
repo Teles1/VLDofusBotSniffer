@@ -12,7 +12,7 @@ open class JobCrafterDirectorySettingsMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		craftersSettings = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = JobCrafterDirectorySettings()
 			item.deserialize(stream)
 			craftersSettings.add(item)

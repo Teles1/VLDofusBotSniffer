@@ -15,7 +15,7 @@ open class PartyInvitationDungeonDetailsMessage : PartyInvitationDetailsMessage(
 		super.deserialize(stream)
 		dungeonId = stream.readVarShort().toInt()
 		playersDungeonReady = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readBoolean()
 			playersDungeonReady.add(item)
 		}

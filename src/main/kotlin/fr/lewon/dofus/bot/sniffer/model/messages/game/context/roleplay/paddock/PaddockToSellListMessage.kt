@@ -16,7 +16,7 @@ open class PaddockToSellListMessage : NetworkMessage() {
 		pageIndex = stream.readVarShort().toInt()
 		totalPage = stream.readVarShort().toInt()
 		paddockList = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = PaddockInformationsForSell()
 			item.deserialize(stream)
 			paddockList.add(item)

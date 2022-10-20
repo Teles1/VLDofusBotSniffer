@@ -14,13 +14,13 @@ open class Achievement : NetworkType() {
 		super.deserialize(stream)
 		id = stream.readVarShort().toInt()
 		finishedObjective = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = AchievementObjective()
 			item.deserialize(stream)
 			finishedObjective.add(item)
 		}
 		startedObjectives = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = AchievementStartedObjective()
 			item.deserialize(stream)
 			startedObjectives.add(item)

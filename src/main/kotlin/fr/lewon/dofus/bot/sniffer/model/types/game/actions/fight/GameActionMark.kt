@@ -26,7 +26,7 @@ open class GameActionMark : NetworkType() {
 		markType = stream.readUnsignedByte().toInt()
 		markimpactCell = stream.readUnsignedShort().toInt()
 		cells = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GameActionMarkedCell()
 			item.deserialize(stream)
 			cells.add(item)

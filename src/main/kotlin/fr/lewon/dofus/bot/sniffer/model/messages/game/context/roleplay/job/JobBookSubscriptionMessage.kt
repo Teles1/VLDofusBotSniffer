@@ -12,7 +12,7 @@ open class JobBookSubscriptionMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		subscriptions = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = JobBookSubscription()
 			item.deserialize(stream)
 			subscriptions.add(item)

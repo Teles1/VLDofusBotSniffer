@@ -20,7 +20,7 @@ open class AlterationInfo : NetworkType() {
 		expirationType = stream.readUnsignedByte().toInt()
 		expirationValue = stream.readDouble().toDouble()
 		effects = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<ObjectEffect>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			effects.add(item)

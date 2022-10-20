@@ -13,7 +13,7 @@ open class ExchangeObjectsModifiedMessage : ExchangeObjectMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		obj = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItem()
 			item.deserialize(stream)
 			obj.add(item)

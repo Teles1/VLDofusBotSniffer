@@ -18,7 +18,7 @@ open class CharacterCreationRequestMessage : NetworkMessage() {
 		breed = stream.readUnsignedByte().toInt()
 		sex = stream.readBoolean()
 		colors = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until 5) {
 			val item = stream.readInt().toInt()
 			colors.add(item)
 		}

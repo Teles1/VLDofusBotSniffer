@@ -28,7 +28,7 @@ open class HouseInformationsForGuild : HouseInformations() {
 		mapId = stream.readDouble().toDouble()
 		subAreaId = stream.readVarShort().toInt()
 		skillListIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readInt().toInt()
 			skillListIds.add(item)
 		}

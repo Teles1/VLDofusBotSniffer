@@ -13,7 +13,7 @@ open class DebugHighlightCellsMessage : NetworkMessage() {
 		super.deserialize(stream)
 		color = stream.readDouble().toDouble()
 		cells = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			cells.add(item)
 		}

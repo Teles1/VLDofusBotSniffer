@@ -13,7 +13,7 @@ open class GameActionFightMultipleSummonMessage : AbstractGameActionMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		summons = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<GameContextSummonsInformation>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			summons.add(item)

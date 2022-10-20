@@ -17,7 +17,7 @@ open class GuildRankInformation : GuildRankMinimalInformation() {
 		gfxId = stream.readVarInt().toInt()
 		modifiable = stream.readBoolean()
 		rights = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			rights.add(item)
 		}

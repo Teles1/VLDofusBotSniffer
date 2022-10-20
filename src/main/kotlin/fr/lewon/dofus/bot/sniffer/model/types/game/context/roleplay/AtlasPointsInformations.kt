@@ -14,7 +14,7 @@ open class AtlasPointsInformations : NetworkType() {
 		super.deserialize(stream)
 		type = stream.readUnsignedByte().toInt()
 		coords = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = MapCoordinatesExtended()
 			item.deserialize(stream)
 			coords.add(item)

@@ -14,7 +14,7 @@ open class HavenBagRoomUpdateMessage : NetworkMessage() {
 		super.deserialize(stream)
 		action = stream.readUnsignedByte().toInt()
 		roomsPreview = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = HavenBagRoomPreviewInformation()
 			item.deserialize(stream)
 			roomsPreview.add(item)

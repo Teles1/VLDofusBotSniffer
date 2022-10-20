@@ -12,7 +12,7 @@ open class HavenBagFurnituresMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		furnituresInfos = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = HavenBagFurnitureInformation()
 			item.deserialize(stream)
 			furnituresInfos.add(item)

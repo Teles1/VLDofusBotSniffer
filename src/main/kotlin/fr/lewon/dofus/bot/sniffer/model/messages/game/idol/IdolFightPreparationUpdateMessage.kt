@@ -14,7 +14,7 @@ open class IdolFightPreparationUpdateMessage : NetworkMessage() {
 		super.deserialize(stream)
 		idolSource = stream.readUnsignedByte().toInt()
 		idols = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<Idol>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			idols.add(item)

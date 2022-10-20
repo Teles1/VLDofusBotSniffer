@@ -13,7 +13,7 @@ open class EntityMovementInformations : NetworkType() {
 		super.deserialize(stream)
 		id = stream.readInt().toInt()
 		steps = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUnsignedByte().toInt()
 			steps.add(item)
 		}

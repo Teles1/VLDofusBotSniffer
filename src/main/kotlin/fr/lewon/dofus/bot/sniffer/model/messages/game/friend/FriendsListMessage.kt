@@ -12,7 +12,7 @@ open class FriendsListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		friendsList = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<FriendInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			friendsList.add(item)

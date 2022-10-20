@@ -14,7 +14,7 @@ open class DebtsUpdateMessage : NetworkMessage() {
 		super.deserialize(stream)
 		action = stream.readUnsignedByte().toInt()
 		debts = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<DebtInformation>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			debts.add(item)

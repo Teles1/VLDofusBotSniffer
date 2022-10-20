@@ -12,7 +12,7 @@ open class AbstractTaxCollectorListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		informations = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<TaxCollectorInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			informations.add(item)

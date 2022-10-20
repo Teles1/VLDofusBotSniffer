@@ -32,7 +32,7 @@ open class ExchangeGuildTaxCollectorGetMessage : NetworkMessage() {
 		experience = stream.readDouble().toDouble()
 		pods = stream.readVarShort().toInt()
 		objectsInfos = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItemGenericQuantity()
 			item.deserialize(stream)
 			objectsInfos.add(item)

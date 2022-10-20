@@ -12,7 +12,7 @@ open class StartupActionsListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		actions = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = StartupActionAddObject()
 			item.deserialize(stream)
 			actions.add(item)

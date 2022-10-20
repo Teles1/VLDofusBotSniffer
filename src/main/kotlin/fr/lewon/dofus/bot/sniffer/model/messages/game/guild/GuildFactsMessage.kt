@@ -20,7 +20,7 @@ open class GuildFactsMessage : NetworkMessage() {
 		creationDate = stream.readInt().toInt()
 		nbTaxCollectors = stream.readVarShort().toInt()
 		members = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = CharacterMinimalGuildPublicInformations()
 			item.deserialize(stream)
 			members.add(item)

@@ -14,7 +14,7 @@ open class DungeonPartyFinderRoomContentMessage : NetworkMessage() {
 		super.deserialize(stream)
 		dungeonId = stream.readVarShort().toInt()
 		players = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = DungeonPartyFinderPlayer()
 			item.deserialize(stream)
 			players.add(item)

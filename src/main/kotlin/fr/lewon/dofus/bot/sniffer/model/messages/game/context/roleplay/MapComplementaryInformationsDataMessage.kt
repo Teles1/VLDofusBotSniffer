@@ -29,37 +29,37 @@ open class MapComplementaryInformationsDataMessage : NetworkMessage() {
 		subAreaId = stream.readVarShort().toInt()
 		mapId = stream.readDouble().toDouble()
 		houses = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<HouseInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			houses.add(item)
 		}
 		actors = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<GameRolePlayActorInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			actors.add(item)
 		}
 		interactiveElements = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<InteractiveElement>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			interactiveElements.add(item)
 		}
 		statedElements = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = StatedElement()
 			item.deserialize(stream)
 			statedElements.add(item)
 		}
 		obstacles = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = MapObstacle()
 			item.deserialize(stream)
 			obstacles.add(item)
 		}
 		fights = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = FightCommonInformations()
 			item.deserialize(stream)
 			fights.add(item)

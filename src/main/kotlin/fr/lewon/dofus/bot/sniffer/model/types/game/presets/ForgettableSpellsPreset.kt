@@ -14,7 +14,7 @@ open class ForgettableSpellsPreset : Preset() {
 		baseSpellsPreset = SpellsPreset()
 		baseSpellsPreset.deserialize(stream)
 		forgettableSpells = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = SpellForPreset()
 			item.deserialize(stream)
 			forgettableSpells.add(item)

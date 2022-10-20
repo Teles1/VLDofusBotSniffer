@@ -13,13 +13,13 @@ open class GuildLogbookInformationMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		globalActivities = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<GuildLogbookEntryBasicInformation>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			globalActivities.add(item)
 		}
 		chestActivities = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<GuildLogbookEntryBasicInformation>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			chestActivities.add(item)

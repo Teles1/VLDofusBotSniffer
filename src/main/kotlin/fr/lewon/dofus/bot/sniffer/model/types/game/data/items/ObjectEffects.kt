@@ -12,7 +12,7 @@ open class ObjectEffects : NetworkType() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		effects = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<ObjectEffect>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			effects.add(item)

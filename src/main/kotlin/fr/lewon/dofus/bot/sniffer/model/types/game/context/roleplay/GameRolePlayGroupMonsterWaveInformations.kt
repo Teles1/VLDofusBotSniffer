@@ -15,7 +15,7 @@ open class GameRolePlayGroupMonsterWaveInformations : GameRolePlayGroupMonsterIn
 		super.deserialize(stream)
 		nbWaves = stream.readUnsignedByte().toInt()
 		alternatives = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<GroupMonsterStaticInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			alternatives.add(item)

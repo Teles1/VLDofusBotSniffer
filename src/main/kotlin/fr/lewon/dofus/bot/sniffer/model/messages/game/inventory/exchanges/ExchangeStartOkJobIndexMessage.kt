@@ -11,7 +11,7 @@ open class ExchangeStartOkJobIndexMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		jobs = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			jobs.add(item)
 		}

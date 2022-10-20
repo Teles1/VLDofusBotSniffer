@@ -14,7 +14,7 @@ open class GuildFightPlayersEnemiesListMessage : NetworkMessage() {
 		super.deserialize(stream)
 		fightId = stream.readDouble().toDouble()
 		playerInfo = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = CharacterMinimalPlusLookInformations()
 			item.deserialize(stream)
 			playerInfo.add(item)

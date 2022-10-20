@@ -18,12 +18,12 @@ open class SellerBuyerDescriptor : NetworkType() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		quantities = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			quantities.add(item)
 		}
 		types = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			types.add(item)
 		}

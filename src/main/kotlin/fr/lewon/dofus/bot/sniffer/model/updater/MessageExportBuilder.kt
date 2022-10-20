@@ -12,7 +12,7 @@ object MessageExportBuilder : VldbAbstractExportPackTaskBuilder() {
         val path = scriptPack.classPath.packageStr.toFilePath()
             .replace("\\", ".")
             .replace("/", ".")
-        val regex = Regex("([^a-zA-Z\\d])object([^a-zA-Z\\d]|Func\\()")
+        val regex = Regex("([^a-zA-Z\\d])object([^a-zA-Z\\d]|Func\\(|treeFunc\\()")
         val treatedFileContent = regex.replace(fileContent) {
             "${it.destructured.component1()}obj${it.destructured.component2()}"
         }

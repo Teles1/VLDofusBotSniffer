@@ -14,7 +14,7 @@ open class TeleportDestinationsMessage : NetworkMessage() {
 		super.deserialize(stream)
 		type = stream.readUnsignedByte().toInt()
 		destinations = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = TeleportDestination()
 			item.deserialize(stream)
 			destinations.add(item)

@@ -17,7 +17,7 @@ open class GameFightResumeWithSlavesMessage : GameFightResumeMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		slavesInfo = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GameFightResumeSlaveInfo()
 			item.deserialize(stream)
 			slavesInfo.add(item)

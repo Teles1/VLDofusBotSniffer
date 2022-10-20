@@ -23,7 +23,7 @@ open class StartupActionAddObject : NetworkType() {
 		descUrl = stream.readUTF()
 		pictureUrl = stream.readUTF()
 		items = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItemInformationWithQuantity()
 			item.deserialize(stream)
 			items.add(item)

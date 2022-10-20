@@ -15,7 +15,7 @@ open class TeleportBuddiesRequestedMessage : NetworkMessage() {
 		dungeonId = stream.readVarShort().toInt()
 		inviterId = stream.readVarLong().toDouble()
 		invalidBuddiesIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarLong().toDouble()
 			invalidBuddiesIds.add(item)
 		}

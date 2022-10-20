@@ -22,7 +22,7 @@ open class TreasureHuntMessage : NetworkMessage() {
 		questType = stream.readUnsignedByte().toInt()
 		startMapId = stream.readDouble().toDouble()
 		knownStepsList = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<TreasureHuntStep>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			knownStepsList.add(item)
@@ -32,7 +32,7 @@ open class TreasureHuntMessage : NetworkMessage() {
 		checkPointTotal = stream.readVarInt().toInt()
 		availableRetryCount = stream.readInt().toInt()
 		flags = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = TreasureHuntFlag()
 			item.deserialize(stream)
 			flags.add(item)

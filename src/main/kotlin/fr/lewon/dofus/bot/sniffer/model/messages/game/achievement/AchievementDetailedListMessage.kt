@@ -13,13 +13,13 @@ open class AchievementDetailedListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		startedAchievements = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = Achievement()
 			item.deserialize(stream)
 			startedAchievements.add(item)
 		}
 		finishedAchievements = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = Achievement()
 			item.deserialize(stream)
 			finishedAchievements.add(item)

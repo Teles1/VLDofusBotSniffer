@@ -14,7 +14,7 @@ open class JobDescription : NetworkType() {
 		super.deserialize(stream)
 		jobId = stream.readUnsignedByte().toInt()
 		skills = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<SkillActionDescription>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			skills.add(item)

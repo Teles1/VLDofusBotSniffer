@@ -13,7 +13,7 @@ open class GuildSummaryMessage : PaginationAnswerAbstractMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		guilds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GuildFactSheetInformations()
 			item.deserialize(stream)
 			guilds.add(item)

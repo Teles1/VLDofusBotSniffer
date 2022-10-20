@@ -11,7 +11,7 @@ open class FullStatsPreset : Preset() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		stats = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = CharacterCharacteristicForPreset()
 			item.deserialize(stream)
 			stats.add(item)

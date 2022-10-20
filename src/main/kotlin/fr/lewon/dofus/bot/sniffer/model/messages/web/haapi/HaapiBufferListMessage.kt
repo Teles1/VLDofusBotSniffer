@@ -12,7 +12,7 @@ open class HaapiBufferListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		buffers = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = BufferInformation()
 			item.deserialize(stream)
 			buffers.add(item)

@@ -14,12 +14,12 @@ open class NpcDialogQuestionMessage : NetworkMessage() {
 		super.deserialize(stream)
 		messageId = stream.readVarInt().toInt()
 		dialogParams = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUTF()
 			dialogParams.add(item)
 		}
 		visibleReplies = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			visibleReplies.add(item)
 		}

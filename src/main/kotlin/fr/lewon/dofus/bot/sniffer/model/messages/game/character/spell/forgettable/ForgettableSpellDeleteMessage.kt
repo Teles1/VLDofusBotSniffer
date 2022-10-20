@@ -13,7 +13,7 @@ open class ForgettableSpellDeleteMessage : NetworkMessage() {
 		super.deserialize(stream)
 		reason = stream.readUnsignedByte().toInt()
 		spells = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readInt().toInt()
 			spells.add(item)
 		}

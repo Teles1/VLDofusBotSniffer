@@ -12,7 +12,7 @@ open class AchievementListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		finishedAchievements = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<AchievementAchieved>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			finishedAchievements.add(item)

@@ -15,12 +15,12 @@ open class MapNpcQuestInfo : NetworkType() {
 		super.deserialize(stream)
 		mapId = stream.readDouble().toDouble()
 		npcsIdsWithQuest = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readInt().toInt()
 			npcsIdsWithQuest.add(item)
 		}
 		questFlags = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GameRolePlayNpcQuestFlag()
 			item.deserialize(stream)
 			questFlags.add(item)

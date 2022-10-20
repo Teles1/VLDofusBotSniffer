@@ -20,7 +20,7 @@ open class CharacterRemodelingInformation : AbstractCharacterInformation() {
 		sex = stream.readBoolean()
 		cosmeticId = stream.readVarShort().toInt()
 		colors = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readInt().toInt()
 			colors.add(item)
 		}

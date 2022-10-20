@@ -37,13 +37,13 @@ open class ObjectEffectMount : ObjectEffect() {
 		reproductionCount = stream.readVarInt().toInt()
 		reproductionCountMax = stream.readVarInt().toInt()
 		effects = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectEffectInteger()
 			item.deserialize(stream)
 			effects.add(item)
 		}
 		capacities = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			capacities.add(item)
 		}

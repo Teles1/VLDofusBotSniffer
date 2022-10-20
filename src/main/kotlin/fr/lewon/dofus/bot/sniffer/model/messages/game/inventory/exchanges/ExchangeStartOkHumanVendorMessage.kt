@@ -14,7 +14,7 @@ open class ExchangeStartOkHumanVendorMessage : NetworkMessage() {
 		super.deserialize(stream)
 		sellerId = stream.readDouble().toDouble()
 		objectsInfos = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItemToSellInHumanVendorShop()
 			item.deserialize(stream)
 			objectsInfos.add(item)

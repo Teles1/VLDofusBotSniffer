@@ -17,18 +17,18 @@ open class FightCommonInformations : NetworkType() {
 		fightId = stream.readVarShort().toInt()
 		fightType = stream.readUnsignedByte().toInt()
 		fightTeams = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<FightTeamInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			fightTeams.add(item)
 		}
 		fightTeamsPositions = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			fightTeamsPositions.add(item)
 		}
 		fightTeamsOptions = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = FightOptionsInformations()
 			item.deserialize(stream)
 			fightTeamsOptions.add(item)

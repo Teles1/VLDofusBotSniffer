@@ -18,7 +18,7 @@ open class GameFightResumeMessage : GameFightSpectateMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		spellCooldowns = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GameFightSpellCooldown()
 			item.deserialize(stream)
 			spellCooldowns.add(item)

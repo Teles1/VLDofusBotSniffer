@@ -12,7 +12,7 @@ open class ExchangeObjectsRemovedMessage : ExchangeObjectMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		objectUID = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			objectUID.add(item)
 		}

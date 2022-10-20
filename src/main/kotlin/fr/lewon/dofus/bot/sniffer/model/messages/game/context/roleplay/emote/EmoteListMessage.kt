@@ -11,7 +11,7 @@ open class EmoteListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		emoteIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUnsignedShort().toInt()
 			emoteIds.add(item)
 		}

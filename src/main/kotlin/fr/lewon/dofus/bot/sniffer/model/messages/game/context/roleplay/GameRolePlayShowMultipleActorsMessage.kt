@@ -12,7 +12,7 @@ open class GameRolePlayShowMultipleActorsMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		informationsList = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<GameRolePlayActorInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			informationsList.add(item)

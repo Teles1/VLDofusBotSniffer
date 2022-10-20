@@ -16,7 +16,7 @@ open class BreachReward : NetworkType() {
 		super.deserialize(stream)
 		id = stream.readVarInt().toInt()
 		buyLocks = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUnsignedByte().toInt()
 			buyLocks.add(item)
 		}

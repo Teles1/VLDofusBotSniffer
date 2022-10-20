@@ -15,7 +15,7 @@ open class HousePropertiesMessage : NetworkMessage() {
 		super.deserialize(stream)
 		houseId = stream.readVarInt().toInt()
 		doorsOnMap = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readInt().toInt()
 			doorsOnMap.add(item)
 		}

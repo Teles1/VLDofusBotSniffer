@@ -12,7 +12,7 @@ open class DecraftResultMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		results = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = DecraftedItemStackInfo()
 			item.deserialize(stream)
 			results.add(item)

@@ -32,7 +32,7 @@ open class TaxCollectorInformations : NetworkType() {
 		look = EntityLook()
 		look.deserialize(stream)
 		complements = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<TaxCollectorComplementaryInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			complements.add(item)

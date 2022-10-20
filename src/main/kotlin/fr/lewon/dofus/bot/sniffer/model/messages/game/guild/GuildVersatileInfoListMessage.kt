@@ -12,7 +12,7 @@ open class GuildVersatileInfoListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		guilds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<GuildVersatileInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			guilds.add(item)

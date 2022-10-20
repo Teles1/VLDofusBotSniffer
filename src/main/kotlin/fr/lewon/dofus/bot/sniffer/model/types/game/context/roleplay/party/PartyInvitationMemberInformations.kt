@@ -22,7 +22,7 @@ open class PartyInvitationMemberInformations : CharacterBaseInformations() {
 		mapId = stream.readDouble().toDouble()
 		subAreaId = stream.readVarShort().toInt()
 		entities = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = PartyEntityBaseInformation()
 			item.deserialize(stream)
 			entities.add(item)

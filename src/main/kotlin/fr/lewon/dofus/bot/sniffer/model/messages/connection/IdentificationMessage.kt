@@ -27,14 +27,14 @@ open class IdentificationMessage : NetworkMessage() {
 		version.deserialize(stream)
 		lang = stream.readUTF()
 		credentials = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readVarInt().toInt()) {
 			val item = stream.readUnsignedByte().toInt()
 			credentials.add(item)
 		}
 		serverId = stream.readUnsignedShort().toInt()
 		sessionOptionalSalt = stream.readVarLong().toDouble()
 		failedAttempts = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			failedAttempts.add(item)
 		}

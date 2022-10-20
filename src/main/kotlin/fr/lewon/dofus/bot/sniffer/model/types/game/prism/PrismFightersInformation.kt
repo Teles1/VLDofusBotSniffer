@@ -19,13 +19,13 @@ open class PrismFightersInformation : NetworkType() {
 		waitingForHelpInfo = ProtectedEntityWaitingForHelpInfo()
 		waitingForHelpInfo.deserialize(stream)
 		allyCharactersInformations = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<CharacterMinimalPlusLookInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			allyCharactersInformations.add(item)
 		}
 		enemyCharactersInformations = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<CharacterMinimalPlusLookInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			enemyCharactersInformations.add(item)

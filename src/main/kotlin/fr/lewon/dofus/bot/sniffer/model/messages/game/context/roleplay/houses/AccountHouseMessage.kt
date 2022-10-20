@@ -12,7 +12,7 @@ open class AccountHouseMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		houses = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = AccountHouseInformations()
 			item.deserialize(stream)
 			houses.add(item)

@@ -16,7 +16,7 @@ open class HouseToSellListMessage : NetworkMessage() {
 		pageIndex = stream.readVarShort().toInt()
 		totalPage = stream.readVarShort().toInt()
 		houseList = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = HouseInformationsForSell()
 			item.deserialize(stream)
 			houseList.add(item)

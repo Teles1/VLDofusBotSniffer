@@ -23,7 +23,7 @@ open class StorageTabInformation : NetworkType() {
 		dropRight = stream.readVarInt().toInt()
 		takeRight = stream.readVarInt().toInt()
 		dropTypeLimitation = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			dropTypeLimitation.add(item)
 		}

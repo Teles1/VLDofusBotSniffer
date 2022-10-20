@@ -13,7 +13,7 @@ open class JobMultiCraftAvailableSkillsMessage : JobAllowMultiCraftRequestMessag
 		super.deserialize(stream)
 		playerId = stream.readVarLong().toDouble()
 		skills = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			skills.add(item)
 		}

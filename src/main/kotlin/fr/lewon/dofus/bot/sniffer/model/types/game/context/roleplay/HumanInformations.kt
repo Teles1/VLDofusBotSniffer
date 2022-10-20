@@ -17,7 +17,7 @@ open class HumanInformations : NetworkType() {
 		restrictions.deserialize(stream)
 		sex = stream.readBoolean()
 		options = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<HumanOption>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			options.add(item)

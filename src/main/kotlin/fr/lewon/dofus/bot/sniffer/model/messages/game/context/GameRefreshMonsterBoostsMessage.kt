@@ -13,13 +13,13 @@ open class GameRefreshMonsterBoostsMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		monsterBoosts = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = MonsterBoosts()
 			item.deserialize(stream)
 			monsterBoosts.add(item)
 		}
 		familyBoosts = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = MonsterBoosts()
 			item.deserialize(stream)
 			familyBoosts.add(item)

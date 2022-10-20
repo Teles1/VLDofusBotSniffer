@@ -25,7 +25,7 @@ class FieldsSettersDeserializersNodeBuilder(
     private fun doGetLines(variableDeclaration: VariableDeclaration, fileContent: String): List<String> {
         return when (variableDeclaration.variableType) {
             VariableType.INT, VariableType.INT2, VariableType.DOUBLE ->
-                listOf(getNumberSetter(variableDeclaration, fileContent))
+                listOf(getNumberSetter(variableDeclaration.name, variableDeclaration.variableType, fileContent))
             VariableType.BOOLEAN -> getBooleanSetterLines(variableDeclaration, fileContent)
             VariableType.STRING -> listOf(getAssignation(variableDeclaration, "$STREAM_NAME.readUTF()"))
             VariableType.BYTE_ARRAY -> getByteArraySetterLines()
@@ -34,19 +34,23 @@ class FieldsSettersDeserializersNodeBuilder(
         }
     }
 
-    private fun getNumberSetter(variableDeclaration: VariableDeclaration, fileContent: String): String {
-        val methodCall = Regex("${variableDeclaration.name} = input\\.(.*?);")
+    private fun getNumberSetter(variableName: String, variableType: VariableType?, fileContent: String): String {
+        return getAssignation(variableName, getNumberValue(variableName, variableType, fileContent))
+    }
+
+    private fun getNumberValue(variableName: String, variableType: VariableType?, fileContent: String): String {
+        val methodCall = Regex("$variableName = input\\.(.*?);")
             .find(fileContent)
             ?.destructured?.component1()
             ?.replace("readVarUh", "readVar")
             ?.replace("readShort", "readUnsignedShort")
             ?.replace("readByte", "readUnsignedByte")
             ?.replace("readUnsignedInt", "readInt")
-            ?: error("Couldn't find setter for field ${variableDeclaration.name} (${nodeDescription.name})")
-        val convertCall = variableDeclaration.variableType?.kotlinType
+            ?: error("Couldn't find setter for field $variableName (${nodeDescription.name})")
+        val convertCall = variableType?.kotlinType
             ?.let { ".to$it()" }
             ?: ""
-        return getAssignation(variableDeclaration, "$STREAM_NAME.$methodCall$convertCall")
+        return "$STREAM_NAME.$methodCall$convertCall"
     }
 
     private fun getBooleanSetterLines(variableDeclaration: VariableDeclaration, fileContent: String): List<String> {
@@ -88,28 +92,19 @@ class FieldsSettersDeserializersNodeBuilder(
     }
 
     private fun getAssignation(variableDeclaration: VariableDeclaration, value: String): String =
-        "${variableDeclaration.name} = $value"
+        getAssignation(variableDeclaration.name, value)
+
+    private fun getAssignation(variableName: String, value: String): String = "$variableName = $value"
 
     private fun getListSetterLines(variableDeclaration: VariableDeclaration, fileContent: String): List<String> {
         val variableName = variableDeclaration.name
-        val setMethodPattern = "function _${variableName}Func\\(.*?\\).*?\\{.*?(push.*?}|\\+\\+.*?})"
-        val setMethodMatchResult = Regex(setMethodPattern, RegexOption.DOT_MATCHES_ALL).find(fileContent)
-            ?: error("Couldn't find set method for : $variableName (${nodeDescription.name})")
-        val setMethodContent = setMethodMatchResult.value
-        val assignedItemName = Regex("$variableName\\.push\\((.*?)\\)").find(setMethodContent)
-            ?: Regex("($variableName\\[.*?])").find(setMethodContent)
-            ?: error("Couldn't find assigned item name : $variableName (${nodeDescription.name})")
-        var itemName = assignedItemName.destructured.component1()
+        val listItemMethodContent = getFuncContent("_${variableName}Func", fileContent)
         val listTypeStr = VariableUtils.getListTypeStr(nodeDescription, variableDeclaration.name)
-        if (setMethodContent.contains("$variableName.push(")) {
-            itemName += ":$listTypeStr"
-        } else {
-            itemName = itemName.replace("[", "\\[")
-        }
+        val itemName = getListItemName(variableName, listTypeStr, listItemMethodContent)
         val listType = VariableType.fromFlashType(listTypeStr)
         val kotlinType = listType?.kotlinType ?: listTypeStr
         val subVariableDeclaration = VariableDeclaration(itemName, kotlinType, "", listType)
-        val itemAssociationLines = doGetLines(subVariableDeclaration, setMethodContent).map {
+        val itemAssociationLines = doGetLines(subVariableDeclaration, listItemMethodContent).map {
             it.replace(itemName, "item")
         }
         val itemInitLine = itemAssociationLines.firstOrNull()?.let { "\tval $it" }
@@ -119,7 +114,7 @@ class FieldsSettersDeserializersNodeBuilder(
         } else emptyList()
         return listOf(
             getAssignation(variableDeclaration, "ArrayList()"),
-            "for (i in 0 until $STREAM_NAME.readUnsignedShort()) {",
+            "for (i in 0 until ${getListLengthValue(variableName, fileContent)}) {",
             itemInitLine,
             *additionalItemInitLines.toTypedArray(),
             "\t${variableDeclaration.name}.add(item)",
@@ -127,8 +122,31 @@ class FieldsSettersDeserializersNodeBuilder(
         )
     }
 
-    override fun getSubNodeBuilders(): List<FTKNodeBuilder> {
-        return emptyList()
+    private fun getListLengthValue(listVariableName: String, fileContent: String): String {
+        val listMethodContent = getFuncContent("_${listVariableName}treeFunc", fileContent)
+        val lengthVar = Regex("for\\(var i:uint = 0; i < (.*?);").find(listMethodContent)?.destructured?.component1()
+            ?: error("Couldn't find list length : $listVariableName (${nodeDescription.name})")
+        return lengthVar.toIntOrNull()?.toString()
+            ?: getNumberValue("$lengthVar:uint", VariableType.INT, listMethodContent)
     }
+
+    private fun getListItemName(variableName: String, listTypeStr: String, methodContent: String): String {
+        val assignedItemName = Regex("$variableName\\.push\\((.*?)\\)").find(methodContent)
+            ?: Regex("($variableName\\[.*?])").find(methodContent)
+            ?: error("Couldn't find assigned item name : $variableName (${nodeDescription.name})")
+        val itemName = assignedItemName.destructured.component1()
+        return if (methodContent.contains("$variableName.push(")) {
+            "$itemName:$listTypeStr"
+        } else {
+            itemName.replace("[", "\\[")
+        }
+    }
+
+    private fun getFuncContent(funcName: String, fileContent: String): String {
+        return fileContent.substringAfter("function $funcName")
+            .substringBefore("private function")
+    }
+
+    override fun getSubNodeBuilders(): List<FTKNodeBuilder> = emptyList()
 
 }

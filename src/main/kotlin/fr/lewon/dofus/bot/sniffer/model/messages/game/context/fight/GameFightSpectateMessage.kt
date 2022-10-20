@@ -20,13 +20,13 @@ open class GameFightSpectateMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		effects = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = FightDispellableEffectExtendedInformations()
 			item.deserialize(stream)
 			effects.add(item)
 		}
 		marks = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GameActionMark()
 			item.deserialize(stream)
 			marks.add(item)
@@ -34,13 +34,13 @@ open class GameFightSpectateMessage : NetworkMessage() {
 		gameTurn = stream.readVarShort().toInt()
 		fightStart = stream.readInt().toInt()
 		idols = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = Idol()
 			item.deserialize(stream)
 			idols.add(item)
 		}
 		fxTriggerCounts = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GameFightEffectTriggerCount()
 			item.deserialize(stream)
 			fxTriggerCounts.add(item)

@@ -14,7 +14,7 @@ open class UpdateMountCharacteristicsMessage : NetworkMessage() {
 		super.deserialize(stream)
 		rideId = stream.readVarInt().toInt()
 		boostToUpdateList = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<UpdateMountCharacteristic>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			boostToUpdateList.add(item)

@@ -28,17 +28,17 @@ open class GuildSummaryRequestMessage : PaginationRequestAbstractMessage() {
 		sortDescending = BooleanByteWrapper.getFlag(_box0, 1)
 		nameFilter = stream.readUTF()
 		criterionFilter = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			criterionFilter.add(item)
 		}
 		languagesFilter = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			languagesFilter.add(item)
 		}
 		recruitmentTypeFilter = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUnsignedByte().toInt()
 			recruitmentTypeFilter.add(item)
 		}

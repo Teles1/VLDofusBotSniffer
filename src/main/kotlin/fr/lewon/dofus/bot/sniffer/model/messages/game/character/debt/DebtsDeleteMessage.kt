@@ -13,7 +13,7 @@ open class DebtsDeleteMessage : NetworkMessage() {
 		super.deserialize(stream)
 		reason = stream.readUnsignedByte().toInt()
 		debts = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readDouble().toDouble()
 			debts.add(item)
 		}

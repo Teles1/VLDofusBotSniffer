@@ -16,22 +16,22 @@ open class EntityLook : NetworkType() {
 		super.deserialize(stream)
 		bonesId = stream.readVarShort().toInt()
 		skins = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			skins.add(item)
 		}
 		indexedColors = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readInt().toInt()
 			indexedColors.add(item)
 		}
 		scales = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			scales.add(item)
 		}
 		subentities = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = SubEntity()
 			item.deserialize(stream)
 			subentities.add(item)

@@ -12,7 +12,7 @@ open class FollowedQuestsMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		quests = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = QuestActiveDetailedInformations()
 			item.deserialize(stream)
 			quests.add(item)

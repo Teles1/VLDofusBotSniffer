@@ -12,7 +12,7 @@ open class GameActionFightTackledMessage : AbstractGameActionMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		tacklersIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readDouble().toDouble()
 			tacklersIds.add(item)
 		}

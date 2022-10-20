@@ -11,7 +11,7 @@ open class EmotePlayMassiveMessage : EmotePlayAbstractMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		actorIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readDouble().toDouble()
 			actorIds.add(item)
 		}

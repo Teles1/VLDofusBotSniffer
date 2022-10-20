@@ -13,13 +13,13 @@ open class ExchangeOfflineSoldItemsMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		bidHouseItems = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItemQuantityPriceDateEffects()
 			item.deserialize(stream)
 			bidHouseItems.add(item)
 		}
 		merchantItems = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItemQuantityPriceDateEffects()
 			item.deserialize(stream)
 			merchantItems.add(item)

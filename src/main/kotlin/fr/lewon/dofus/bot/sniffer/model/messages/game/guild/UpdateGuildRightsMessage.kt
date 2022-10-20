@@ -13,7 +13,7 @@ open class UpdateGuildRightsMessage : NetworkMessage() {
 		super.deserialize(stream)
 		rankId = stream.readVarInt().toInt()
 		rights = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			rights.add(item)
 		}

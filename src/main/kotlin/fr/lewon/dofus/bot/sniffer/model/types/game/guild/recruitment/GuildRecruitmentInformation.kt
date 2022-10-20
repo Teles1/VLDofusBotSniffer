@@ -33,12 +33,12 @@ open class GuildRecruitmentInformation : NetworkType() {
 		recruitmentTitle = stream.readUTF()
 		recruitmentText = stream.readUTF()
 		selectedLanguages = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			selectedLanguages.add(item)
 		}
 		selectedCriterion = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			selectedCriterion.add(item)
 		}

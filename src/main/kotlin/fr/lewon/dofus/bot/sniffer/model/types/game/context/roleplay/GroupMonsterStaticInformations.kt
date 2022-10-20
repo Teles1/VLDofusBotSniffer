@@ -14,7 +14,7 @@ open class GroupMonsterStaticInformations : NetworkType() {
 		mainCreatureLightInfos = MonsterInGroupLightInformations()
 		mainCreatureLightInfos.deserialize(stream)
 		underlings = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = MonsterInGroupInformations()
 			item.deserialize(stream)
 			underlings.add(item)

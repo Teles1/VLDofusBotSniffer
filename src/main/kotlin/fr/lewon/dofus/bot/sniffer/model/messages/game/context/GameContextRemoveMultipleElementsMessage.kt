@@ -11,7 +11,7 @@ open class GameContextRemoveMultipleElementsMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		elementsIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readDouble().toDouble()
 			elementsIds.add(item)
 		}

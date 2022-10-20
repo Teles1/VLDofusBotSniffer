@@ -11,7 +11,7 @@ open class GroupMonsterStaticInformationsWithAlternatives : GroupMonsterStaticIn
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		alternatives = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = AlternativeMonstersInGroupLightInformations()
 			item.deserialize(stream)
 			alternatives.add(item)

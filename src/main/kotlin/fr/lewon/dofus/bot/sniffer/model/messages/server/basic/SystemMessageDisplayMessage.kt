@@ -15,7 +15,7 @@ open class SystemMessageDisplayMessage : NetworkMessage() {
 		hangUp = stream.readBoolean()
 		msgId = stream.readVarShort().toInt()
 		parameters = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUTF()
 			parameters.add(item)
 		}

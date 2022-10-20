@@ -16,7 +16,7 @@ open class TaxCollectorListMessage : AbstractTaxCollectorListMessage() {
 		super.deserialize(stream)
 		nbcollectorMax = stream.readUnsignedByte().toInt()
 		fightersInformations = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = TaxCollectorFightersInformation()
 			item.deserialize(stream)
 			fightersInformations.add(item)

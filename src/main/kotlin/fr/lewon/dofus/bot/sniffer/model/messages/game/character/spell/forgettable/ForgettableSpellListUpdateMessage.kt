@@ -14,7 +14,7 @@ open class ForgettableSpellListUpdateMessage : NetworkMessage() {
 		super.deserialize(stream)
 		action = stream.readUnsignedByte().toInt()
 		spells = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ForgettableSpellItem()
 			item.deserialize(stream)
 			spells.add(item)

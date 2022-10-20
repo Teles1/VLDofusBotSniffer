@@ -11,7 +11,7 @@ open class GameContextRemoveMultipleElementsWithEventsMessage : GameContextRemov
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		elementEventIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUnsignedByte().toInt()
 			elementEventIds.add(item)
 		}

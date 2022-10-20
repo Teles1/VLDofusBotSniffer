@@ -12,7 +12,7 @@ open class MapRunningFightListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		fights = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = FightExternalInformations()
 			item.deserialize(stream)
 			fights.add(item)

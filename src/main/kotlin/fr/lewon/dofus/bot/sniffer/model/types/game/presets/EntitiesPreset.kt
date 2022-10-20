@@ -13,7 +13,7 @@ open class EntitiesPreset : Preset() {
 		super.deserialize(stream)
 		iconId = stream.readUnsignedShort().toInt()
 		entityIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			entityIds.add(item)
 		}

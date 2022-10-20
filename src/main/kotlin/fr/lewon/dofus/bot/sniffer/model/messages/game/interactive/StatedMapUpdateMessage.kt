@@ -12,7 +12,7 @@ open class StatedMapUpdateMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		statedElements = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = StatedElement()
 			item.deserialize(stream)
 			statedElements.add(item)

@@ -18,13 +18,13 @@ open class AllianceInsiderInfoMessage : NetworkMessage() {
 		allianceInfos = AllianceFactSheetInformations()
 		allianceInfos.deserialize(stream)
 		guilds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GuildInsiderFactSheetInformations()
 			item.deserialize(stream)
 			guilds.add(item)
 		}
 		prisms = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<PrismSubareaEmptyInfo>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			prisms.add(item)

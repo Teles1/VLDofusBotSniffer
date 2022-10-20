@@ -12,7 +12,7 @@ open class ObjectsQuantityMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		objectsUIDAndQty = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItemQuantity()
 			item.deserialize(stream)
 			objectsUIDAndQty.add(item)

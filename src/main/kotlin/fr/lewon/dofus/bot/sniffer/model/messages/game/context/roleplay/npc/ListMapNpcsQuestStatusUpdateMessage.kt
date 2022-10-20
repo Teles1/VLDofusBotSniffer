@@ -12,7 +12,7 @@ open class ListMapNpcsQuestStatusUpdateMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		mapInfo = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = MapNpcQuestInfo()
 			item.deserialize(stream)
 			mapInfo.add(item)

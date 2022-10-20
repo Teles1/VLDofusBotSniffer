@@ -12,7 +12,7 @@ open class JobCrafterDirectoryListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		listEntries = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = JobCrafterDirectoryListEntry()
 			item.deserialize(stream)
 			listEntries.add(item)

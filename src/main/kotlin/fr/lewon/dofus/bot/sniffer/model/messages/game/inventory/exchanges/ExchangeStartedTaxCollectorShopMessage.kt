@@ -13,7 +13,7 @@ open class ExchangeStartedTaxCollectorShopMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		objects = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItem()
 			item.deserialize(stream)
 			objects.add(item)

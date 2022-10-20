@@ -12,7 +12,7 @@ open class EntitiesInformationMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		entities = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = EntityInformation()
 			item.deserialize(stream)
 			entities.add(item)

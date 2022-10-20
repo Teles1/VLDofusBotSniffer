@@ -11,7 +11,7 @@ open class PartyIdol : Idol() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		ownersIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarLong().toDouble()
 			ownersIds.add(item)
 		}

@@ -53,12 +53,12 @@ open class MountClientData : NetworkType() {
 		id = stream.readDouble().toDouble()
 		model = stream.readVarInt().toInt()
 		ancestor = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readInt().toInt()
 			ancestor.add(item)
 		}
 		behaviors = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readInt().toInt()
 			behaviors.add(item)
 		}
@@ -87,7 +87,7 @@ open class MountClientData : NetworkType() {
 		reproductionCountMax = stream.readVarInt().toInt()
 		harnessGID = stream.readVarInt().toInt()
 		effectList = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectEffectInteger()
 			item.deserialize(stream)
 			effectList.add(item)

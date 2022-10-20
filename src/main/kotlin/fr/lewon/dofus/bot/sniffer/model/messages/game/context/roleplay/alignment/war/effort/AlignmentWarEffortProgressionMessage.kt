@@ -12,7 +12,7 @@ open class AlignmentWarEffortProgressionMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		effortProgressions = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = AlignmentWarEffortInformation()
 			item.deserialize(stream)
 			effortProgressions.add(item)

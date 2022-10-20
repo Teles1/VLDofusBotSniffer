@@ -12,7 +12,7 @@ open class PrismsListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		prisms = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<PrismSubareaEmptyInfo>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			prisms.add(item)

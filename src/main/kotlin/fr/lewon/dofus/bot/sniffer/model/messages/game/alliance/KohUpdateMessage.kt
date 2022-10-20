@@ -20,28 +20,28 @@ open class KohUpdateMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		alliances = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = AllianceInformations()
 			item.deserialize(stream)
 			alliances.add(item)
 		}
 		allianceNbMembers = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			allianceNbMembers.add(item)
 		}
 		allianceRoundWeigth = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			allianceRoundWeigth.add(item)
 		}
 		allianceMatchScore = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUnsignedByte().toInt()
 			allianceMatchScore.add(item)
 		}
 		allianceMapWinners = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = BasicAllianceInformations()
 			item.deserialize(stream)
 			allianceMapWinners.add(item)

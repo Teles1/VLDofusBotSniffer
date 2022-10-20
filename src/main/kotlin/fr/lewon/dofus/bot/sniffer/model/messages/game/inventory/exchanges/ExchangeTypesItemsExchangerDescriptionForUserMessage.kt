@@ -16,7 +16,7 @@ open class ExchangeTypesItemsExchangerDescriptionForUserMessage : NetworkMessage
 		objectGID = stream.readVarInt().toInt()
 		objectType = stream.readInt().toInt()
 		itemTypeDescriptions = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = BidExchangerObjectInfo()
 			item.deserialize(stream)
 			itemTypeDescriptions.add(item)

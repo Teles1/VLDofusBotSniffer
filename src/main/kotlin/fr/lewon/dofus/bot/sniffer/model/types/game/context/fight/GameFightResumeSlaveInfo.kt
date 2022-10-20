@@ -15,7 +15,7 @@ open class GameFightResumeSlaveInfo : NetworkType() {
 		super.deserialize(stream)
 		slaveId = stream.readDouble().toDouble()
 		spellCooldowns = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GameFightSpellCooldown()
 			item.deserialize(stream)
 			spellCooldowns.add(item)

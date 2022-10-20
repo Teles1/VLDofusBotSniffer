@@ -11,7 +11,7 @@ open class CheckIntegrityMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		data = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readVarInt().toInt()) {
 			val item = stream.readUnsignedByte().toInt()
 			data.add(item)
 		}

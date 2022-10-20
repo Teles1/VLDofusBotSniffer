@@ -22,7 +22,7 @@ open class SlaveSwitchContextMessage : NetworkMessage() {
 		slaveId = stream.readDouble().toDouble()
 		slaveTurn = stream.readVarShort().toInt()
 		slaveSpells = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = SpellItem()
 			item.deserialize(stream)
 			slaveSpells.add(item)
@@ -30,7 +30,7 @@ open class SlaveSwitchContextMessage : NetworkMessage() {
 		slaveStats = CharacterCharacteristicsInformations()
 		slaveStats.deserialize(stream)
 		shortcuts = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<Shortcut>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			shortcuts.add(item)

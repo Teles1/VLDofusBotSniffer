@@ -12,7 +12,7 @@ open class AnomalySubareaInformationResponseMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		subareas = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = AnomalySubareaInformation()
 			item.deserialize(stream)
 			subareas.add(item)

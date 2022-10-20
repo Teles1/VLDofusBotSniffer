@@ -18,7 +18,7 @@ open class BreachStateMessage : NetworkMessage() {
 		owner = CharacterMinimalInformations()
 		owner.deserialize(stream)
 		bonuses = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectEffectInteger()
 			item.deserialize(stream)
 			bonuses.add(item)

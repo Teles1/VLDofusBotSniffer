@@ -14,7 +14,7 @@ open class ObjectFeedMessage : NetworkMessage() {
 		super.deserialize(stream)
 		objectUID = stream.readVarInt().toInt()
 		meal = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItemQuantity()
 			item.deserialize(stream)
 			meal.add(item)

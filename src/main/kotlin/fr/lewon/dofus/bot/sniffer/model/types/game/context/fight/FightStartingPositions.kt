@@ -12,12 +12,12 @@ open class FightStartingPositions : NetworkType() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		positionsForChallengers = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			positionsForChallengers.add(item)
 		}
 		positionsForDefenders = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			positionsForDefenders.add(item)
 		}

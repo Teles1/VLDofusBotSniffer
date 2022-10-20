@@ -26,7 +26,7 @@ open class MapComplementaryInformationsBreachMessage : MapComplementaryInformati
 		room = stream.readUnsignedByte().toInt()
 		infinityMode = stream.readUnsignedShort().toInt()
 		branches = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<BreachBranch>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			branches.add(item)

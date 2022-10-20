@@ -12,7 +12,7 @@ open class GuildRanksMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		ranks = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GuildRankInformation()
 			item.deserialize(stream)
 			ranks.add(item)

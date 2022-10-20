@@ -29,13 +29,13 @@ open class CharacterCharacteristicsInformations : NetworkType() {
 		alignmentInfos.deserialize(stream)
 		criticalHitWeapon = stream.readVarShort().toInt()
 		characteristics = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<CharacterCharacteristic>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			characteristics.add(item)
 		}
 		spellModifications = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = CharacterSpellModification()
 			item.deserialize(stream)
 			spellModifications.add(item)

@@ -17,13 +17,13 @@ open class InteractiveElement : NetworkType() {
 		elementId = stream.readInt().toInt()
 		elementTypeId = stream.readInt().toInt()
 		enabledSkills = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<InteractiveElementSkill>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			enabledSkills.add(item)
 		}
 		disabledSkills = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<InteractiveElementSkill>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			disabledSkills.add(item)

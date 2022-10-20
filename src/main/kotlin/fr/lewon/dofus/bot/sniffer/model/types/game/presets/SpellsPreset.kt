@@ -11,7 +11,7 @@ open class SpellsPreset : Preset() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		spells = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = SpellForPreset()
 			item.deserialize(stream)
 			spells.add(item)

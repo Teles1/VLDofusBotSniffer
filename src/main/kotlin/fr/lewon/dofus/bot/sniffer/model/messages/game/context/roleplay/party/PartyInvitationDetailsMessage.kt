@@ -24,13 +24,13 @@ open class PartyInvitationDetailsMessage : AbstractPartyMessage() {
 		fromName = stream.readUTF()
 		leaderId = stream.readVarLong().toDouble()
 		members = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<PartyInvitationMemberInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			members.add(item)
 		}
 		guests = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = PartyGuestInformations()
 			item.deserialize(stream)
 			guests.add(item)

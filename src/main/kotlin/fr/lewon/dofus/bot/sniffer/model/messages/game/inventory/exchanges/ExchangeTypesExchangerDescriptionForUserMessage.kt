@@ -13,7 +13,7 @@ open class ExchangeTypesExchangerDescriptionForUserMessage : NetworkMessage() {
 		super.deserialize(stream)
 		objectType = stream.readInt().toInt()
 		typeDescription = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			typeDescription.add(item)
 		}

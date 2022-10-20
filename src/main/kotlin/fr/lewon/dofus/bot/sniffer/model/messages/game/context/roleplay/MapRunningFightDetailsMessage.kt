@@ -15,13 +15,13 @@ open class MapRunningFightDetailsMessage : NetworkMessage() {
 		super.deserialize(stream)
 		fightId = stream.readVarShort().toInt()
 		attackers = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<GameFightFighterLightInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			attackers.add(item)
 		}
 		defenders = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<GameFightFighterLightInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			defenders.add(item)

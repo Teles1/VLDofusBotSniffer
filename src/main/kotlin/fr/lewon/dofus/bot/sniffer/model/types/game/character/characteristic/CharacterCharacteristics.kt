@@ -11,7 +11,7 @@ open class CharacterCharacteristics : NetworkType() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		characteristics = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<CharacterCharacteristic>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			characteristics.add(item)

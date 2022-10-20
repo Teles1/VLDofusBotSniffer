@@ -14,7 +14,7 @@ open class ShortcutBarContentMessage : NetworkMessage() {
 		super.deserialize(stream)
 		barType = stream.readUnsignedByte().toInt()
 		shortcuts = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<Shortcut>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			shortcuts.add(item)

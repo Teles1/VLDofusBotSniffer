@@ -15,13 +15,13 @@ open class TaxCollectorFightersInformation : NetworkType() {
 		super.deserialize(stream)
 		collectorId = stream.readDouble().toDouble()
 		allyCharactersInformations = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<CharacterMinimalPlusLookInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			allyCharactersInformations.add(item)
 		}
 		enemyCharactersInformations = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<CharacterMinimalPlusLookInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			enemyCharactersInformations.add(item)

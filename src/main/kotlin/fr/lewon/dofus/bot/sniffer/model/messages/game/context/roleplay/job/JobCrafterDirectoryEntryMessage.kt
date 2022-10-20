@@ -18,7 +18,7 @@ open class JobCrafterDirectoryEntryMessage : NetworkMessage() {
 		playerInfo = JobCrafterDirectoryEntryPlayerInfo()
 		playerInfo.deserialize(stream)
 		jobInfoList = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = JobCrafterDirectoryEntryJobInfo()
 			item.deserialize(stream)
 			jobInfoList.add(item)

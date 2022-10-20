@@ -12,7 +12,7 @@ open class ExchangeBidHouseUnsoldItemsMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		items = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItemGenericQuantity()
 			item.deserialize(stream)
 			items.add(item)

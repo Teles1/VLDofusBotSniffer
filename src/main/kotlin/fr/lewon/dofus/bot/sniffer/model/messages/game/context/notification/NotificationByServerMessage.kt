@@ -14,7 +14,7 @@ open class NotificationByServerMessage : NetworkMessage() {
 		super.deserialize(stream)
 		id = stream.readVarShort().toInt()
 		parameters = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUTF()
 			parameters.add(item)
 		}

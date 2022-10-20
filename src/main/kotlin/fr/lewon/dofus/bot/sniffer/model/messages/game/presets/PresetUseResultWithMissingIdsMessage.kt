@@ -11,7 +11,7 @@ open class PresetUseResultWithMissingIdsMessage : PresetUseResultMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		missingIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			missingIds.add(item)
 		}

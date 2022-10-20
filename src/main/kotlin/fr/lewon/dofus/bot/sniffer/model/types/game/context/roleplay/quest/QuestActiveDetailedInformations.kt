@@ -13,7 +13,7 @@ open class QuestActiveDetailedInformations : QuestActiveInformations() {
 		super.deserialize(stream)
 		stepId = stream.readVarShort().toInt()
 		objectives = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<QuestObjectiveInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			objectives.add(item)

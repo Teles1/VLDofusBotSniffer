@@ -20,7 +20,7 @@ open class BreachBranch : NetworkType() {
 		room = stream.readUnsignedByte().toInt()
 		element = stream.readInt().toInt()
 		bosses = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = MonsterInGroupLightInformations()
 			item.deserialize(stream)
 			bosses.add(item)
@@ -29,7 +29,7 @@ open class BreachBranch : NetworkType() {
 		score = stream.readUnsignedShort().toInt()
 		relativeScore = stream.readUnsignedShort().toInt()
 		monsters = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = MonsterInGroupLightInformations()
 			item.deserialize(stream)
 			monsters.add(item)

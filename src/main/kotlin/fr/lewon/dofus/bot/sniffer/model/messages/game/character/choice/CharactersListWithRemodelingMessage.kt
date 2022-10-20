@@ -13,7 +13,7 @@ open class CharactersListWithRemodelingMessage : CharactersListMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		charactersToRemodel = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = CharacterToRemodelInformations()
 			item.deserialize(stream)
 			charactersToRemodel.add(item)

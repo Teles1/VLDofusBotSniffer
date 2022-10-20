@@ -13,7 +13,7 @@ open class IdolsPreset : Preset() {
 		super.deserialize(stream)
 		iconId = stream.readUnsignedShort().toInt()
 		idolIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarShort().toInt()
 			idolIds.add(item)
 		}

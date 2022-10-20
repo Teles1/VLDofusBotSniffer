@@ -15,7 +15,7 @@ open class GameActionFightSpellCastMessage : AbstractGameActionFightTargetedAbil
 		spellId = stream.readVarShort().toInt()
 		spellLevel = stream.readUnsignedShort().toInt()
 		portalsIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUnsignedShort().toInt()
 			portalsIds.add(item)
 		}

@@ -12,7 +12,7 @@ open class PrismsInfoValidMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		fights = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = PrismFightersInformation()
 			item.deserialize(stream)
 			fights.add(item)

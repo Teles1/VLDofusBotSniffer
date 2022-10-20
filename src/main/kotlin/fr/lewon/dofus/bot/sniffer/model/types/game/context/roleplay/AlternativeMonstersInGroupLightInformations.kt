@@ -13,7 +13,7 @@ open class AlternativeMonstersInGroupLightInformations : NetworkType() {
 		super.deserialize(stream)
 		playerCount = stream.readInt().toInt()
 		monsters = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = MonsterInGroupLightInformations()
 			item.deserialize(stream)
 			monsters.add(item)

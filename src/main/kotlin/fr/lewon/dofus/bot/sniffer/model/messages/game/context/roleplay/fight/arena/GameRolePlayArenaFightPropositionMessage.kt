@@ -14,7 +14,7 @@ open class GameRolePlayArenaFightPropositionMessage : NetworkMessage() {
 		super.deserialize(stream)
 		fightId = stream.readVarShort().toInt()
 		alliesId = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readDouble().toDouble()
 			alliesId.add(item)
 		}

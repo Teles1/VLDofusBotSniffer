@@ -11,7 +11,7 @@ open class FightTeamInformations : AbstractFightTeamInformations() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		teamMembers = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<FightTeamMemberInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			teamMembers.add(item)

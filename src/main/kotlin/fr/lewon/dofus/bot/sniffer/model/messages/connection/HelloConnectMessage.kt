@@ -13,7 +13,7 @@ open class HelloConnectMessage : NetworkMessage() {
 		super.deserialize(stream)
 		salt = stream.readUTF()
 		key = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readVarInt().toInt()) {
 			val item = stream.readUnsignedByte().toInt()
 			key.add(item)
 		}

@@ -14,7 +14,7 @@ open class GuildInformationsPaddocksMessage : NetworkMessage() {
 		super.deserialize(stream)
 		nbPaddockMax = stream.readUnsignedByte().toInt()
 		paddocksInformations = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = PaddockContentInformations()
 			item.deserialize(stream)
 			paddocksInformations.add(item)

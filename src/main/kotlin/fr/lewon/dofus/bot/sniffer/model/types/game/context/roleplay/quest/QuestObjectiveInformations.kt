@@ -15,7 +15,7 @@ open class QuestObjectiveInformations : NetworkType() {
 		objectiveId = stream.readVarShort().toInt()
 		objectiveStatus = stream.readBoolean()
 		dialogParams = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readUTF()
 			dialogParams.add(item)
 		}

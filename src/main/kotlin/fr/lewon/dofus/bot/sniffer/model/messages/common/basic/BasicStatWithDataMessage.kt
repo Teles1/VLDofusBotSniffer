@@ -12,7 +12,7 @@ open class BasicStatWithDataMessage : BasicStatMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		datas = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<StatisticData>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			datas.add(item)

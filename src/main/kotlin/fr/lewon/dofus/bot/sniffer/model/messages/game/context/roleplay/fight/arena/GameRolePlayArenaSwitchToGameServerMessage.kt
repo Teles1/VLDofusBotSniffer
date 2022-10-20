@@ -14,7 +14,7 @@ open class GameRolePlayArenaSwitchToGameServerMessage : NetworkMessage() {
 		super.deserialize(stream)
 		validToken = stream.readBoolean()
 		ticket = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readVarInt().toInt()) {
 			val item = stream.readUnsignedByte().toInt()
 			ticket.add(item)
 		}

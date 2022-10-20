@@ -17,7 +17,7 @@ open class UpdatedStorageTabInformation : NetworkType() {
 		tabNumber = stream.readVarInt().toInt()
 		picto = stream.readVarInt().toInt()
 		dropTypeLimitation = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			dropTypeLimitation.add(item)
 		}

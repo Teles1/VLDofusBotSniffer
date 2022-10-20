@@ -13,7 +13,7 @@ open class GuildListApplicationAnswerMessage : PaginationAnswerAbstractMessage()
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		applies = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GuildApplicationInformation()
 			item.deserialize(stream)
 			applies.add(item)

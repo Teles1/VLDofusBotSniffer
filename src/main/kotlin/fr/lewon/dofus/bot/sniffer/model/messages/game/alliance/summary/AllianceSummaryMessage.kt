@@ -13,7 +13,7 @@ open class AllianceSummaryMessage : PaginationAnswerAbstractMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		alliances = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = AllianceFactSheetInformations()
 			item.deserialize(stream)
 			alliances.add(item)

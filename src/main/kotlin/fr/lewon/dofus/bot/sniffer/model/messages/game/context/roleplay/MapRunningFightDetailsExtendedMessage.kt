@@ -13,7 +13,7 @@ open class MapRunningFightDetailsExtendedMessage : MapRunningFightDetailsMessage
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		namedPartyTeams = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = NamedPartyTeam()
 			item.deserialize(stream)
 			namedPartyTeams.add(item)

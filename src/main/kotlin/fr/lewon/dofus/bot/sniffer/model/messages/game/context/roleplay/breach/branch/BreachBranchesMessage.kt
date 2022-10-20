@@ -12,7 +12,7 @@ open class BreachBranchesMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		branches = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<ExtendedBreachBranch>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			branches.add(item)

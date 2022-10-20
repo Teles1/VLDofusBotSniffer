@@ -13,7 +13,7 @@ open class ExchangeBidPriceForSellerMessage : ExchangeBidPriceMessage() {
 		super.deserialize(stream)
 		allIdentical = stream.readBoolean()
 		minimalPrices = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarLong().toDouble()
 			minimalPrices.add(item)
 		}

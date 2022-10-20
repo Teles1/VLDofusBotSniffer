@@ -12,7 +12,7 @@ open class JobExperienceMultiUpdateMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		experiencesUpdate = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = JobExperience()
 			item.deserialize(stream)
 			experiencesUpdate.add(item)

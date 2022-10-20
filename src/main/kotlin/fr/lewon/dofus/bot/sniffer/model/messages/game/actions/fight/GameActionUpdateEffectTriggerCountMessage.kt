@@ -12,7 +12,7 @@ open class GameActionUpdateEffectTriggerCountMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		targetIds = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = GameFightEffectTriggerCount()
 			item.deserialize(stream)
 			targetIds.add(item)

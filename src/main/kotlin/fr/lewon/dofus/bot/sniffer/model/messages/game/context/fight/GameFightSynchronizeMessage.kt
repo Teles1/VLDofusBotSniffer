@@ -12,7 +12,7 @@ open class GameFightSynchronizeMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		fighters = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<GameFightFighterInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			fighters.add(item)

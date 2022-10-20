@@ -12,7 +12,7 @@ open class JobDescriptionMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		jobsDescription = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = JobDescription()
 			item.deserialize(stream)
 			jobsDescription.add(item)

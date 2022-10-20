@@ -16,7 +16,7 @@ open class ExchangeStartOkNpcShopMessage : NetworkMessage() {
 		npcSellerId = stream.readDouble().toDouble()
 		tokenId = stream.readVarInt().toInt()
 		objectsInfos = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItemToSellInNpcShop()
 			item.deserialize(stream)
 			objectsInfos.add(item)

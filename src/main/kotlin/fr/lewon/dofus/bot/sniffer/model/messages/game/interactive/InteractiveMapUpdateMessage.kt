@@ -12,7 +12,7 @@ open class InteractiveMapUpdateMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		interactiveElements = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<InteractiveElement>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			interactiveElements.add(item)

@@ -12,7 +12,7 @@ open class IgnoredListMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		ignoredList = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<IgnoredInformations>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			ignoredList.add(item)

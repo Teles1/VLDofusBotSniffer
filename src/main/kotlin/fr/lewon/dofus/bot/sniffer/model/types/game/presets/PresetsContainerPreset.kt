@@ -11,7 +11,7 @@ open class PresetsContainerPreset : Preset() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		presets = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<Preset>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			presets.add(item)

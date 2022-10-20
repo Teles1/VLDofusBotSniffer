@@ -13,7 +13,7 @@ open class ExchangeHandleMountsMessage : NetworkMessage() {
 		super.deserialize(stream)
 		actionType = stream.readUnsignedByte().toInt()
 		ridesId = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarInt().toInt()
 			ridesId.add(item)
 		}

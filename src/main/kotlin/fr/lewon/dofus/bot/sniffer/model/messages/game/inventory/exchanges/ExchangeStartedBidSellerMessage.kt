@@ -16,7 +16,7 @@ open class ExchangeStartedBidSellerMessage : NetworkMessage() {
 		sellerDescriptor = SellerBuyerDescriptor()
 		sellerDescriptor.deserialize(stream)
 		objectsInfos = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ObjectItemToSellInBid()
 			item.deserialize(stream)
 			objectsInfos.add(item)

@@ -12,7 +12,7 @@ open class GuildChestTabContributionsMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		contributions = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = Contribution()
 			item.deserialize(stream)
 			contributions.add(item)

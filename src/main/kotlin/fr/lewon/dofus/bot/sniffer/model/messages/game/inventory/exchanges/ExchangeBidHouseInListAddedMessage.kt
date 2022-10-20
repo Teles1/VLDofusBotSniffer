@@ -19,13 +19,13 @@ open class ExchangeBidHouseInListAddedMessage : NetworkMessage() {
 		objectGID = stream.readVarInt().toInt()
 		objectType = stream.readInt().toInt()
 		effects = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = ProtocolTypeManager.getInstance<ObjectEffect>(stream.readUnsignedShort())
 			item.deserialize(stream)
 			effects.add(item)
 		}
 		prices = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = stream.readVarLong().toDouble()
 			prices.add(item)
 		}

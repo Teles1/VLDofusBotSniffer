@@ -23,7 +23,7 @@ open class PaddockContentInformations : PaddockInformations() {
 		subAreaId = stream.readVarShort().toInt()
 		abandonned = stream.readBoolean()
 		mountsInformations = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until stream.readUnsignedShort().toInt()) {
 			val item = MountInformationsForPaddock()
 			item.deserialize(stream)
 			mountsInformations.add(item)

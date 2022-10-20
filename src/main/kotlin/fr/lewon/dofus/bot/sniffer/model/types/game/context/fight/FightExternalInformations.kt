@@ -20,13 +20,13 @@ open class FightExternalInformations : NetworkType() {
 		fightStart = stream.readInt().toInt()
 		fightSpectatorLocked = stream.readBoolean()
 		fightTeams = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until 2) {
 			val item = FightTeamLightInformations()
 			item.deserialize(stream)
 			fightTeams.add(item)
 		}
 		fightTeamsOptions = ArrayList()
-		for (i in 0 until stream.readUnsignedShort()) {
+		for (i in 0 until 2) {
 			val item = FightOptionsInformations()
 			item.deserialize(stream)
 			fightTeamsOptions.add(item)
