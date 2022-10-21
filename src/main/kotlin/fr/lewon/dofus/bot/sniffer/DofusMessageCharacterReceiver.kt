@@ -26,7 +26,11 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
 
     private fun readPackets() {
         try {
+            val printNevermind = packets.size > 30
             handlePackets()
+            if (printNevermind) {
+                println("Port ${hostState.connection.hostPort} : Nevermind, everything worked as planned.")
+            }
         } catch (e: IncompleteMessageException) {
             // Nothing
         } catch (e: Exception) {
@@ -35,9 +39,8 @@ class DofusMessageCharacterReceiver(private val hostState: HostState) {
                 e.printStackTrace()
             }
         }
-        if (packets.size > 10) {
-            packets.remove(getSortedPackets().first())
-            readPackets()
+        if (packets.size == 30) {
+            println("Port ${hostState.connection.hostPort} : Large packet buffer, character might have crashed. If a character is stuck, please reload sniffer.")
         }
     }
 
