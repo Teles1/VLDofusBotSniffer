@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock
 class EventStore {
 
     private val eventQueue = ArrayBlockingQueue<NetworkMessage>(QUEUE_SIZE)
-    private val lock = ReentrantLock(true)
+    private val lock = ReentrantLock()
     private val waitLock = ReentrantLock()
 
     private var messageWaiter: AbstractMessageWaiter? = null

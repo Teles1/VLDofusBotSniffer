@@ -6,31 +6,46 @@ import fr.lewon.dofus.bot.sniffer.store.EventStore
 import org.pcap4j.core.*
 import org.pcap4j.core.BpfProgram.BpfCompileMode
 import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode
+import org.pcap4j.packet.Packet
 import org.pcap4j.packet.TcpPacket
+import java.util.*
+import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.locks.ReentrantLock
 
 class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
 
-    private val lock = ReentrantLock(true)
+    private val lock = ReentrantLock()
     private val handle: PcapHandle
     private val packetListener: PacketListener
-    private val dofusConnectionByHostPort = HashMap<String, DofusConnection>()
+    private val connectionByHostPort = HashMap<String, DofusConnection>()
     private val characterReceiverByConnection = HashMap<DofusConnection, DofusMessageCharacterReceiver>()
+    private val ethernetPackets = ArrayBlockingQueue<Packet>(300)
+    private val timer = Timer()
 
     init {
         val nif = findActiveDevice(networkInterfaceName)
         handle = nif.openLive(65536000, PromiscuousMode.PROMISCUOUS, -1)
         updateFilter()
-        packetListener = PacketListener { ethernetPacket ->
-            LockUtils.executeSyncOperation(lock) {
-                val ipV4Packet = ethernetPacket.payload
-                if (ipV4Packet != null) {
-                    val tcpPacket = ipV4Packet.payload
-                    if (tcpPacket != null) {
-                        if (tcpPacket.payload != null) {
-                            getCharacterReceiver(tcpPacket as TcpPacket).receiveTcpPacket(tcpPacket)
-                        }
-                    }
+        packetListener = PacketListener {
+            ethernetPackets.add(it)
+            timer.schedule(buildTreatEthernetPacketTimerTask(), 0)
+        }
+    }
+
+    private fun buildTreatEthernetPacketTimerTask() = object : TimerTask() {
+        override fun run() {
+            treatEthernetPacket()
+        }
+    }
+
+    private fun treatEthernetPacket() {
+        val ethernetPacket = ethernetPackets.poll()
+        val ipV4Packet = ethernetPacket.payload
+        if (ipV4Packet != null) {
+            val tcpPacket = ipV4Packet.payload
+            if (tcpPacket != null) {
+                if (tcpPacket.payload != null) {
+                    getCharacterReceiver(tcpPacket as TcpPacket).receiveTcpPacket(tcpPacket)
                 }
             }
         }
@@ -39,7 +54,7 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
     fun startListening(dofusConnection: DofusConnection, eventStore: EventStore, logger: VldbLogger) {
         LockUtils.executeSyncOperation(lock) {
             stopListening(dofusConnection.hostPort)
-            dofusConnectionByHostPort[dofusConnection.hostPort] = dofusConnection
+            connectionByHostPort[dofusConnection.hostPort] = dofusConnection
             val hostState = HostState(dofusConnection, eventStore, logger)
             characterReceiverByConnection[dofusConnection] = DofusMessageCharacterReceiver(hostState)
             updateFilter()
@@ -48,14 +63,14 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
 
     fun stopListening(hostPort: String) {
         LockUtils.executeSyncOperation(lock) {
-            val connection = dofusConnectionByHostPort.remove(hostPort)
+            val connection = connectionByHostPort.remove(hostPort)
             characterReceiverByConnection.remove(connection)
             updateFilter()
         }
     }
 
     private fun updateFilter() {
-        val filter = if (dofusConnectionByHostPort.isEmpty()) {
+        val filter = if (connectionByHostPort.isEmpty()) {
             "src host 255.255.255.255 and dst host 255.255.255.255"
         } else {
             buildFilter()
@@ -64,11 +79,13 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
     }
 
     private fun buildFilter(): String {
-        val srcHostPart = dofusConnectionByHostPort.values.map { it.serverIp }.joinToString(" or ") { "src host $it" }
-        val srcPortPart = dofusConnectionByHostPort.values.map { it.serverPort }.joinToString(" or ") { "src port $it" }
-        val dstHostPart = dofusConnectionByHostPort.values.map { it.hostIp }.joinToString(" or ") { "dst host $it" }
-        val dstPortPart = dofusConnectionByHostPort.values.map { it.hostPort }.joinToString(" or ") { "dst port $it" }
-        return "($srcHostPart) and ($srcPortPart) and ($dstHostPart) and ($dstPortPart)"
+        return LockUtils.executeSyncOperation(lock) {
+            val srcHostPart = connectionByHostPort.values.map { it.serverIp }.joinToString(" or ") { "src host $it" }
+            val srcPortPart = connectionByHostPort.values.map { it.serverPort }.joinToString(" or ") { "src port $it" }
+            val dstHostPart = connectionByHostPort.values.map { it.hostIp }.joinToString(" or ") { "dst host $it" }
+            val dstPortPart = connectionByHostPort.values.map { it.hostPort }.joinToString(" or ") { "dst port $it" }
+            "($srcHostPart) and ($srcPortPart) and ($dstHostPart) and ($dstPortPart)"
+        }
     }
 
     override fun run() {
@@ -86,6 +103,7 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
     override fun interrupt() {
         handle.breakLoop()
         handle.close()
+        timer.cancel()
     }
 
     fun isSnifferRunning(): Boolean {
@@ -95,7 +113,7 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
     private fun getCharacterReceiver(tcpPacket: TcpPacket): DofusMessageCharacterReceiver {
         return LockUtils.executeSyncOperation(lock) {
             val hostPortStr = tcpPacket.header.dstPort.valueAsString()
-            val dofusConnection = dofusConnectionByHostPort[hostPortStr]
+            val dofusConnection = connectionByHostPort[hostPortStr]
                 ?: error("Unknown connection for port : $hostPortStr")
             characterReceiverByConnection[dofusConnection]
                 ?: error("Unknown character receiver for port : ${dofusConnection.hostPort}")
