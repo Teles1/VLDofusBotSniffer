@@ -20,4 +20,5 @@ open class UpdateMountCharacteristicsMessage : NetworkMessage() {
 			boostToUpdateList.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 5459
 }

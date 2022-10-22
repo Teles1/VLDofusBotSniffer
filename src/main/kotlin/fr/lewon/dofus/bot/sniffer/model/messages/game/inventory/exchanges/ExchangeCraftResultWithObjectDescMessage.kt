@@ -14,4 +14,5 @@ open class ExchangeCraftResultWithObjectDescMessage : ExchangeCraftResultMessage
 		objectInfo = ObjectItemNotInContainer()
 		objectInfo.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 819
 }

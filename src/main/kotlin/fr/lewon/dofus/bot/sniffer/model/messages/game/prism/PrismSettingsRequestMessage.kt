@@ -14,4 +14,5 @@ open class PrismSettingsRequestMessage : NetworkMessage() {
 		subAreaId = stream.readVarShort().toInt()
 		startDefenseTime = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 7896
 }

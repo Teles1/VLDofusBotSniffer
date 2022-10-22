@@ -20,4 +20,5 @@ open class ObjectFeedMessage : NetworkMessage() {
 			meal.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 1643
 }

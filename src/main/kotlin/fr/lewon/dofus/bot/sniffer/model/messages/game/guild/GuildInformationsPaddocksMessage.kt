@@ -20,4 +20,5 @@ open class GuildInformationsPaddocksMessage : NetworkMessage() {
 			paddocksInformations.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 609
 }

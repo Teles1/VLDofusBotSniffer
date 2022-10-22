@@ -14,4 +14,5 @@ open class AbstractGameActionMessage : NetworkMessage() {
 		actionId = stream.readVarShort().toInt()
 		sourceId = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 3413
 }

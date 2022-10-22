@@ -13,4 +13,5 @@ open class ExchangeKamaModifiedMessage : ExchangeObjectMessage() {
 		super.deserialize(stream)
 		quantity = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 6732
 }

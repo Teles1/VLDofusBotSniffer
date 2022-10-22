@@ -14,4 +14,5 @@ open class GameRolePlayShowChallengeMessage : NetworkMessage() {
 		commonsInfos = FightCommonInformations()
 		commonsInfos.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 8261
 }

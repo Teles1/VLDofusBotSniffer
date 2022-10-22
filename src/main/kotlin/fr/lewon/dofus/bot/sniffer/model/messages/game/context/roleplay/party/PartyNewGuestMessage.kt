@@ -14,4 +14,5 @@ open class PartyNewGuestMessage : AbstractPartyEventMessage() {
 		guest = PartyGuestInformations()
 		guest.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 3120
 }

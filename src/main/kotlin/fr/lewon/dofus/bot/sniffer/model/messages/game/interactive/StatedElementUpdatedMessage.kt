@@ -14,4 +14,5 @@ open class StatedElementUpdatedMessage : NetworkMessage() {
 		statedElement = StatedElement()
 		statedElement.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 2165
 }

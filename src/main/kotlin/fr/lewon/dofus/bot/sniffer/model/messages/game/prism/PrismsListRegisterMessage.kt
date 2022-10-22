@@ -12,4 +12,5 @@ open class PrismsListRegisterMessage : NetworkMessage() {
 		super.deserialize(stream)
 		listen = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 2416
 }

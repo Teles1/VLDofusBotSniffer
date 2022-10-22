@@ -12,4 +12,5 @@ open class StartupActionsAllAttributionMessage : NetworkMessage() {
 		super.deserialize(stream)
 		characterId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 2964
 }

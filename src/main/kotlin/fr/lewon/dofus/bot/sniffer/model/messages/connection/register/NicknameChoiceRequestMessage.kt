@@ -12,4 +12,5 @@ open class NicknameChoiceRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		nickname = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 2668
 }

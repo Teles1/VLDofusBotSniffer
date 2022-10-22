@@ -19,4 +19,5 @@ open class IdolSelectErrorMessage : NetworkMessage() {
 		reason = stream.readUnsignedByte().toInt()
 		idolId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 4821
 }

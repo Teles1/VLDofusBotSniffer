@@ -14,4 +14,5 @@ open class SlaveNoLongerControledMessage : NetworkMessage() {
 		masterId = stream.readDouble().toDouble()
 		slaveId = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 8362
 }

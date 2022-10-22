@@ -14,4 +14,5 @@ open class BasicStatMessage : NetworkMessage() {
 		timeSpent = stream.readDouble().toDouble()
 		statId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 9318
 }

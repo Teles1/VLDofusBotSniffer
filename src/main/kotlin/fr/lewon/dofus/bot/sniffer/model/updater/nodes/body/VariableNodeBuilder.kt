@@ -10,9 +10,8 @@ class VariableNodeBuilder(
 ) : FTKNodeBuilder(nodeDescription) {
 
     companion object {
-        fun fromFileDescription(nodeDescription: FTKNodeDescription): List<VariableNodeBuilder> {
-            return nodeDescription.variables.map { VariableNodeBuilder(nodeDescription, it) }
-        }
+        fun fromFileDescription(nodeDescription: FTKNodeDescription): List<VariableNodeBuilder> =
+            nodeDescription.variables.map { VariableNodeBuilder(nodeDescription, it) }
     }
 
     override fun getLines(): List<String> {

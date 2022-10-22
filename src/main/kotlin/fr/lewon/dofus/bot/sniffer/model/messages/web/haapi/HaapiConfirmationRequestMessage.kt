@@ -18,4 +18,5 @@ open class HaapiConfirmationRequestMessage : NetworkMessage() {
 		rate = stream.readVarShort().toInt()
 		action = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 2911
 }

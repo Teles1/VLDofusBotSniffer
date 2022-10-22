@@ -11,4 +11,5 @@ open class WatchInventoryContentMessage : InventoryContentMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 7194
 }

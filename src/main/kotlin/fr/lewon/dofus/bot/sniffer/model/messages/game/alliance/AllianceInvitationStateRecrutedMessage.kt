@@ -12,4 +12,5 @@ open class AllianceInvitationStateRecrutedMessage : NetworkMessage() {
 		super.deserialize(stream)
 		invitationState = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 8899
 }

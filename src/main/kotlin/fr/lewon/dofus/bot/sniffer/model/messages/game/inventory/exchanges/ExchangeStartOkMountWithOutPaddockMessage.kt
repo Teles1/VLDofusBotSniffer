@@ -18,4 +18,5 @@ open class ExchangeStartOkMountWithOutPaddockMessage : NetworkMessage() {
 			stabledMountsDescription.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8189
 }

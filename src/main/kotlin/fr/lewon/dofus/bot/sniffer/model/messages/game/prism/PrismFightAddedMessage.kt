@@ -14,4 +14,5 @@ open class PrismFightAddedMessage : NetworkMessage() {
 		fight = PrismFightersInformation()
 		fight.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 3116
 }

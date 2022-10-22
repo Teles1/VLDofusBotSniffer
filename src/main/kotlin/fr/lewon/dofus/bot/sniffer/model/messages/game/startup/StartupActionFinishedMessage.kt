@@ -17,4 +17,5 @@ open class StartupActionFinishedMessage : NetworkMessage() {
 		automaticAction = BooleanByteWrapper.getFlag(_box0, 1)
 		actionId = stream.readInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 4888
 }

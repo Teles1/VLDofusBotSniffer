@@ -12,4 +12,5 @@ open class GuildChestTabLastContributionMessage : NetworkMessage() {
 		super.deserialize(stream)
 		lastContributionDate = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 3992
 }

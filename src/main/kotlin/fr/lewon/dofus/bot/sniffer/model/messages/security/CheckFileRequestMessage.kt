@@ -14,4 +14,5 @@ open class CheckFileRequestMessage : NetworkMessage() {
 		filename = stream.readUTF()
 		type = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 8191
 }

@@ -14,4 +14,5 @@ open class TeleportOnSameMapMessage : NetworkMessage() {
 		targetId = stream.readDouble().toDouble()
 		cellId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 2506
 }

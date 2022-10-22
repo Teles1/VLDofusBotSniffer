@@ -18,4 +18,5 @@ open class IgnoredListMessage : NetworkMessage() {
 			ignoredList.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 5881
 }

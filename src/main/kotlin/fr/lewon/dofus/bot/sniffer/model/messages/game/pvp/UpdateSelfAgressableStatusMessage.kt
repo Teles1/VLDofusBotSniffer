@@ -14,4 +14,5 @@ open class UpdateSelfAgressableStatusMessage : NetworkMessage() {
 		status = stream.readUnsignedByte().toInt()
 		probationTime = stream.readInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 4742
 }

@@ -18,4 +18,5 @@ open class PresetsMessage : NetworkMessage() {
 			presets.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 177
 }

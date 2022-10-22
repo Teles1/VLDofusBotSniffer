@@ -12,4 +12,5 @@ open class IdolPartyRegisterRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		register = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 2278
 }

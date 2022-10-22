@@ -12,4 +12,5 @@ open class GameFightOptionToggleMessage : NetworkMessage() {
 		super.deserialize(stream)
 		option = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 4574
 }

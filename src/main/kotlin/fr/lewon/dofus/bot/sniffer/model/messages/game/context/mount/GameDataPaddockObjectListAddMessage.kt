@@ -18,4 +18,5 @@ open class GameDataPaddockObjectListAddMessage : NetworkMessage() {
 			paddockItemDescription.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 4203
 }

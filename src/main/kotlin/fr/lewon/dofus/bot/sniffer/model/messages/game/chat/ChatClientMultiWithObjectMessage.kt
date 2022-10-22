@@ -18,4 +18,5 @@ open class ChatClientMultiWithObjectMessage : ChatClientMultiMessage() {
 			objects.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8958
 }

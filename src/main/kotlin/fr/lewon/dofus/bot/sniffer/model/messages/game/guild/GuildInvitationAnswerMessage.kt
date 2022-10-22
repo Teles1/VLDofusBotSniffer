@@ -12,4 +12,5 @@ open class GuildInvitationAnswerMessage : NetworkMessage() {
 		super.deserialize(stream)
 		accept = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 9438
 }

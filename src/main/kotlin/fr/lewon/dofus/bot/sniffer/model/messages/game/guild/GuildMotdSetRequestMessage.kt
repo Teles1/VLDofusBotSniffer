@@ -13,4 +13,5 @@ open class GuildMotdSetRequestMessage : SocialNoticeSetRequestMessage() {
 		super.deserialize(stream)
 		content = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 4621
 }

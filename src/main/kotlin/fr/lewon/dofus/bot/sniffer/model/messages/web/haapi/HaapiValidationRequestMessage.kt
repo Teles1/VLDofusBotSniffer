@@ -12,4 +12,5 @@ open class HaapiValidationRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		transaction = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 4191
 }

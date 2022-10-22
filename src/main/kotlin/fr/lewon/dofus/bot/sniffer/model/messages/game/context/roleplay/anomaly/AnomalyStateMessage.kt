@@ -16,4 +16,5 @@ open class AnomalyStateMessage : NetworkMessage() {
 		open = stream.readBoolean()
 		closingTime = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 7889
 }

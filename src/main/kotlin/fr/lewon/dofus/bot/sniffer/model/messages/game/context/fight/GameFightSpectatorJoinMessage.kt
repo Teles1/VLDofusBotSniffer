@@ -18,4 +18,5 @@ open class GameFightSpectatorJoinMessage : GameFightJoinMessage() {
 			namedPartyTeams.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 5897
 }

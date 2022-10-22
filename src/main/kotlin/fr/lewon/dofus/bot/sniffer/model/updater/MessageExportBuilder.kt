@@ -31,7 +31,6 @@ object MessageExportBuilder : VldbAbstractExportPackTaskBuilder() {
         ktFile.writeText(ktContent)
     }
 
-    override fun matchesScriptPack(scriptPack: ScriptPack): Boolean {
-        return scriptPack.path.startsWith(BASE_MESSAGES_PATH) || scriptPack.path.startsWith(BASE_TYPES_PATH)
-    }
+    override fun matchesScriptPack(scriptPack: ScriptPack): Boolean =
+        scriptPack.path.startsWith(BASE_MESSAGES_PATH) || scriptPack.path.startsWith(BASE_TYPES_PATH)
 }

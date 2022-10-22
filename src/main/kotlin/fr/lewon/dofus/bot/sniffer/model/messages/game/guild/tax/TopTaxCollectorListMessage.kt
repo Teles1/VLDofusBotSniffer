@@ -13,4 +13,5 @@ open class TopTaxCollectorListMessage : AbstractTaxCollectorListMessage() {
 		super.deserialize(stream)
 		isDungeon = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 3290
 }

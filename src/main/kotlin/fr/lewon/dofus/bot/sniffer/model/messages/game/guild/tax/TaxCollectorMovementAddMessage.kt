@@ -14,4 +14,5 @@ open class TaxCollectorMovementAddMessage : NetworkMessage() {
 		informations = ProtocolTypeManager.getInstance<TaxCollectorInformations>(stream.readUnsignedShort())
 		informations.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 5732
 }

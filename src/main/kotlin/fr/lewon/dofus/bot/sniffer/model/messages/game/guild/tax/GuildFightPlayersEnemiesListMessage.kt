@@ -20,4 +20,5 @@ open class GuildFightPlayersEnemiesListMessage : NetworkMessage() {
 			playerInfo.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 9655
 }

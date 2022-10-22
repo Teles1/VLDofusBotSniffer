@@ -12,4 +12,5 @@ open class ShowCellRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		cellId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 279
 }

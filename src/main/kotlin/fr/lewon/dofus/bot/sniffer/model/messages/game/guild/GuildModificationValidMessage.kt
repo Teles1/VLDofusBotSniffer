@@ -16,4 +16,5 @@ open class GuildModificationValidMessage : NetworkMessage() {
 		guildEmblem = GuildEmblem()
 		guildEmblem.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 6728
 }

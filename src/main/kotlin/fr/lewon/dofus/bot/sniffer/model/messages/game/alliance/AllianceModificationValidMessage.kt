@@ -18,4 +18,5 @@ open class AllianceModificationValidMessage : NetworkMessage() {
 		Alliancemblem = GuildEmblem()
 		Alliancemblem.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 5476
 }

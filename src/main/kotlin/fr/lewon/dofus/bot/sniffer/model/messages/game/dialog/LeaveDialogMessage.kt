@@ -12,4 +12,5 @@ open class LeaveDialogMessage : NetworkMessage() {
 		super.deserialize(stream)
 		dialogType = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6885
 }

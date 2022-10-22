@@ -19,4 +19,5 @@ open class GameActionFightLifePointsLostMessage : AbstractGameActionMessage() {
 		permanentDamages = stream.readVarInt().toInt()
 		elementId = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 7842
 }

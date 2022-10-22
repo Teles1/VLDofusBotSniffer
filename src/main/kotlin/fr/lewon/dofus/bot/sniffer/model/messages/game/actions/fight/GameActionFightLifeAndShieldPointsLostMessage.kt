@@ -12,4 +12,5 @@ open class GameActionFightLifeAndShieldPointsLostMessage : GameActionFightLifePo
 		super.deserialize(stream)
 		shieldLoss = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 1349
 }

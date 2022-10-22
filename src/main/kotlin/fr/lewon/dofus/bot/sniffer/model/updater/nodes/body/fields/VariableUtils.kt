@@ -31,10 +31,9 @@ object VariableUtils {
         }.toList()
     }
 
-    fun getListTypeStr(nodeDeclaration: FTKNodeDescription, varName: String): String {
-        return Regex("public var $varName:Vector\\.<(.*?)>;").find(nodeDeclaration.fileContent)
+    fun getListTypeStr(nodeDeclaration: FTKNodeDescription, varName: String): String =
+        Regex("public var $varName:Vector\\.<(.*?)>;").find(nodeDeclaration.fileContent)
             ?.destructured?.component1()
             ?: error("Couldn't find list var : $varName (${nodeDeclaration.name})")
-    }
 
 }

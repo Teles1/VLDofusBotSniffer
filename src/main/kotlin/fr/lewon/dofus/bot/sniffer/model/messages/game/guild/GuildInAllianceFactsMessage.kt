@@ -16,4 +16,5 @@ open class GuildInAllianceFactsMessage : GuildFactsMessage() {
 		allianceInfos = BasicNamedAllianceInformations()
 		allianceInfos.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 9704
 }

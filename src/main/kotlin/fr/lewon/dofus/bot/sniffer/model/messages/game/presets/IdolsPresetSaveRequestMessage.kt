@@ -10,4 +10,5 @@ open class IdolsPresetSaveRequestMessage : IconPresetSaveRequestMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 2794
 }

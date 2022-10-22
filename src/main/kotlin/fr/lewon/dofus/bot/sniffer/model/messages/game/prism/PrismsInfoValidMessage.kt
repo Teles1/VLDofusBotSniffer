@@ -18,4 +18,5 @@ open class PrismsInfoValidMessage : NetworkMessage() {
 			fights.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 2302
 }

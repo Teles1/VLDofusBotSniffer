@@ -20,4 +20,5 @@ open class GameActionFightSpellCastMessage : AbstractGameActionFightTargetedAbil
 			portalsIds.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 5527
 }

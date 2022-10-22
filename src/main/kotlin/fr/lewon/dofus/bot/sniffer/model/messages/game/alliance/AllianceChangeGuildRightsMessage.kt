@@ -14,4 +14,5 @@ open class AllianceChangeGuildRightsMessage : NetworkMessage() {
 		guildId = stream.readVarInt().toInt()
 		rights = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 4656
 }

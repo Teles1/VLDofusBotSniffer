@@ -12,4 +12,5 @@ open class PartyLoyaltyStatusMessage : AbstractPartyMessage() {
 		super.deserialize(stream)
 		loyal = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 4419
 }

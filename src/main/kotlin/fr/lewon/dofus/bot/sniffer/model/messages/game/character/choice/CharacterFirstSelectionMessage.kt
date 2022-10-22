@@ -12,4 +12,5 @@ open class CharacterFirstSelectionMessage : CharacterSelectionMessage() {
 		super.deserialize(stream)
 		doTutorial = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 6337
 }

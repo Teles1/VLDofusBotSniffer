@@ -15,4 +15,5 @@ open class AllianceBulletinSetRequestMessage : SocialNoticeSetRequestMessage() {
 		content = stream.readUTF()
 		notifyMembers = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 2726
 }

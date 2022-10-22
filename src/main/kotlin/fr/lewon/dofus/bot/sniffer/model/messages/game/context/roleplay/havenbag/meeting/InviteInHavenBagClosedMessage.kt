@@ -14,4 +14,5 @@ open class InviteInHavenBagClosedMessage : NetworkMessage() {
 		hostInformations = CharacterMinimalInformations()
 		hostInformations.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 8204
 }

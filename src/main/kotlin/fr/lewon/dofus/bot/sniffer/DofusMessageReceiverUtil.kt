@@ -19,19 +19,19 @@ object DofusMessageReceiverUtil {
     private lateinit var messagesById: Map<Int, Class<out NetworkMessage>>
 
     fun parseMessagePremise(stream: ByteArrayReader, messageId: Int): DofusMessagePremise {
-        val messageType = messagesById[messageId]
-            ?: throw MessageIdNotFoundException(messageId)
-        val messageName = MessageIdByName.getName(messageId)
-            ?: throw MessageIdNotFoundException(messageId)
-        return DofusMessagePremise(messageName, messageId, messageType, stream)
+        val messageType = messagesById[messageId] ?: throw MessageIdNotFoundException(messageId)
+        return DofusMessagePremise(messageId, messageType, stream)
     }
 
     fun prepareNetworkManagers(additionalBuilders: List<VldbAbstractExportPackTaskBuilder> = emptyList()) {
         processExport(getExportPackBuilders().union(additionalBuilders).toList())
         messagesById = Reflections(NetworkMessage::class.java.packageName)
             .getSubTypesOf(NetworkMessage::class.java)
-            .mapNotNull { msgClass -> (MessageIdByName.getId(msgClass.simpleName)?.let { id -> id to msgClass }) }
-            .toMap()
+            .groupBy { MessageIdByName.getId(it.simpleName) ?: it.getConstructor().newInstance().getNetworkMessageId() }
+            .mapValues {
+                it.value.takeIf { msgs -> msgs.size == 1 }?.get(0)
+                    ?: error("Multiple messages for id ${it.key} : ${it.value.joinToString(", ") { msg -> msg.simpleName }}")
+            }
     }
 
     private fun getExportPackBuilders(): List<VldbAbstractExportPackTaskBuilder> {

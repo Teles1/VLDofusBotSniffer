@@ -12,4 +12,5 @@ open class IdolPartyLostMessage : NetworkMessage() {
 		super.deserialize(stream)
 		idolId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6301
 }

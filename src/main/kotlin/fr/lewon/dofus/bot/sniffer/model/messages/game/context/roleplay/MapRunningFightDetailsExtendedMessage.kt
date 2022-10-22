@@ -19,4 +19,5 @@ open class MapRunningFightDetailsExtendedMessage : MapRunningFightDetailsMessage
 			namedPartyTeams.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 7680
 }

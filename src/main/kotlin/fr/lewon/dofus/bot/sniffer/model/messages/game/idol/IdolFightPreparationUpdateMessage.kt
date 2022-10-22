@@ -20,4 +20,5 @@ open class IdolFightPreparationUpdateMessage : NetworkMessage() {
 			idols.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8734
 }

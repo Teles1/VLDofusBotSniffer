@@ -18,4 +18,5 @@ open class GuildRanksMessage : NetworkMessage() {
 			ranks.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 6535
 }

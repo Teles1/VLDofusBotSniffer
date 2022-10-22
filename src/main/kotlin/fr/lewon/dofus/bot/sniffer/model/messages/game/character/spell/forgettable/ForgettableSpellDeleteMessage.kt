@@ -18,4 +18,5 @@ open class ForgettableSpellDeleteMessage : NetworkMessage() {
 			spells.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 2921
 }

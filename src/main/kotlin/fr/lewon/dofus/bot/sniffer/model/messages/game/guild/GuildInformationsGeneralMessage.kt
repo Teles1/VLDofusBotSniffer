@@ -26,4 +26,5 @@ open class GuildInformationsGeneralMessage : NetworkMessage() {
 		nbTotalMembers = stream.readVarShort().toInt()
 		nbConnectedMembers = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 1524
 }

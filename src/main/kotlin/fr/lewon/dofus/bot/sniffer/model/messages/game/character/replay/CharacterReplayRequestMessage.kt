@@ -12,4 +12,5 @@ open class CharacterReplayRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		characterId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 5716
 }

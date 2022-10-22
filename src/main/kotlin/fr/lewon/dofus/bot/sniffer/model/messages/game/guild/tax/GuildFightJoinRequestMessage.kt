@@ -12,4 +12,5 @@ open class GuildFightJoinRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		taxCollectorId = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 6500
 }

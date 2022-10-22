@@ -13,4 +13,5 @@ open class ExchangeCraftResultMagicWithObjectDescMessage : ExchangeCraftResultWi
 		super.deserialize(stream)
 		magicPoolStatus = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 371
 }

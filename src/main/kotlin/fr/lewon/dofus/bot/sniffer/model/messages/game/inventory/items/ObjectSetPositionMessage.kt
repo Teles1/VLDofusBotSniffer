@@ -16,4 +16,5 @@ open class ObjectSetPositionMessage : NetworkMessage() {
 		position = stream.readUnsignedShort().toInt()
 		quantity = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 9577
 }

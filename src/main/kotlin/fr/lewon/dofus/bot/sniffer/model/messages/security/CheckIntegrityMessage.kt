@@ -16,4 +16,5 @@ open class CheckIntegrityMessage : NetworkMessage() {
 			data.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 2862
 }

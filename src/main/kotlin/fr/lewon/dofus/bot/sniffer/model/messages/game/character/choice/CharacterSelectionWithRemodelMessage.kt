@@ -14,4 +14,5 @@ open class CharacterSelectionWithRemodelMessage : CharacterSelectionMessage() {
 		remodel = RemodelingInformation()
 		remodel.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 3948
 }

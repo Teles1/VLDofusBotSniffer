@@ -15,4 +15,5 @@ open class ExchangeObjectModifiedMessage : ExchangeObjectMessage() {
 		obj = ObjectItem()
 		obj.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 2710
 }

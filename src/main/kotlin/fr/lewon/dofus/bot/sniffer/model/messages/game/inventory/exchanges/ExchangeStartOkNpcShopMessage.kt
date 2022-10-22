@@ -22,4 +22,5 @@ open class ExchangeStartOkNpcShopMessage : NetworkMessage() {
 			objectsInfos.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8054
 }

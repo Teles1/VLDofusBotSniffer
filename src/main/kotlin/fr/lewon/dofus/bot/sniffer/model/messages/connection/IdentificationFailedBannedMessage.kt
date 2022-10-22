@@ -12,4 +12,5 @@ open class IdentificationFailedBannedMessage : IdentificationFailedMessage() {
 		super.deserialize(stream)
 		banEndDate = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 6866
 }

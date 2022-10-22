@@ -14,4 +14,5 @@ open class ShortcutBarRemoveRequestMessage : NetworkMessage() {
 		barType = stream.readUnsignedByte().toInt()
 		slot = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 9468
 }

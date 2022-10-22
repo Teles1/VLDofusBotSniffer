@@ -21,4 +21,5 @@ open class AllianceSummaryRequestMessage : PaginationRequestAbstractMessage() {
 		sortType = stream.readUnsignedByte().toInt()
 		sortDescending = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 8823
 }

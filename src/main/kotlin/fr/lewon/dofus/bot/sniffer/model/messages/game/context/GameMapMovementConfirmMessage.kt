@@ -10,4 +10,5 @@ open class GameMapMovementConfirmMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 562
 }

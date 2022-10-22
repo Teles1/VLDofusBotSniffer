@@ -14,4 +14,5 @@ open class ArenaFighterLeaveMessage : NetworkMessage() {
 		leaver = CharacterBasicMinimalInformations()
 		leaver.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 4468
 }

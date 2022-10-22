@@ -12,4 +12,5 @@ open class MountHarnessColorsUpdateRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		useHarnessColors = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 5448
 }

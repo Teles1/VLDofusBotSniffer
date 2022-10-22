@@ -12,4 +12,5 @@ open class TreasureHuntGiveUpRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		questType = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6206
 }

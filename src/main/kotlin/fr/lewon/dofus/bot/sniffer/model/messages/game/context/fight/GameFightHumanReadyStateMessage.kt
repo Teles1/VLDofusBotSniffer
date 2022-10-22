@@ -14,4 +14,5 @@ open class GameFightHumanReadyStateMessage : NetworkMessage() {
 		characterId = stream.readVarLong().toDouble()
 		isReady = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 7924
 }

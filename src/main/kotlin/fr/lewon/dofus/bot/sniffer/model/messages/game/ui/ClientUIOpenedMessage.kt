@@ -12,4 +12,5 @@ open class ClientUIOpenedMessage : NetworkMessage() {
 		super.deserialize(stream)
 		type = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 4141
 }

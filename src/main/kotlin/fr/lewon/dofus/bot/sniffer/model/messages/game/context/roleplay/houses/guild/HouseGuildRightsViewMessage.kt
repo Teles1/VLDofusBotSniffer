@@ -14,4 +14,5 @@ open class HouseGuildRightsViewMessage : NetworkMessage() {
 		houseId = stream.readVarInt().toInt()
 		instanceId = stream.readInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 8248
 }

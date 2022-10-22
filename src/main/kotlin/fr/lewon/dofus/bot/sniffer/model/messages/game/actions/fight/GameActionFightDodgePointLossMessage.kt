@@ -15,4 +15,5 @@ open class GameActionFightDodgePointLossMessage : AbstractGameActionMessage() {
 		targetId = stream.readDouble().toDouble()
 		amount = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 5077
 }

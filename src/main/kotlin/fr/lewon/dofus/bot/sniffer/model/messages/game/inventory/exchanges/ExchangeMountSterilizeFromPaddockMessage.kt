@@ -18,4 +18,5 @@ open class ExchangeMountSterilizeFromPaddockMessage : NetworkMessage() {
 		worldY = stream.readUnsignedShort().toInt()
 		sterilizator = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 3630
 }

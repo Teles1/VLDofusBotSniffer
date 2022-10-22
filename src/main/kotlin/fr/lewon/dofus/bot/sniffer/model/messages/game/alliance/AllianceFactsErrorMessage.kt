@@ -12,4 +12,5 @@ open class AllianceFactsErrorMessage : NetworkMessage() {
 		super.deserialize(stream)
 		allianceId = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 1188
 }

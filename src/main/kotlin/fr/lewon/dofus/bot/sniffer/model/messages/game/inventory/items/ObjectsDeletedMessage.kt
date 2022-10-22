@@ -16,4 +16,5 @@ open class ObjectsDeletedMessage : NetworkMessage() {
 			objectUID.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 7217
 }

@@ -13,4 +13,5 @@ open class IdentificationSuccessWithLoginTokenMessage : IdentificationSuccessMes
 		super.deserialize(stream)
 		loginToken = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 5572
 }

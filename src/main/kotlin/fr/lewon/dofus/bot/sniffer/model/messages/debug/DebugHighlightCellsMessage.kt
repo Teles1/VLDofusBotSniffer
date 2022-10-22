@@ -18,4 +18,5 @@ open class DebugHighlightCellsMessage : NetworkMessage() {
 			cells.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 1909
 }

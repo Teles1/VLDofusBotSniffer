@@ -20,4 +20,5 @@ open class ExchangeStartOkHumanVendorMessage : NetworkMessage() {
 			objectsInfos.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 5962
 }

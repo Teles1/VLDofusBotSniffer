@@ -12,4 +12,5 @@ open class AbstractGameActionWithAckMessage : AbstractGameActionMessage() {
 		super.deserialize(stream)
 		waitAckId = stream.readUnsignedShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 4925
 }

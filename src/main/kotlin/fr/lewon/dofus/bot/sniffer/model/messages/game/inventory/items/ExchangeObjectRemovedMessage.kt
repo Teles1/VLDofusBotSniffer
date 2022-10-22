@@ -13,4 +13,5 @@ open class ExchangeObjectRemovedMessage : ExchangeObjectMessage() {
 		super.deserialize(stream)
 		objectUID = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 8854
 }

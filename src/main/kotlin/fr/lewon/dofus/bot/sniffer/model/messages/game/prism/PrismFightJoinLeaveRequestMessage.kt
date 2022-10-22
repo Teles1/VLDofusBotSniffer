@@ -14,4 +14,5 @@ open class PrismFightJoinLeaveRequestMessage : NetworkMessage() {
 		subAreaId = stream.readVarShort().toInt()
 		join = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 2201
 }

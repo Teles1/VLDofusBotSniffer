@@ -25,4 +25,5 @@ open class ExchangeOfflineSoldItemsMessage : NetworkMessage() {
 			merchantItems.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 5561
 }

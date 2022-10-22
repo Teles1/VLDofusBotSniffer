@@ -14,4 +14,5 @@ open class GameRolePlayArenaUpdatePlayerInfosMessage : NetworkMessage() {
 		solo = ArenaRankInfos()
 		solo.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 4740
 }

@@ -10,4 +10,5 @@ open class GuildLogbookInformationRequestMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 8801
 }

@@ -19,4 +19,5 @@ open class GuildListApplicationAnswerMessage : PaginationAnswerAbstractMessage()
 			applies.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 9346
 }

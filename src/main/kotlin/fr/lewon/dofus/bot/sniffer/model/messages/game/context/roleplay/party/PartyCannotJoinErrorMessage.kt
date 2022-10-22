@@ -12,4 +12,5 @@ open class PartyCannotJoinErrorMessage : AbstractPartyMessage() {
 		super.deserialize(stream)
 		reason = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6009
 }

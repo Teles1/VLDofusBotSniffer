@@ -22,4 +22,5 @@ open class ChallengeTargetsListMessage : NetworkMessage() {
 			targetCells.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 2592
 }

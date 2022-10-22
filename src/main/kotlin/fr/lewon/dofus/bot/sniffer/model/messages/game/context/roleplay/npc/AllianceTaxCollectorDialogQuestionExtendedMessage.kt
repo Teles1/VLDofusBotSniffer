@@ -15,4 +15,5 @@ open class AllianceTaxCollectorDialogQuestionExtendedMessage : TaxCollectorDialo
 		alliance = BasicNamedAllianceInformations()
 		alliance.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 6708
 }

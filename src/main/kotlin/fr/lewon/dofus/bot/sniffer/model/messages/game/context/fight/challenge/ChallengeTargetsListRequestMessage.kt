@@ -12,4 +12,5 @@ open class ChallengeTargetsListRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		challengeId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 801
 }

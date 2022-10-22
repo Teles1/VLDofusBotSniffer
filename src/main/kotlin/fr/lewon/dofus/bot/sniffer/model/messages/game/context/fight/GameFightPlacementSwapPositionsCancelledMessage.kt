@@ -14,4 +14,5 @@ open class GameFightPlacementSwapPositionsCancelledMessage : NetworkMessage() {
 		requestId = stream.readInt().toInt()
 		cancellerId = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 3083
 }

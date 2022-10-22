@@ -18,4 +18,5 @@ open class BreachBranchesMessage : NetworkMessage() {
 			branches.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 3885
 }

@@ -18,4 +18,5 @@ open class GameRolePlayArenaLeagueRewardsMessage : NetworkMessage() {
 		ladderPosition = stream.readInt().toInt()
 		endSeasonReward = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 6638
 }

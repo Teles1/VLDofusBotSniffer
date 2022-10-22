@@ -12,4 +12,5 @@ open class OrnamentGainedMessage : NetworkMessage() {
 		super.deserialize(stream)
 		ornamentId = stream.readUnsignedShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6140
 }

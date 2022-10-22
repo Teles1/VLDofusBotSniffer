@@ -16,4 +16,5 @@ open class FriendDeleteResultMessage : NetworkMessage() {
 		tag = AccountTagInformation()
 		tag.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 9565
 }

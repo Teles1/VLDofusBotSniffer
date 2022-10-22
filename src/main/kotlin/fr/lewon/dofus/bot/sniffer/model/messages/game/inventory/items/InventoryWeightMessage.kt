@@ -16,4 +16,5 @@ open class InventoryWeightMessage : NetworkMessage() {
 		shopWeight = stream.readVarInt().toInt()
 		weightMax = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 1405
 }

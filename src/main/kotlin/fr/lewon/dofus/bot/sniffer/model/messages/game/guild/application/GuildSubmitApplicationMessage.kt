@@ -36,4 +36,5 @@ open class GuildSubmitApplicationMessage : NetworkMessage() {
 		filterSearchName = stream.readUTF()
 		filterLastSort = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 2648
 }

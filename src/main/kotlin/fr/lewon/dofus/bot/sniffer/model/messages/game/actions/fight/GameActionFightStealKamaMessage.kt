@@ -15,4 +15,5 @@ open class GameActionFightStealKamaMessage : AbstractGameActionMessage() {
 		targetId = stream.readDouble().toDouble()
 		amount = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 5920
 }

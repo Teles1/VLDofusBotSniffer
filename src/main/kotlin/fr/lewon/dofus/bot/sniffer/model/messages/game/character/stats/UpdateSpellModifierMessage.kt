@@ -16,4 +16,5 @@ open class UpdateSpellModifierMessage : NetworkMessage() {
 		spellModifier = CharacterSpellModification()
 		spellModifier.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 7959
 }

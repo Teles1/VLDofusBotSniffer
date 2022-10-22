@@ -12,4 +12,5 @@ open class ExchangeCraftPaymentModifiedMessage : NetworkMessage() {
 		super.deserialize(stream)
 		goldSum = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 4465
 }

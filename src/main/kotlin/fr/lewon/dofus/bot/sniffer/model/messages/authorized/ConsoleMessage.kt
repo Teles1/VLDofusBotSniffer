@@ -14,4 +14,5 @@ open class ConsoleMessage : NetworkMessage() {
 		type = stream.readUnsignedByte().toInt()
 		content = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 6862
 }

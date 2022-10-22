@@ -23,4 +23,5 @@ open class AccountCapabilitiesMessage : NetworkMessage() {
 		breedsAvailable = stream.readVarInt().toInt()
 		status = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 8689
 }

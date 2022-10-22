@@ -11,8 +11,7 @@ enum class VariableType(val flashTypeRegex: Regex, val kotlinType: String, val d
     ;
 
     companion object {
-        fun fromFlashType(flashType: String): VariableType? {
-            return VariableType.values().firstOrNull { it.flashTypeRegex.matches(flashType) }
-        }
+        fun fromFlashType(flashType: String): VariableType? =
+            VariableType.values().firstOrNull { it.flashTypeRegex.matches(flashType) }
     }
 }

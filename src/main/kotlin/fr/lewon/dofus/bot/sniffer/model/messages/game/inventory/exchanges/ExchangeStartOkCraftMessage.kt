@@ -10,4 +10,5 @@ open class ExchangeStartOkCraftMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 8327
 }

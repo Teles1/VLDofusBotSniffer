@@ -24,4 +24,5 @@ open class GameFightPlacementPossiblePositionsMessage : NetworkMessage() {
 		}
 		teamNumber = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 1511
 }

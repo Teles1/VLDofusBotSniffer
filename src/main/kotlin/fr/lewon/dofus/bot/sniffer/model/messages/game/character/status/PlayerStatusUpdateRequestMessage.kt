@@ -14,4 +14,5 @@ open class PlayerStatusUpdateRequestMessage : NetworkMessage() {
 		status = ProtocolTypeManager.getInstance<PlayerStatus>(stream.readUnsignedShort())
 		status.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 4979
 }

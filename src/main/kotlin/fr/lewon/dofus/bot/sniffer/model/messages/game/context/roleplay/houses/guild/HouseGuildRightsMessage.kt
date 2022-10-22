@@ -22,4 +22,5 @@ open class HouseGuildRightsMessage : NetworkMessage() {
 		guildInfo.deserialize(stream)
 		rights = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 7988
 }

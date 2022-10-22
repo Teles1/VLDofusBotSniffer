@@ -16,4 +16,5 @@ open class DiceRollRequestMessage : NetworkMessage() {
 		faces = stream.readVarInt().toInt()
 		channel = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6930
 }

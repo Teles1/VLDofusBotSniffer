@@ -14,4 +14,5 @@ open class IgnoredDeleteRequestMessage : NetworkMessage() {
 		accountId = stream.readInt().toInt()
 		session = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 5999
 }

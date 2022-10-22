@@ -22,4 +22,5 @@ open class GameFightTurnListMessage : NetworkMessage() {
 			deadsIds.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 5357
 }

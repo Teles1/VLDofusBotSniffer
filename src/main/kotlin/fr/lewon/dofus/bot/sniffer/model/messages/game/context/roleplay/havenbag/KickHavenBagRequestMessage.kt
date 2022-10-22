@@ -12,4 +12,5 @@ open class KickHavenBagRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		guestId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 5506
 }

@@ -30,4 +30,5 @@ open class AllianceInsiderInfoMessage : NetworkMessage() {
 			prisms.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 7172
 }

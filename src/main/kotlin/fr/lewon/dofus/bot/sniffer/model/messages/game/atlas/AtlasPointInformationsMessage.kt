@@ -14,4 +14,5 @@ open class AtlasPointInformationsMessage : NetworkMessage() {
 		type = AtlasPointsInformations()
 		type.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 9996
 }

@@ -12,4 +12,5 @@ open class LifePointsRegenEndMessage : UpdateLifePointsMessage() {
 		super.deserialize(stream)
 		lifePointsGained = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 2754
 }

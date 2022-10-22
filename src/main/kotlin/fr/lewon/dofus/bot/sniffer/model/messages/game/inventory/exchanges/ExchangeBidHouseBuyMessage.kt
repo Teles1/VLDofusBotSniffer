@@ -16,4 +16,5 @@ open class ExchangeBidHouseBuyMessage : NetworkMessage() {
 		qty = stream.readVarInt().toInt()
 		price = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 610
 }

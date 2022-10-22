@@ -12,4 +12,5 @@ open class QuestStepInfoRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		questId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 9227
 }

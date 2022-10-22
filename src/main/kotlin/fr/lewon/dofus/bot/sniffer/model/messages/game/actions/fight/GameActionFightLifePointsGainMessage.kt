@@ -15,4 +15,5 @@ open class GameActionFightLifePointsGainMessage : AbstractGameActionMessage() {
 		targetId = stream.readDouble().toDouble()
 		delta = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 2490
 }

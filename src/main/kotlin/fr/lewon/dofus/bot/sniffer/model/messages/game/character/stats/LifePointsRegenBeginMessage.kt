@@ -12,4 +12,5 @@ open class LifePointsRegenBeginMessage : NetworkMessage() {
 		super.deserialize(stream)
 		regenRate = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6391
 }

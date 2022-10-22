@@ -16,4 +16,5 @@ open class GameRolePlayArenaFighterStatusMessage : NetworkMessage() {
 		playerId = stream.readVarLong().toDouble()
 		accepted = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 4632
 }

@@ -14,4 +14,5 @@ open class GameMapNoMovementMessage : NetworkMessage() {
 		cellX = stream.readUnsignedShort().toInt()
 		cellY = stream.readUnsignedShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 5211
 }

@@ -12,4 +12,5 @@ open class AreaFightModificatorUpdateMessage : NetworkMessage() {
 		super.deserialize(stream)
 		spellPairId = stream.readInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6181
 }

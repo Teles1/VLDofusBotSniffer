@@ -13,4 +13,5 @@ open class WatchQuestListMessage : QuestListMessage() {
 		super.deserialize(stream)
 		playerId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 9861
 }

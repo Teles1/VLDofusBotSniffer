@@ -14,4 +14,5 @@ open class TreasureHuntAvailableRetryCountUpdateMessage : NetworkMessage() {
 		questType = stream.readUnsignedByte().toInt()
 		availableRetryCount = stream.readInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 4275
 }

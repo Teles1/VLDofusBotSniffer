@@ -14,4 +14,5 @@ open class ExchangeReplyTaxVendorMessage : NetworkMessage() {
 		objectValue = stream.readVarLong().toDouble()
 		totalTaxValue = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 6703
 }

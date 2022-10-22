@@ -12,4 +12,5 @@ open class EnterHavenBagRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		havenBagOwner = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 1611
 }

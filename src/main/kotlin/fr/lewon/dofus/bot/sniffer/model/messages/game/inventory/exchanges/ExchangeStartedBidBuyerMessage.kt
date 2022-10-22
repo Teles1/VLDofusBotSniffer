@@ -14,4 +14,5 @@ open class ExchangeStartedBidBuyerMessage : NetworkMessage() {
 		buyerDescriptor = SellerBuyerDescriptor()
 		buyerDescriptor.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 2883
 }

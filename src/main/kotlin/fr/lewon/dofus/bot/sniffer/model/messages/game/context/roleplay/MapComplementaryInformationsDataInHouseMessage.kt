@@ -21,4 +21,5 @@ open class MapComplementaryInformationsDataInHouseMessage : MapComplementaryInfo
 		currentHouse = HouseInformationsInside()
 		currentHouse.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 1153
 }

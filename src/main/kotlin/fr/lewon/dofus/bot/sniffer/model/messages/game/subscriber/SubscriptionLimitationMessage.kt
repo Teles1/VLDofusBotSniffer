@@ -12,4 +12,5 @@ open class SubscriptionLimitationMessage : NetworkMessage() {
 		super.deserialize(stream)
 		reason = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 7302
 }

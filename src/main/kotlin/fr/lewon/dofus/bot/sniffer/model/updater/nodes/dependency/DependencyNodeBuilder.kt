@@ -31,9 +31,8 @@ class DependencyNodeBuilder(
                 .toList()
         }
 
-        private fun isDependencyValid(dependency: DependencyDeclaration): Boolean {
-            return dependency.path.contains(BASE_MESSAGES_PATH) || dependency.path.contains(BASE_TYPES_PATH)
-        }
+        private fun isDependencyValid(dependency: DependencyDeclaration): Boolean =
+            dependency.path.contains(BASE_MESSAGES_PATH) || dependency.path.contains(BASE_TYPES_PATH)
     }
 
     override fun getLines(): List<String> {

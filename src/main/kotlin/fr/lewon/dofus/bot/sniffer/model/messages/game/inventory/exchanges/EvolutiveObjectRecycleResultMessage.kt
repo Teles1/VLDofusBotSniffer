@@ -18,4 +18,5 @@ open class EvolutiveObjectRecycleResultMessage : NetworkMessage() {
 			recycledItems.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 1621
 }

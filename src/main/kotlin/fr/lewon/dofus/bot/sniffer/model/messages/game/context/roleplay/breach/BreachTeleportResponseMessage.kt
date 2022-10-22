@@ -12,4 +12,5 @@ open class BreachTeleportResponseMessage : NetworkMessage() {
 		super.deserialize(stream)
 		teleported = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 6195
 }

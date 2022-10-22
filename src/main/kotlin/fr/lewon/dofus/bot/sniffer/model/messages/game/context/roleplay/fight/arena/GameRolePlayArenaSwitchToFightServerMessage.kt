@@ -24,4 +24,5 @@ open class GameRolePlayArenaSwitchToFightServerMessage : NetworkMessage() {
 			ticket.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 2504
 }

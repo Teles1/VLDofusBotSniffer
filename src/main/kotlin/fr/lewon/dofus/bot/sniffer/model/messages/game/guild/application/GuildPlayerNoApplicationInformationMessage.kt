@@ -10,4 +10,5 @@ open class GuildPlayerNoApplicationInformationMessage : GuildPlayerApplicationAb
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 5484
 }

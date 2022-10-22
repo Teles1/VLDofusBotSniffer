@@ -16,4 +16,5 @@ open class GuildApplicationIsAnsweredMessage : NetworkMessage() {
 		guildInformation = GuildInformations()
 		guildInformation.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 3385
 }

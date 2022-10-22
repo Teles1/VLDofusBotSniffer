@@ -12,4 +12,5 @@ open class PrismFightRemovedMessage : NetworkMessage() {
 		super.deserialize(stream)
 		subAreaId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6268
 }

@@ -12,4 +12,5 @@ open class GameFightPauseMessage : NetworkMessage() {
 		super.deserialize(stream)
 		isPaused = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 9673
 }

@@ -14,4 +14,5 @@ open class GameMapChangeOrientationMessage : NetworkMessage() {
 		orientation = ActorOrientation()
 		orientation.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 4786
 }

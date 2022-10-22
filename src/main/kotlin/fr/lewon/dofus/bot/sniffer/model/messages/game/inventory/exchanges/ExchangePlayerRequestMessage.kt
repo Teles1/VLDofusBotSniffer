@@ -12,4 +12,5 @@ open class ExchangePlayerRequestMessage : ExchangeRequestMessage() {
 		super.deserialize(stream)
 		target = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 5272
 }

@@ -18,4 +18,5 @@ open class SelectedServerDataExtendedMessage : SelectedServerDataMessage() {
 			servers.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 6049
 }

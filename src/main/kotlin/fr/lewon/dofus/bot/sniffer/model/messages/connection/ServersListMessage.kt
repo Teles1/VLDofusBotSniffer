@@ -20,4 +20,5 @@ open class ServersListMessage : NetworkMessage() {
 		}
 		canCreateNewCharacter = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 2743
 }

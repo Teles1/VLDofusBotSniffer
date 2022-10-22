@@ -14,4 +14,5 @@ open class HaapiSessionMessage : NetworkMessage() {
 		key = stream.readUTF()
 		type = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 9409
 }

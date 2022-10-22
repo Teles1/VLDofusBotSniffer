@@ -16,4 +16,5 @@ open class JobBookSubscribeRequestMessage : NetworkMessage() {
 			jobIds.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 3860
 }

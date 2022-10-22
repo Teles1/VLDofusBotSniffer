@@ -18,4 +18,5 @@ open class EntitiesInformationMessage : NetworkMessage() {
 			entities.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 185
 }

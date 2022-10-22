@@ -14,4 +14,5 @@ open class GameRolePlayPlayerLifeStatusMessage : NetworkMessage() {
 		state = stream.readUnsignedByte().toInt()
 		phenixMapId = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 6208
 }

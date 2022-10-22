@@ -12,4 +12,5 @@ open class GameFightNewRoundMessage : NetworkMessage() {
 		super.deserialize(stream)
 		roundNumber = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 7672
 }

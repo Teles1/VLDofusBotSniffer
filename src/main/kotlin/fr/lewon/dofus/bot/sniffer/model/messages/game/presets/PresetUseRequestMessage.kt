@@ -12,4 +12,5 @@ open class PresetUseRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		presetId = stream.readUnsignedShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 7519
 }

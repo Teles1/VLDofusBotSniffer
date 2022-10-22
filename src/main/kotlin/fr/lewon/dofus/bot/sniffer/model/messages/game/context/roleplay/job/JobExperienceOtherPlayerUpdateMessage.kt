@@ -13,4 +13,5 @@ open class JobExperienceOtherPlayerUpdateMessage : JobExperienceUpdateMessage() 
 		super.deserialize(stream)
 		playerId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 2955
 }

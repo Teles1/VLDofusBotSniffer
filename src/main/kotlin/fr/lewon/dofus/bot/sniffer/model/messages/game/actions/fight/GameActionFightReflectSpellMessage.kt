@@ -13,4 +13,5 @@ open class GameActionFightReflectSpellMessage : AbstractGameActionMessage() {
 		super.deserialize(stream)
 		targetId = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 3054
 }

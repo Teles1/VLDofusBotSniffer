@@ -16,4 +16,5 @@ open class HouseSellRequestMessage : NetworkMessage() {
 		amount = stream.readVarLong().toDouble()
 		forSale = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 3432
 }

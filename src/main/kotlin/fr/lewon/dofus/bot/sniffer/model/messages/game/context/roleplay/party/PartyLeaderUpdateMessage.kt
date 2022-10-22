@@ -12,4 +12,5 @@ open class PartyLeaderUpdateMessage : AbstractPartyEventMessage() {
 		super.deserialize(stream)
 		partyLeaderId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 6594
 }

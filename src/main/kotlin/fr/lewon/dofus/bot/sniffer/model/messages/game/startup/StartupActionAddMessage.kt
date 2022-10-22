@@ -14,4 +14,5 @@ open class StartupActionAddMessage : NetworkMessage() {
 		newAction = StartupActionAddObject()
 		newAction.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 4307
 }

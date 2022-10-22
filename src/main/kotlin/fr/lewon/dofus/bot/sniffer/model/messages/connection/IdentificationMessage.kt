@@ -39,4 +39,5 @@ open class IdentificationMessage : NetworkMessage() {
 			failedAttempts.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 3373
 }

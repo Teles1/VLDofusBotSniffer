@@ -14,4 +14,5 @@ open class PaddockPropertiesMessage : NetworkMessage() {
 		properties = PaddockInstancesInformations()
 		properties.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 8294
 }

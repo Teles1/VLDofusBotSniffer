@@ -18,4 +18,5 @@ open class PrismFightDefenderAddMessage : NetworkMessage() {
 		defender = ProtocolTypeManager.getInstance<CharacterMinimalPlusLookInformations>(stream.readUnsignedShort())
 		defender.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 7712
 }

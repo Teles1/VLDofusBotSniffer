@@ -12,4 +12,5 @@ open class GuildFactsRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		guildId = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 793
 }

@@ -16,4 +16,5 @@ open class GameRolePlayArenaRegistrationStatusMessage : NetworkMessage() {
 		step = stream.readUnsignedByte().toInt()
 		battleMode = stream.readInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 133
 }

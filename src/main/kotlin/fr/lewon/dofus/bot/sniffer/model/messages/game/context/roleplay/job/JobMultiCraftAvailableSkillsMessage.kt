@@ -18,4 +18,5 @@ open class JobMultiCraftAvailableSkillsMessage : JobAllowMultiCraftRequestMessag
 			skills.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8225
 }

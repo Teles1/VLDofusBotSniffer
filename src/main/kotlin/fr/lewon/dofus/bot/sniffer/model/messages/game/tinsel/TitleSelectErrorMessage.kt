@@ -12,4 +12,5 @@ open class TitleSelectErrorMessage : NetworkMessage() {
 		super.deserialize(stream)
 		reason = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 4587
 }

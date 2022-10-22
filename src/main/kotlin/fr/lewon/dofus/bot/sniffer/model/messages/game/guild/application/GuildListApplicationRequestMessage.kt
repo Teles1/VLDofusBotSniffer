@@ -11,4 +11,5 @@ open class GuildListApplicationRequestMessage : PaginationRequestAbstractMessage
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 3394
 }

@@ -12,4 +12,5 @@ open class GuildFightTakePlaceRequestMessage : GuildFightJoinRequestMessage() {
 		super.deserialize(stream)
 		replacedCharacterId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 1733
 }

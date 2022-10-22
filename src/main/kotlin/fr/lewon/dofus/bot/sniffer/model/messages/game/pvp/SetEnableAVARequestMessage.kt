@@ -12,4 +12,5 @@ open class SetEnableAVARequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		enable = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 4015
 }

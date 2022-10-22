@@ -16,4 +16,5 @@ open class ExchangeStartOkJobIndexMessage : NetworkMessage() {
 			jobs.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 6747
 }

@@ -13,4 +13,5 @@ open class CharactersListMessage : BasicCharactersListMessage() {
 		super.deserialize(stream)
 		hasStartupActions = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 2876
 }

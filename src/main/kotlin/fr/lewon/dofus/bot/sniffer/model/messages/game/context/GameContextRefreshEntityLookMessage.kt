@@ -16,4 +16,5 @@ open class GameContextRefreshEntityLookMessage : NetworkMessage() {
 		look = EntityLook()
 		look.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 8873
 }

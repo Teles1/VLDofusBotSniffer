@@ -1,8 +1,10 @@
 package fr.lewon.dofus.bot.sniffer.model.updater.nodes
 
+import fr.lewon.dofus.bot.sniffer.model.updater.BASE_MESSAGES_PATH
 import fr.lewon.dofus.bot.sniffer.model.updater.FTKNodeBuilder
 import fr.lewon.dofus.bot.sniffer.model.updater.FTKNodeDescription
 import fr.lewon.dofus.bot.sniffer.model.updater.nodes.body.DeserializeFunctionNodeBuilder
+import fr.lewon.dofus.bot.sniffer.model.updater.nodes.body.GetIdFunctionNodeBuilder
 import fr.lewon.dofus.bot.sniffer.model.updater.nodes.body.VariableNodeBuilder
 
 class ClassNodeBuilder(nodeDescription: FTKNodeDescription) : FTKNodeBuilder(nodeDescription) {
@@ -18,9 +20,13 @@ class ClassNodeBuilder(nodeDescription: FTKNodeDescription) : FTKNodeBuilder(nod
     }
 
     override fun getSubNodeBuilders(): List<FTKNodeBuilder> {
-        return listOf(
+        val subNodeBuilders = mutableListOf(
             *VariableNodeBuilder.fromFileDescription(nodeDescription).toTypedArray(),
-            DeserializeFunctionNodeBuilder(nodeDescription)
+            DeserializeFunctionNodeBuilder(nodeDescription),
         )
+        if (nodeDescription.path.startsWith(BASE_MESSAGES_PATH)) {
+            subNodeBuilders.add(GetIdFunctionNodeBuilder(nodeDescription))
+        }
+        return subNodeBuilders
     }
 }

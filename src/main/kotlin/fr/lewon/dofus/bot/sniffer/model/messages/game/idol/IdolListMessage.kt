@@ -30,4 +30,5 @@ open class IdolListMessage : NetworkMessage() {
 			partyIdols.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 582
 }

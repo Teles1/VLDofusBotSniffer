@@ -12,4 +12,5 @@ open class BreachKickRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		target = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 8498
 }

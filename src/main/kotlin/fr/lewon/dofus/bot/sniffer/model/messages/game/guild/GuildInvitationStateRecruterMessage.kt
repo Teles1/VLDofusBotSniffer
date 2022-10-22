@@ -14,4 +14,5 @@ open class GuildInvitationStateRecruterMessage : NetworkMessage() {
 		recrutedName = stream.readUTF()
 		invitationState = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 8889
 }

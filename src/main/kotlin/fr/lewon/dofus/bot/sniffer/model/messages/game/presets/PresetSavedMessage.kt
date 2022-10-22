@@ -16,4 +16,5 @@ open class PresetSavedMessage : NetworkMessage() {
 		preset = ProtocolTypeManager.getInstance<Preset>(stream.readUnsignedShort())
 		preset.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 7543
 }

@@ -18,4 +18,5 @@ open class ReloginTokenStatusMessage : NetworkMessage() {
 			ticket.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 9030
 }

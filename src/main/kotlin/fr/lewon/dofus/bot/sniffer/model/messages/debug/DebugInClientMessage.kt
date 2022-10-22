@@ -14,4 +14,5 @@ open class DebugInClientMessage : NetworkMessage() {
 		level = stream.readUnsignedByte().toInt()
 		message = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 3458
 }

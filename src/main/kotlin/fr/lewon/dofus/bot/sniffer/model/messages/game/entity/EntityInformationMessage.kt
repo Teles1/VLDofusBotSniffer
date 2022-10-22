@@ -14,4 +14,5 @@ open class EntityInformationMessage : NetworkMessage() {
 		entity = EntityInformation()
 		entity.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 718
 }

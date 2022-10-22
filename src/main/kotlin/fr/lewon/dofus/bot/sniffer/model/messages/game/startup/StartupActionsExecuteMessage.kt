@@ -10,4 +10,5 @@ open class StartupActionsExecuteMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 1978
 }

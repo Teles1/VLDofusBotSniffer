@@ -18,4 +18,5 @@ open class ExchangeObjectsAddedMessage : ExchangeObjectMessage() {
 			obj.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 1117
 }

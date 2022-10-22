@@ -12,4 +12,5 @@ open class ClientKeyMessage : NetworkMessage() {
 		super.deserialize(stream)
 		key = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 3841
 }

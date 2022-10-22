@@ -13,4 +13,5 @@ open class RawDataMessage : NetworkMessage() {
 		val contentLength = stream.readVarInt()
 		content += stream.readNBytes(contentLength)
 	}
+	override fun getNetworkMessageId(): Int = 6253
 }

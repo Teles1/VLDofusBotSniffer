@@ -20,4 +20,5 @@ open class DungeonPartyFinderRoomContentMessage : NetworkMessage() {
 			players.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 1482
 }

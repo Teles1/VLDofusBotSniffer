@@ -14,4 +14,5 @@ open class FriendAddedMessage : NetworkMessage() {
 		friendAdded = ProtocolTypeManager.getInstance<FriendInformations>(stream.readUnsignedShort())
 		friendAdded.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 1055
 }

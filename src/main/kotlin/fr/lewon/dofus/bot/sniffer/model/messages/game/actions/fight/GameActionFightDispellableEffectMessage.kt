@@ -15,4 +15,5 @@ open class GameActionFightDispellableEffectMessage : AbstractGameActionMessage()
 		effect = ProtocolTypeManager.getInstance<AbstractFightDispellableEffect>(stream.readUnsignedShort())
 		effect.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 3912
 }

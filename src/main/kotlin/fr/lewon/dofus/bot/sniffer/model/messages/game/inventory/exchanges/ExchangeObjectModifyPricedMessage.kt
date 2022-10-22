@@ -10,4 +10,5 @@ open class ExchangeObjectModifyPricedMessage : ExchangeObjectMovePricedMessage()
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 639
 }

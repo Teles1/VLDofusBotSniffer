@@ -22,4 +22,5 @@ open class ExchangeStartedBidSellerMessage : NetworkMessage() {
 			objectsInfos.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8513
 }

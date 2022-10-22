@@ -18,4 +18,5 @@ open class ChatServerMessage : ChatAbstractServerMessage() {
 		prefix = stream.readUTF()
 		senderAccountId = stream.readInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 7983
 }

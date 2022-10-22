@@ -18,4 +18,5 @@ open class HouseGuildShareRequestMessage : NetworkMessage() {
 		enable = stream.readBoolean()
 		rights = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 8516
 }

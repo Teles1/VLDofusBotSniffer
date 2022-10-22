@@ -12,4 +12,5 @@ open class PrismUseRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		moduleToUse = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 5045
 }

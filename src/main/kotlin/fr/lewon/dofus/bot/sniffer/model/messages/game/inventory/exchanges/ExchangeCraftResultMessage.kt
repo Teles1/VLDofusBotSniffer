@@ -12,4 +12,5 @@ open class ExchangeCraftResultMessage : NetworkMessage() {
 		super.deserialize(stream)
 		craftResult = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 5967
 }

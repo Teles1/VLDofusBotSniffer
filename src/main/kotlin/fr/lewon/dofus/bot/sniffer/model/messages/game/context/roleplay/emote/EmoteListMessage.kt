@@ -16,4 +16,5 @@ open class EmoteListMessage : NetworkMessage() {
 			emoteIds.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 1503
 }

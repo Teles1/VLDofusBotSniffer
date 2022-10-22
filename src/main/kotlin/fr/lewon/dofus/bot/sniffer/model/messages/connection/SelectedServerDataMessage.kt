@@ -28,4 +28,5 @@ open class SelectedServerDataMessage : NetworkMessage() {
 			ticket.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 9007
 }

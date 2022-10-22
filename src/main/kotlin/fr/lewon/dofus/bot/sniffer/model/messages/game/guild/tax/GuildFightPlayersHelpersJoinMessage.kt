@@ -16,4 +16,5 @@ open class GuildFightPlayersHelpersJoinMessage : NetworkMessage() {
 		playerInfo = CharacterMinimalPlusLookInformations()
 		playerInfo.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 823
 }

@@ -16,4 +16,5 @@ open class PaddockSellBuyDialogMessage : NetworkMessage() {
 		ownerId = stream.readVarInt().toInt()
 		price = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 9602
 }

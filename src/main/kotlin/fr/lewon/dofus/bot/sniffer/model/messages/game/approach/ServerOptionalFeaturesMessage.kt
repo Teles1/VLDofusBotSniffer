@@ -16,4 +16,5 @@ open class ServerOptionalFeaturesMessage : NetworkMessage() {
 			features.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 4140
 }

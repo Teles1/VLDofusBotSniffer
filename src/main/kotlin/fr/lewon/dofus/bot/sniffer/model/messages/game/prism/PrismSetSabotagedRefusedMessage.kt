@@ -14,4 +14,5 @@ open class PrismSetSabotagedRefusedMessage : NetworkMessage() {
 		subAreaId = stream.readVarShort().toInt()
 		reason = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 748
 }

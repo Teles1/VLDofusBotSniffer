@@ -18,4 +18,5 @@ open class MountFeedRequestMessage : NetworkMessage() {
 		mountFoodUid = stream.readVarInt().toInt()
 		quantity = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 7067
 }

@@ -12,4 +12,5 @@ open class TeleportHavenBagAnswerMessage : NetworkMessage() {
 		super.deserialize(stream)
 		accept = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 2215
 }

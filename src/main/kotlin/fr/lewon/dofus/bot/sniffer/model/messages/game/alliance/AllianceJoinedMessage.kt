@@ -18,4 +18,5 @@ open class AllianceJoinedMessage : NetworkMessage() {
 		enabled = stream.readBoolean()
 		leadingGuildId = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 7127
 }

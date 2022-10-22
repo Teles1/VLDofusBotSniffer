@@ -18,4 +18,5 @@ open class ChallengeInfoMessage : NetworkMessage() {
 		xpBonus = stream.readVarInt().toInt()
 		dropBonus = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6532
 }

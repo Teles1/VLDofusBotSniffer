@@ -12,4 +12,5 @@ open class ServerSelectionMessage : NetworkMessage() {
 		super.deserialize(stream)
 		serverId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 8079
 }

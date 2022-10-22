@@ -12,4 +12,5 @@ open class BasicPongMessage : NetworkMessage() {
 		super.deserialize(stream)
 		quiet = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 996
 }

@@ -19,4 +19,5 @@ open class IgnoredDeleteResultMessage : NetworkMessage() {
 		tag = AccountTagInformation()
 		tag.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 3899
 }

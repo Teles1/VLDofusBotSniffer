@@ -12,4 +12,5 @@ open class GuildGetInformationsMessage : NetworkMessage() {
 		super.deserialize(stream)
 		infoType = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 1819
 }

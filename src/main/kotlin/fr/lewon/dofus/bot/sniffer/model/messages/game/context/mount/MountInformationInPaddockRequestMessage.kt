@@ -12,4 +12,5 @@ open class MountInformationInPaddockRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		mapRideId = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 9823
 }

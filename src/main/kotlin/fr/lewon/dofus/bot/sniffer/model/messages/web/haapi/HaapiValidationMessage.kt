@@ -14,4 +14,5 @@ open class HaapiValidationMessage : NetworkMessage() {
 		action = stream.readUnsignedByte().toInt()
 		code = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 3454
 }

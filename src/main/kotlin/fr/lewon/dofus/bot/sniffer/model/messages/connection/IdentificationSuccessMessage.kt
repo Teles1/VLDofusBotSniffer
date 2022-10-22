@@ -39,4 +39,5 @@ open class IdentificationSuccessMessage : NetworkMessage() {
 		subscriptionEndDate = stream.readDouble().toDouble()
 		havenbagAvailableRoom = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 734
 }

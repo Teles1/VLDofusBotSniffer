@@ -16,4 +16,5 @@ open class PrismFightAttackerRemoveMessage : NetworkMessage() {
 		fightId = stream.readVarShort().toInt()
 		fighterToRemoveId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 1842
 }

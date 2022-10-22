@@ -14,4 +14,5 @@ open class ChallengeTargetUpdateMessage : NetworkMessage() {
 		challengeId = stream.readVarShort().toInt()
 		targetId = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 178
 }

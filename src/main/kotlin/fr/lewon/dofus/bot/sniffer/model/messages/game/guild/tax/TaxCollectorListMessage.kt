@@ -23,4 +23,5 @@ open class TaxCollectorListMessage : AbstractTaxCollectorListMessage() {
 		}
 		infoType = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 4775
 }

@@ -12,4 +12,5 @@ open class SubareaRewardRateMessage : NetworkMessage() {
 		super.deserialize(stream)
 		subAreaRate = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6241
 }

@@ -14,4 +14,5 @@ open class ObjectGroundAddedMessage : NetworkMessage() {
 		cellId = stream.readVarShort().toInt()
 		objectGID = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 8608
 }

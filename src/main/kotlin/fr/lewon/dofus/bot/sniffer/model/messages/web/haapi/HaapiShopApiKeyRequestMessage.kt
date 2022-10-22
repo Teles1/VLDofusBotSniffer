@@ -10,4 +10,5 @@ open class HaapiShopApiKeyRequestMessage : NetworkMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 6255
 }

@@ -12,4 +12,5 @@ open class PaddockBuyRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		proposedPrice = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 2872
 }

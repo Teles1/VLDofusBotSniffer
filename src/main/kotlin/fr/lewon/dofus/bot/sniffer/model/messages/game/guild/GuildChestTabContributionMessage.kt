@@ -20,4 +20,5 @@ open class GuildChestTabContributionMessage : NetworkMessage() {
 		chestContributionEnrollmentDelay = stream.readDouble().toDouble()
 		chestContributionDelay = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 2443
 }

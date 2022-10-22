@@ -16,4 +16,5 @@ open class TreasureHuntFlagRequestAnswerMessage : NetworkMessage() {
 		result = stream.readUnsignedByte().toInt()
 		index = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 2854
 }

@@ -22,4 +22,5 @@ open class HouseToSellFilterMessage : NetworkMessage() {
 		maxPrice = stream.readVarLong().toDouble()
 		orderBy = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6631
 }

@@ -12,4 +12,5 @@ open class EmoteRemoveMessage : NetworkMessage() {
 		super.deserialize(stream)
 		emoteId = stream.readUnsignedShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 7203
 }

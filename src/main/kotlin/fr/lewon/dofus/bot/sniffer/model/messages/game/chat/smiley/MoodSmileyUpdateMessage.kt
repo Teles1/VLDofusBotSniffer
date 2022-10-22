@@ -16,4 +16,5 @@ open class MoodSmileyUpdateMessage : NetworkMessage() {
 		playerId = stream.readVarLong().toDouble()
 		smileyId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 5091
 }

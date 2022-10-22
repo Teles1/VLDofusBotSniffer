@@ -12,4 +12,5 @@ open class BulletinMessage : SocialNoticeMessage() {
 		super.deserialize(stream)
 		lastNotifiedTimestamp = stream.readInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 3638
 }

@@ -18,4 +18,5 @@ open class JobDescriptionMessage : NetworkMessage() {
 			jobsDescription.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 1383
 }

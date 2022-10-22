@@ -20,4 +20,5 @@ open class TaxCollectorAttackedResultMessage : NetworkMessage() {
 		guild = BasicGuildInformations()
 		guild.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 9933
 }

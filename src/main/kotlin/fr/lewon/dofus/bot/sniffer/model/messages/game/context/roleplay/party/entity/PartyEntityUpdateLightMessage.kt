@@ -13,4 +13,5 @@ open class PartyEntityUpdateLightMessage : PartyUpdateLightMessage() {
 		super.deserialize(stream)
 		indexId = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 7007
 }

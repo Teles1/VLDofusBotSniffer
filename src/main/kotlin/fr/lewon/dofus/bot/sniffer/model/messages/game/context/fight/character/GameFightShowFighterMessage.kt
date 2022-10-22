@@ -14,4 +14,5 @@ open class GameFightShowFighterMessage : NetworkMessage() {
 		informations = ProtocolTypeManager.getInstance<GameFightFighterInformations>(stream.readUnsignedShort())
 		informations.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 4792
 }

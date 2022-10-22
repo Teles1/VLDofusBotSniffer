@@ -12,4 +12,5 @@ open class GuildLevelUpMessage : NetworkMessage() {
 		super.deserialize(stream)
 		newLevel = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 9959
 }

@@ -11,4 +11,5 @@ open class GuildBulletinSetErrorMessage : SocialNoticeSetErrorMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 8233
 }

@@ -14,4 +14,5 @@ open class ExchangeBuyMessage : NetworkMessage() {
 		objectToBuyId = stream.readVarInt().toInt()
 		quantity = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 4098
 }

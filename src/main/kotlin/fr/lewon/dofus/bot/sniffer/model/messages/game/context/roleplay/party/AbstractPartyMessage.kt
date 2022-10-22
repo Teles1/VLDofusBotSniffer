@@ -12,4 +12,5 @@ open class AbstractPartyMessage : NetworkMessage() {
 		super.deserialize(stream)
 		partyId = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 1553
 }

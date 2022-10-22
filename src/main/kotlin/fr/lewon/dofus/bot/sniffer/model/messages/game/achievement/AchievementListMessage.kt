@@ -18,4 +18,5 @@ open class AchievementListMessage : NetworkMessage() {
 			finishedAchievements.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 2446
 }

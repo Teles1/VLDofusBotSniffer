@@ -10,4 +10,5 @@ open class HouseSellFromInsideRequestMessage : HouseSellRequestMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 7088
 }

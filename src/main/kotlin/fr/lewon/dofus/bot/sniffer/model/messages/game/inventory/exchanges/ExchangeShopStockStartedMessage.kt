@@ -18,4 +18,5 @@ open class ExchangeShopStockStartedMessage : NetworkMessage() {
 			objectsInfos.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 6831
 }

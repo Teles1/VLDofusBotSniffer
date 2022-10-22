@@ -17,4 +17,5 @@ open class GameActionFightTackledMessage : AbstractGameActionMessage() {
 			tacklersIds.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 2383
 }

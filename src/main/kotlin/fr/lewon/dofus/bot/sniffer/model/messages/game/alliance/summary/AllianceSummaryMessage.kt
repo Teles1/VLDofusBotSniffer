@@ -19,4 +19,5 @@ open class AllianceSummaryMessage : PaginationAnswerAbstractMessage() {
 			alliances.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8808
 }

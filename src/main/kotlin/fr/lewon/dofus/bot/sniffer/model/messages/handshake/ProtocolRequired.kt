@@ -12,4 +12,5 @@ open class ProtocolRequired : NetworkMessage() {
 		super.deserialize(stream)
 		version = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 2966
 }

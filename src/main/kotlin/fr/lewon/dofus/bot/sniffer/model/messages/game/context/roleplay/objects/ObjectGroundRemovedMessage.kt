@@ -12,4 +12,5 @@ open class ObjectGroundRemovedMessage : NetworkMessage() {
 		super.deserialize(stream)
 		cell = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 8819
 }

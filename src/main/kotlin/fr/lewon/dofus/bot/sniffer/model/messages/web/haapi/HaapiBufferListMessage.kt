@@ -18,4 +18,5 @@ open class HaapiBufferListMessage : NetworkMessage() {
 			buffers.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 6013
 }

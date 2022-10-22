@@ -16,4 +16,5 @@ open class TeleportRequestMessage : NetworkMessage() {
 		destinationType = stream.readUnsignedByte().toInt()
 		mapId = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 9293
 }

@@ -14,4 +14,5 @@ open class GameEntityDispositionMessage : NetworkMessage() {
 		disposition = IdentifiedEntityDispositionInformations()
 		disposition.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 7364
 }

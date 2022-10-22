@@ -14,4 +14,5 @@ open class CharacterLevelUpInformationMessage : CharacterLevelUpMessage() {
 		name = stream.readUTF()
 		id = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 8088
 }

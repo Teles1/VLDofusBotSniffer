@@ -12,4 +12,5 @@ open class NumericWhoIsRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		playerId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 8385
 }

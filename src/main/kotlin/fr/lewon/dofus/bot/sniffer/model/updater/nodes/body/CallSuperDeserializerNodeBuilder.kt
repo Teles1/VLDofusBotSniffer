@@ -7,12 +7,8 @@ import fr.lewon.dofus.bot.sniffer.model.updater.STREAM_NAME
 
 class CallSuperDeserializerNodeBuilder(nodeDescription: FTKNodeDescription) : FTKNodeBuilder(nodeDescription) {
 
-    override fun getLines(): List<String> {
-        return listOf("super.$DESERIALIZE_FUNC_NAME($STREAM_NAME)")
-    }
+    override fun getLines(): List<String> = listOf("super.$DESERIALIZE_FUNC_NAME($STREAM_NAME)")
 
-    override fun getSubNodeBuilders(): List<FTKNodeBuilder> {
-        return emptyList()
-    }
+    override fun getSubNodeBuilders(): List<FTKNodeBuilder> = emptyList()
 
 }

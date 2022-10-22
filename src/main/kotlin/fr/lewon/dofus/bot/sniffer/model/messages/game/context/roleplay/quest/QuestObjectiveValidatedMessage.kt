@@ -14,4 +14,5 @@ open class QuestObjectiveValidatedMessage : NetworkMessage() {
 		questId = stream.readVarShort().toInt()
 		objectiveId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 1245
 }

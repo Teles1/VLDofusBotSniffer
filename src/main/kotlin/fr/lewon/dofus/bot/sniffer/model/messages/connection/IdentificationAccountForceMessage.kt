@@ -13,4 +13,5 @@ open class IdentificationAccountForceMessage : IdentificationMessage() {
 		super.deserialize(stream)
 		forcerAccountLogin = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 7826
 }

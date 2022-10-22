@@ -14,4 +14,5 @@ open class FinishMoveSetRequestMessage : NetworkMessage() {
 		finishMoveId = stream.readInt().toInt()
 		finishMoveState = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 9936
 }

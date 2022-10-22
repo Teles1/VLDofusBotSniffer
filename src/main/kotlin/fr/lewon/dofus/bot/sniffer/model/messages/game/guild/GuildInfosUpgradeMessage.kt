@@ -38,4 +38,5 @@ open class GuildInfosUpgradeMessage : NetworkMessage() {
 			spellLevel.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 4747
 }

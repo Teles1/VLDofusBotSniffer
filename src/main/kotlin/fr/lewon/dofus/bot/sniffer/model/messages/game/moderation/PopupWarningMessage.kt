@@ -16,4 +16,5 @@ open class PopupWarningMessage : NetworkMessage() {
 		author = stream.readUTF()
 		content = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 5012
 }

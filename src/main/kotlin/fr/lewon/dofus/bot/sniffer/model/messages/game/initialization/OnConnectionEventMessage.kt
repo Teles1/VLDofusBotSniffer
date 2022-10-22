@@ -12,4 +12,5 @@ open class OnConnectionEventMessage : NetworkMessage() {
 		super.deserialize(stream)
 		eventType = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 9657
 }

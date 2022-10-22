@@ -43,4 +43,5 @@ open class BasicWhoIsMessage : NetworkMessage() {
 		}
 		playerState = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 2359
 }

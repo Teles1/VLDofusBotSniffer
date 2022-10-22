@@ -6,6 +6,7 @@ import fr.lewon.dofus.bot.sniffer.store.EventStore
 import org.pcap4j.core.*
 import org.pcap4j.core.BpfProgram.BpfCompileMode
 import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode
+import org.pcap4j.packet.IpV4Packet
 import org.pcap4j.packet.Packet
 import org.pcap4j.packet.TcpPacket
 import java.util.*
@@ -17,7 +18,7 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
     private val lock = ReentrantLock()
     private val handle: PcapHandle
     private val packetListener: PacketListener
-    private val connectionByHostPort = HashMap<String, DofusConnection>()
+    private val connectionByHostPort = HashMap<Host, DofusConnection>()
     private val characterReceiverByConnection = HashMap<DofusConnection, DofusMessageCharacterReceiver>()
     private val ethernetPackets = ArrayBlockingQueue<Packet>(300)
     private val timer = Timer()
@@ -45,25 +46,39 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
             val tcpPacket = ipV4Packet.payload
             if (tcpPacket != null) {
                 if (tcpPacket.payload != null) {
-                    getCharacterReceiver(tcpPacket as TcpPacket).receiveTcpPacket(tcpPacket)
+                    val srcPort = (tcpPacket as TcpPacket).header.srcPort.valueAsString()
+                    val srcIp = (ipV4Packet as IpV4Packet).header.srcAddr.hostAddress
+                    val dstPort = tcpPacket.header.dstPort.valueAsString()
+                    val dstIp = ipV4Packet.header.dstAddr.hostAddress
+                    val srcHost = Host(srcIp, srcPort)
+                    val dstHost = Host(dstIp, dstPort)
+                    LockUtils.executeSyncOperation(lock) {
+                        getCharacterReceiver(dstHost)?.treatReceivedTcpPacket(tcpPacket)
+                            ?: getCharacterReceiver(srcHost)?.treatSentTcpPacket(tcpPacket)
+                    }
                 }
             }
         }
     }
 
-    fun startListening(dofusConnection: DofusConnection, eventStore: EventStore, logger: VldbLogger) {
+    private fun getCharacterReceiver(host: Host): DofusMessageCharacterReceiver? {
+        return LockUtils.executeSyncOperation(lock) {
+            connectionByHostPort[host]?.let { characterReceiverByConnection[it] }
+        }
+    }
+
+    fun startListening(connection: DofusConnection, eventStore: EventStore, logger: VldbLogger) {
         LockUtils.executeSyncOperation(lock) {
-            stopListening(dofusConnection.hostPort)
-            connectionByHostPort[dofusConnection.hostPort] = dofusConnection
-            val hostState = HostState(dofusConnection, eventStore, logger)
-            characterReceiverByConnection[dofusConnection] = DofusMessageCharacterReceiver(hostState)
+            stopListening(connection.client)
+            connectionByHostPort[connection.client] = connection
+            characterReceiverByConnection[connection] = DofusMessageCharacterReceiver(connection, eventStore, logger)
             updateFilter()
         }
     }
 
-    fun stopListening(hostPort: String) {
+    fun stopListening(host: Host) {
         LockUtils.executeSyncOperation(lock) {
-            val connection = connectionByHostPort.remove(hostPort)
+            val connection = connectionByHostPort.remove(host)
             characterReceiverByConnection.remove(connection)
             updateFilter()
         }
@@ -80,11 +95,14 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
 
     private fun buildFilter(): String {
         return LockUtils.executeSyncOperation(lock) {
-            val srcHostPart = connectionByHostPort.values.map { it.serverIp }.joinToString(" or ") { "src host $it" }
-            val srcPortPart = connectionByHostPort.values.map { it.serverPort }.joinToString(" or ") { "src port $it" }
-            val dstHostPart = connectionByHostPort.values.map { it.hostIp }.joinToString(" or ") { "dst host $it" }
-            val dstPortPart = connectionByHostPort.values.map { it.hostPort }.joinToString(" or ") { "dst port $it" }
-            "($srcHostPart) and ($srcPortPart) and ($dstHostPart) and ($dstPortPart)"
+            val connections = connectionByHostPort.values
+            val clientToServerFilters = connections.map {
+                "src host ${it.client.ip} and src port ${it.client.port} and dst host ${it.server.ip} and dst port ${it.server.port}"
+            }
+            val serverToClientFilters = connections.map {
+                "src host ${it.server.ip} and src port ${it.server.port} and dst host ${it.client.ip} and dst port ${it.client.port}"
+            }
+            clientToServerFilters.plus(serverToClientFilters).joinToString(" or ") { "($it)" }
         }
     }
 
@@ -108,16 +126,6 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
 
     fun isSnifferRunning(): Boolean {
         return isAlive && handle.isOpen
-    }
-
-    private fun getCharacterReceiver(tcpPacket: TcpPacket): DofusMessageCharacterReceiver {
-        return LockUtils.executeSyncOperation(lock) {
-            val hostPortStr = tcpPacket.header.dstPort.valueAsString()
-            val dofusConnection = connectionByHostPort[hostPortStr]
-                ?: error("Unknown connection for port : $hostPortStr")
-            characterReceiverByConnection[dofusConnection]
-                ?: error("Unknown character receiver for port : ${dofusConnection.hostPort}")
-        }
     }
 
     /** Find the current active pcap network interface.

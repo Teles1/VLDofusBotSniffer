@@ -15,15 +15,14 @@ class FieldsSettersDeserializersNodeBuilder(
 ) : FTKNodeBuilder(nodeDescription) {
 
     companion object {
-        fun fromFileDescription(nodeDescription: FTKNodeDescription): List<FieldsSettersDeserializersNodeBuilder> {
-            return nodeDescription.variables.map { FieldsSettersDeserializersNodeBuilder(nodeDescription, it) }
-        }
+        fun fromFileDescription(nodeDescription: FTKNodeDescription): List<FieldsSettersDeserializersNodeBuilder> =
+            nodeDescription.variables.map { FieldsSettersDeserializersNodeBuilder(nodeDescription, it) }
     }
 
     override fun getLines(): List<String> = doGetLines(variable, nodeDescription.fileContent)
 
-    private fun doGetLines(variableDeclaration: VariableDeclaration, fileContent: String): List<String> {
-        return when (variableDeclaration.variableType) {
+    private fun doGetLines(variableDeclaration: VariableDeclaration, fileContent: String): List<String> =
+        when (variableDeclaration.variableType) {
             VariableType.INT, VariableType.INT2, VariableType.DOUBLE ->
                 listOf(getNumberSetter(variableDeclaration.name, variableDeclaration.variableType, fileContent))
             VariableType.BOOLEAN -> getBooleanSetterLines(variableDeclaration, fileContent)
@@ -32,11 +31,9 @@ class FieldsSettersDeserializersNodeBuilder(
             VariableType.LIST -> getListSetterLines(variableDeclaration, fileContent)
             null -> getObjectSetter(variableDeclaration, fileContent)
         }
-    }
 
-    private fun getNumberSetter(variableName: String, variableType: VariableType?, fileContent: String): String {
-        return getAssignation(variableName, getNumberValue(variableName, variableType, fileContent))
-    }
+    private fun getNumberSetter(variableName: String, variableType: VariableType?, fileContent: String): String =
+        getAssignation(variableName, getNumberValue(variableName, variableType, fileContent))
 
     private fun getNumberValue(variableName: String, variableType: VariableType?, fileContent: String): String {
         val methodCall = Regex("$variableName = input\\.(.*?);")

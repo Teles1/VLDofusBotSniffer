@@ -14,4 +14,5 @@ open class AcquaintanceSearchMessage : NetworkMessage() {
 		tag = AccountTagInformation()
 		tag.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 8798
 }

@@ -22,4 +22,5 @@ open class AbstractGameActionFightTargetedAbilityMessage : AbstractGameActionMes
 		destinationCellId = stream.readUnsignedShort().toInt()
 		critical = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 1321
 }

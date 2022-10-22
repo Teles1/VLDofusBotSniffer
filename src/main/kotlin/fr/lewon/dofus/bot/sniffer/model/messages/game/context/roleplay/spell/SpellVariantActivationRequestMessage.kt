@@ -12,4 +12,5 @@ open class SpellVariantActivationRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		spellId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 1130
 }

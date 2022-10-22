@@ -12,4 +12,5 @@ open class TeleportBuddiesAnswerMessage : NetworkMessage() {
 		super.deserialize(stream)
 		accept = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 4538
 }

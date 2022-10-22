@@ -14,4 +14,5 @@ open class GuildFightLeaveRequestMessage : NetworkMessage() {
 		taxCollectorId = stream.readDouble().toDouble()
 		characterId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 5403
 }

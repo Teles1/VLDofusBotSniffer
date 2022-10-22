@@ -13,4 +13,5 @@ open class GameActionFightUnmarkCellsMessage : AbstractGameActionMessage() {
 		super.deserialize(stream)
 		markId = stream.readUnsignedShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 236
 }

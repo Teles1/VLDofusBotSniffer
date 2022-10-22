@@ -36,4 +36,5 @@ open class QuestListMessage : NetworkMessage() {
 			reinitDoneQuestsIds.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8636
 }

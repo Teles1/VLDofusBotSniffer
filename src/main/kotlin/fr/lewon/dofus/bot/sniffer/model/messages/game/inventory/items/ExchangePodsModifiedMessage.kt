@@ -15,4 +15,5 @@ open class ExchangePodsModifiedMessage : ExchangeObjectMessage() {
 		currentWeight = stream.readVarInt().toInt()
 		maxWeight = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 9160
 }

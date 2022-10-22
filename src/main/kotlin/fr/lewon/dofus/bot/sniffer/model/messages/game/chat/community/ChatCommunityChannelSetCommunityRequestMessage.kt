@@ -12,4 +12,5 @@ open class ChatCommunityChannelSetCommunityRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		communityId = stream.readUnsignedShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 433
 }

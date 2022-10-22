@@ -14,4 +14,5 @@ open class PartyUpdateMessage : AbstractPartyEventMessage() {
 		memberInformations = ProtocolTypeManager.getInstance<PartyMemberInformations>(stream.readUnsignedShort())
 		memberInformations.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 3721
 }

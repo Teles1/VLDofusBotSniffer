@@ -18,4 +18,5 @@ open class ExchangeShopStockMultiMovementUpdatedMessage : NetworkMessage() {
 			objectInfoList.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 393
 }

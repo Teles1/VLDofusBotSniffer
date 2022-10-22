@@ -16,4 +16,5 @@ open class BasicWhoIsRequestMessage : NetworkMessage() {
 		target = ProtocolTypeManager.getInstance<AbstractPlayerSearchInformation>(stream.readUnsignedShort())
 		target.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 5384
 }

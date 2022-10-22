@@ -13,4 +13,5 @@ open class ZaapDestinationsMessage : TeleportDestinationsMessage() {
 		super.deserialize(stream)
 		spawnMapId = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 5618
 }

@@ -16,4 +16,5 @@ open class StatsUpgradeRequestMessage : NetworkMessage() {
 		statId = stream.readUnsignedByte().toInt()
 		boostPoint = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 644
 }

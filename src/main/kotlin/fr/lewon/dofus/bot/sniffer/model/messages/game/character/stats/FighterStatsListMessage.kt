@@ -14,4 +14,5 @@ open class FighterStatsListMessage : NetworkMessage() {
 		stats = CharacterCharacteristicsInformations()
 		stats.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 7890
 }

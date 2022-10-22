@@ -22,4 +22,5 @@ open class UpdateMapPlayersAgressableStatusMessage : NetworkMessage() {
 			enable.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8920
 }

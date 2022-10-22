@@ -17,4 +17,5 @@ open class IdolSelectRequestMessage : NetworkMessage() {
 		party = BooleanByteWrapper.getFlag(_box0, 1)
 		idolId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 643
 }

@@ -12,4 +12,5 @@ open class CinematicMessage : NetworkMessage() {
 		super.deserialize(stream)
 		cinematicId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6739
 }

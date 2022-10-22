@@ -16,4 +16,5 @@ open class CreateGuildRankRequestMessage : NetworkMessage() {
 		gfxId = stream.readVarInt().toInt()
 		name = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 3801
 }

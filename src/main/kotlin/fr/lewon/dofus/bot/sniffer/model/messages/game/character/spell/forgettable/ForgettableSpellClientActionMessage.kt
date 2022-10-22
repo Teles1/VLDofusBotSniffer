@@ -14,4 +14,5 @@ open class ForgettableSpellClientActionMessage : NetworkMessage() {
 		spellId = stream.readInt().toInt()
 		action = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 3675
 }

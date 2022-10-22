@@ -36,4 +36,5 @@ open class PartyInvitationDetailsMessage : AbstractPartyMessage() {
 			guests.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 6488
 }

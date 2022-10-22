@@ -18,4 +18,5 @@ open class StatedMapUpdateMessage : NetworkMessage() {
 			statedElements.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8211
 }

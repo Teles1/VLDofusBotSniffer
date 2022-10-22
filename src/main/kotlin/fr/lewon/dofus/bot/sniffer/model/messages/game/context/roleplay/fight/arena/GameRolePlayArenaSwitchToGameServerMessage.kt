@@ -20,4 +20,5 @@ open class GameRolePlayArenaSwitchToGameServerMessage : NetworkMessage() {
 		}
 		homeServerId = stream.readUnsignedShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 2400
 }

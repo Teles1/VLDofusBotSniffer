@@ -12,4 +12,5 @@ open class StorageObjectRemoveMessage : NetworkMessage() {
 		super.deserialize(stream)
 		objectUID = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6765
 }

@@ -18,4 +18,5 @@ open class GameRolePlayShowMultipleActorsMessage : NetworkMessage() {
 			informationsList.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 7415
 }

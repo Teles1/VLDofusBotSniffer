@@ -12,4 +12,5 @@ open class PrismInfoJoinLeaveRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		join = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 5114
 }

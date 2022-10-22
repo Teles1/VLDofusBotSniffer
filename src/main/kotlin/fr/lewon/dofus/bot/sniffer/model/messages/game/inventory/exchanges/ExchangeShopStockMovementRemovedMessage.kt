@@ -12,4 +12,5 @@ open class ExchangeShopStockMovementRemovedMessage : NetworkMessage() {
 		super.deserialize(stream)
 		objectId = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 2164
 }

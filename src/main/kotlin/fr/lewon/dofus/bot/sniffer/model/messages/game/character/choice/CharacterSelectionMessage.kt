@@ -12,4 +12,5 @@ open class CharacterSelectionMessage : NetworkMessage() {
 		super.deserialize(stream)
 		id = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 3787
 }

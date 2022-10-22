@@ -20,4 +20,5 @@ open class TaxCollectorMovementMessage : NetworkMessage() {
 		playerId = stream.readVarLong().toDouble()
 		playerName = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 8470
 }

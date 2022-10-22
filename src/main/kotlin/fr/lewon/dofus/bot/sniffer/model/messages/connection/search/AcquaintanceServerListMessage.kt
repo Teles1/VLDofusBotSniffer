@@ -16,4 +16,5 @@ open class AcquaintanceServerListMessage : NetworkMessage() {
 			servers.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 1941
 }

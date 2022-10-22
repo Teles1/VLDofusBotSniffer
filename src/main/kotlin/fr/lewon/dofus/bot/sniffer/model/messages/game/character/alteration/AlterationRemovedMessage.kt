@@ -14,4 +14,5 @@ open class AlterationRemovedMessage : NetworkMessage() {
 		alteration = AlterationInfo()
 		alteration.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 8564
 }

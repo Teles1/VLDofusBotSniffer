@@ -12,4 +12,5 @@ open class SpouseStatusMessage : NetworkMessage() {
 		super.deserialize(stream)
 		hasSpouse = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 1875
 }

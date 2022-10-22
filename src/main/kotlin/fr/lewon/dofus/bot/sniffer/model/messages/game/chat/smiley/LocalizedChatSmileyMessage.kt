@@ -12,4 +12,5 @@ open class LocalizedChatSmileyMessage : ChatSmileyMessage() {
 		super.deserialize(stream)
 		cellId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 9331
 }

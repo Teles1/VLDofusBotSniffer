@@ -12,4 +12,5 @@ open class GuildApplicationListenMessage : NetworkMessage() {
 		super.deserialize(stream)
 		listen = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 8534
 }

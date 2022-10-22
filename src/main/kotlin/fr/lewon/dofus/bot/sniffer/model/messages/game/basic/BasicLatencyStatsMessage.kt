@@ -16,4 +16,5 @@ open class BasicLatencyStatsMessage : NetworkMessage() {
 		sampleCount = stream.readVarShort().toInt()
 		max = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 9790
 }

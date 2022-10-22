@@ -18,4 +18,5 @@ open class AbstractTaxCollectorListMessage : NetworkMessage() {
 			informations.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 7262
 }

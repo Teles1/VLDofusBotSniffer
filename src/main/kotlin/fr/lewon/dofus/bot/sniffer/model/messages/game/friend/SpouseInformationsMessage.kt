@@ -14,4 +14,5 @@ open class SpouseInformationsMessage : NetworkMessage() {
 		spouse = ProtocolTypeManager.getInstance<FriendSpouseInformations>(stream.readUnsignedShort())
 		spouse.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 4951
 }

@@ -18,4 +18,5 @@ open class FinishMoveListMessage : NetworkMessage() {
 			finishMoves.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 3003
 }

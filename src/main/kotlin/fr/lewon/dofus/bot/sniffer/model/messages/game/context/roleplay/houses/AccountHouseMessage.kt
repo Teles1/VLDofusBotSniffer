@@ -18,4 +18,5 @@ open class AccountHouseMessage : NetworkMessage() {
 			houses.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 7334
 }

@@ -17,4 +17,5 @@ open class GameActionFightSpellCooldownVariationMessage : AbstractGameActionMess
 		spellId = stream.readVarShort().toInt()
 		value = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 937
 }

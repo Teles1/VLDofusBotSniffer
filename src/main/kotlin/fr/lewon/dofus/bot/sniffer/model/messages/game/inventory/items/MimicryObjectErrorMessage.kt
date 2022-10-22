@@ -12,4 +12,5 @@ open class MimicryObjectErrorMessage : SymbioticObjectErrorMessage() {
 		super.deserialize(stream)
 		preview = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 862
 }

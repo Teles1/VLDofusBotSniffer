@@ -14,4 +14,5 @@ open class GameContextMoveElementMessage : NetworkMessage() {
 		movement = EntityMovementInformations()
 		movement.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 762
 }

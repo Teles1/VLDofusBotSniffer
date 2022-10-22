@@ -22,4 +22,5 @@ open class EnabledChannelsMessage : NetworkMessage() {
 			disallowed.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 2996
 }

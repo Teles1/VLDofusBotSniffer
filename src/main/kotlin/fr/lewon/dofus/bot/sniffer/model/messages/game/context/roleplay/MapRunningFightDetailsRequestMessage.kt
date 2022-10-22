@@ -12,4 +12,5 @@ open class MapRunningFightDetailsRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		fightId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 2632
 }

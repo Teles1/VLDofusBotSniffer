@@ -14,4 +14,5 @@ open class PrismFightSwapRequestMessage : NetworkMessage() {
 		subAreaId = stream.readVarShort().toInt()
 		targetId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 5236
 }

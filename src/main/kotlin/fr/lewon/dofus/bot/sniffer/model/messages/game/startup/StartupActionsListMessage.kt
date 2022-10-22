@@ -18,4 +18,5 @@ open class StartupActionsListMessage : NetworkMessage() {
 			actions.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 3233
 }

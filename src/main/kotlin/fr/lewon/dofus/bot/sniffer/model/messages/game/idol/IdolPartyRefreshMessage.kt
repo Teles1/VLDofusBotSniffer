@@ -14,4 +14,5 @@ open class IdolPartyRefreshMessage : NetworkMessage() {
 		partyIdol = PartyIdol()
 		partyIdol.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 550
 }

@@ -11,4 +11,5 @@ open class GuildMembershipMessage : GuildJoinedMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 3048
 }

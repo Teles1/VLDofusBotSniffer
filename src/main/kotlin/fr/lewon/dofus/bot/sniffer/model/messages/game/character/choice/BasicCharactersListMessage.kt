@@ -18,4 +18,5 @@ open class BasicCharactersListMessage : NetworkMessage() {
 			characters.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 9624
 }

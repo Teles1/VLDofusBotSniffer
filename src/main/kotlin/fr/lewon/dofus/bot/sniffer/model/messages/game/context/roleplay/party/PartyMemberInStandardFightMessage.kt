@@ -14,4 +14,5 @@ open class PartyMemberInStandardFightMessage : AbstractPartyMemberInFightMessage
 		fightMap = MapCoordinatesExtended()
 		fightMap.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 8326
 }

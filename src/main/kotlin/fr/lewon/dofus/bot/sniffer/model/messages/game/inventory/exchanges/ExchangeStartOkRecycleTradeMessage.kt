@@ -14,4 +14,5 @@ open class ExchangeStartOkRecycleTradeMessage : NetworkMessage() {
 		percentToPrism = stream.readUnsignedShort().toInt()
 		percentToPlayer = stream.readUnsignedShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6298
 }

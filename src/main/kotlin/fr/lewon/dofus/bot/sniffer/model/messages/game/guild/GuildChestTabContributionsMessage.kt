@@ -18,4 +18,5 @@ open class GuildChestTabContributionsMessage : NetworkMessage() {
 			contributions.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 1755
 }

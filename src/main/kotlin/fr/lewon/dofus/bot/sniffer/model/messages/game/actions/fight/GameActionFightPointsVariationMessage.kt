@@ -15,4 +15,5 @@ open class GameActionFightPointsVariationMessage : AbstractGameActionMessage() {
 		targetId = stream.readDouble().toDouble()
 		delta = stream.readUnsignedShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 9391
 }

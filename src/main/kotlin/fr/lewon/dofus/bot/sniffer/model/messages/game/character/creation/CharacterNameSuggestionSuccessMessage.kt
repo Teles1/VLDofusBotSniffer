@@ -12,4 +12,5 @@ open class CharacterNameSuggestionSuccessMessage : NetworkMessage() {
 		super.deserialize(stream)
 		suggestion = stream.readUTF()
 	}
+	override fun getNetworkMessageId(): Int = 1151
 }

@@ -16,4 +16,5 @@ open class ObjectGroundRemovedMultipleMessage : NetworkMessage() {
 			cells.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 4569
 }

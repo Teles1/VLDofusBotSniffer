@@ -50,4 +50,5 @@ open class KohUpdateMessage : NetworkMessage() {
 		allianceMapMyAllianceScore = stream.readVarInt().toInt()
 		nextTickTime = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 1974
 }

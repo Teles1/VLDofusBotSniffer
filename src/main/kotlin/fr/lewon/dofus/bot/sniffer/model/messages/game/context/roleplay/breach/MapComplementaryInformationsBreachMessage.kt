@@ -32,4 +32,5 @@ open class MapComplementaryInformationsBreachMessage : MapComplementaryInformati
 			branches.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8329
 }

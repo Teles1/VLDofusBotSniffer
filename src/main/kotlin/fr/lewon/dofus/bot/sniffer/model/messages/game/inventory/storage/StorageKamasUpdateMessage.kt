@@ -12,4 +12,5 @@ open class StorageKamasUpdateMessage : NetworkMessage() {
 		super.deserialize(stream)
 		kamasTotal = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 3044
 }

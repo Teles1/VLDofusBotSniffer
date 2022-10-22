@@ -16,4 +16,5 @@ open class ListenersOfSynchronizedStorageMessage : NetworkMessage() {
 			players.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 2975
 }

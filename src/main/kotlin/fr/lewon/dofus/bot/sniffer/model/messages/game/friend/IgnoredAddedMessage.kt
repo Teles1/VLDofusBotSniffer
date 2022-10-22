@@ -16,4 +16,5 @@ open class IgnoredAddedMessage : NetworkMessage() {
 		ignoreAdded.deserialize(stream)
 		session = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 9175
 }

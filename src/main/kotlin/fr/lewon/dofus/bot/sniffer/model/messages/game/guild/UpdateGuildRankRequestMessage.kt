@@ -14,4 +14,5 @@ open class UpdateGuildRankRequestMessage : NetworkMessage() {
 		rank = GuildRankInformation()
 		rank.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 9753
 }

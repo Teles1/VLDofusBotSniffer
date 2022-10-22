@@ -12,4 +12,5 @@ open class TreasureHuntLegendaryRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		legendaryId = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6849
 }

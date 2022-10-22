@@ -14,4 +14,5 @@ open class NpcDialogCreationMessage : NetworkMessage() {
 		mapId = stream.readDouble().toDouble()
 		npcId = stream.readInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 4308
 }

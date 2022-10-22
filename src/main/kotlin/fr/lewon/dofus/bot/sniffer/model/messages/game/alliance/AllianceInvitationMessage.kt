@@ -12,4 +12,5 @@ open class AllianceInvitationMessage : NetworkMessage() {
 		super.deserialize(stream)
 		targetId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 2680
 }

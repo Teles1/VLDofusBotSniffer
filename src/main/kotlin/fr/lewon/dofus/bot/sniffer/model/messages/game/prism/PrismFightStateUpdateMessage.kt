@@ -12,4 +12,5 @@ open class PrismFightStateUpdateMessage : NetworkMessage() {
 		super.deserialize(stream)
 		state = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 5973
 }

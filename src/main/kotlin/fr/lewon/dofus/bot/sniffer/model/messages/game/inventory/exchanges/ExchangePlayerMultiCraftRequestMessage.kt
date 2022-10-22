@@ -14,4 +14,5 @@ open class ExchangePlayerMultiCraftRequestMessage : ExchangeRequestMessage() {
 		target = stream.readVarLong().toDouble()
 		skillId = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 5534
 }

@@ -14,4 +14,5 @@ open class ExchangeBidHouseListMessage : NetworkMessage() {
 		objectGID = stream.readVarInt().toInt()
 		follow = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 8742
 }

@@ -26,4 +26,5 @@ open class JobCrafterDirectoryEntryMessage : NetworkMessage() {
 		playerLook = EntityLook()
 		playerLook.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 8133
 }

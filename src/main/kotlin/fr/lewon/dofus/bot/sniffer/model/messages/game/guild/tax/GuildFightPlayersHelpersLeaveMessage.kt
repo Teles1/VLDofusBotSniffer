@@ -14,4 +14,5 @@ open class GuildFightPlayersHelpersLeaveMessage : NetworkMessage() {
 		fightId = stream.readDouble().toDouble()
 		playerId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 7484
 }

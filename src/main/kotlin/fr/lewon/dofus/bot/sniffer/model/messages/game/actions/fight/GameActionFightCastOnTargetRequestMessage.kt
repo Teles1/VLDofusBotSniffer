@@ -14,4 +14,5 @@ open class GameActionFightCastOnTargetRequestMessage : NetworkMessage() {
 		spellId = stream.readVarShort().toInt()
 		targetId = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 1709
 }

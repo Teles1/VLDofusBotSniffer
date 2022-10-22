@@ -14,4 +14,5 @@ open class ExchangeShopStockMovementUpdatedMessage : NetworkMessage() {
 		objectInfo = ObjectItemToSell()
 		objectInfo.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 6659
 }

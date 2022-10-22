@@ -12,4 +12,5 @@ open class ChatClientMultiMessage : ChatAbstractClientMessage() {
 		super.deserialize(stream)
 		channel = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 3495
 }

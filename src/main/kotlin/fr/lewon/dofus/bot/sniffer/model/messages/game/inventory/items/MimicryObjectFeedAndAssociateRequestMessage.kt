@@ -16,4 +16,5 @@ open class MimicryObjectFeedAndAssociateRequestMessage : SymbioticObjectAssociat
 		foodPos = stream.readUnsignedByte().toInt()
 		preview = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 1365
 }

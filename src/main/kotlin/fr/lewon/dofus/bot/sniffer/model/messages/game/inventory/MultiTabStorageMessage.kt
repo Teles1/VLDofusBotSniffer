@@ -18,4 +18,5 @@ open class MultiTabStorageMessage : NetworkMessage() {
 			tabs.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8932
 }

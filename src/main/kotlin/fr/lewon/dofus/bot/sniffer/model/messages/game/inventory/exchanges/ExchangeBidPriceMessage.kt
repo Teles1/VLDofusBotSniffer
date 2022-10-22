@@ -14,4 +14,5 @@ open class ExchangeBidPriceMessage : NetworkMessage() {
 		genericId = stream.readVarInt().toInt()
 		averagePrice = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 1312
 }

@@ -14,4 +14,5 @@ open class IdentificationFailedForBadVersionMessage : IdentificationFailedMessag
 		requiredVersion = Version()
 		requiredVersion.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 8161
 }

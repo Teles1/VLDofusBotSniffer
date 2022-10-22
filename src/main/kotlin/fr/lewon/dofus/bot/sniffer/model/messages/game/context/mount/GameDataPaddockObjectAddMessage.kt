@@ -14,4 +14,5 @@ open class GameDataPaddockObjectAddMessage : NetworkMessage() {
 		paddockItemDescription = PaddockItem()
 		paddockItemDescription.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 9444
 }

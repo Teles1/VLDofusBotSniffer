@@ -18,4 +18,5 @@ open class DebtsDeleteMessage : NetworkMessage() {
 			debts.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8089
 }

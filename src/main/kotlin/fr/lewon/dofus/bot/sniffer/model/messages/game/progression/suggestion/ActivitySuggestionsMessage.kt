@@ -22,4 +22,5 @@ open class ActivitySuggestionsMessage : NetworkMessage() {
 			unlockedActivitiesIds.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 285
 }

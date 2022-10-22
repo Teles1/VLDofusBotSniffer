@@ -14,4 +14,5 @@ open class AllianceGuildLeavingMessage : NetworkMessage() {
 		kicked = stream.readBoolean()
 		guildId = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6456
 }

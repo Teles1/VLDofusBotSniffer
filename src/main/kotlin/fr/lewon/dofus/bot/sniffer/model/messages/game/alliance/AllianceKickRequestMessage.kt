@@ -12,4 +12,5 @@ open class AllianceKickRequestMessage : NetworkMessage() {
 		super.deserialize(stream)
 		kickedId = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 3702
 }

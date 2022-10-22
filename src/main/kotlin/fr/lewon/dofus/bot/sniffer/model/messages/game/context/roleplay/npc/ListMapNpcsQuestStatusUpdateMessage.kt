@@ -18,4 +18,5 @@ open class ListMapNpcsQuestStatusUpdateMessage : NetworkMessage() {
 			mapInfo.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 8330
 }

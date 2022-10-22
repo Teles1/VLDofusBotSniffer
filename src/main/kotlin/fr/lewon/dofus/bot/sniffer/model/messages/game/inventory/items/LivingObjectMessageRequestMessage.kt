@@ -20,4 +20,5 @@ open class LivingObjectMessageRequestMessage : NetworkMessage() {
 		}
 		livingObject = stream.readVarInt().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 9214
 }

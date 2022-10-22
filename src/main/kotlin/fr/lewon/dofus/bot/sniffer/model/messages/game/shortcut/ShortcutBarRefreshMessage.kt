@@ -16,4 +16,5 @@ open class ShortcutBarRefreshMessage : NetworkMessage() {
 		shortcut = ProtocolTypeManager.getInstance<Shortcut>(stream.readUnsignedShort())
 		shortcut.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 4401
 }

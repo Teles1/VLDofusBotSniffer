@@ -11,4 +11,5 @@ open class HouseLockFromInsideRequestMessage : LockableChangeCodeMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 3289
 }

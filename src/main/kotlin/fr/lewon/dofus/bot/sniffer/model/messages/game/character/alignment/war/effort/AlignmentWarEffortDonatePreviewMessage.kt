@@ -12,4 +12,5 @@ open class AlignmentWarEffortDonatePreviewMessage : NetworkMessage() {
 		super.deserialize(stream)
 		xp = stream.readDouble().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 942
 }

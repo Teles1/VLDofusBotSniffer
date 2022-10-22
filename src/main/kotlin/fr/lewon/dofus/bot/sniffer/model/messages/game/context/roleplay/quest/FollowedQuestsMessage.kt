@@ -18,4 +18,5 @@ open class FollowedQuestsMessage : NetworkMessage() {
 			quests.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 6986
 }

@@ -12,4 +12,5 @@ open class HaapiAuthErrorMessage : NetworkMessage() {
 		super.deserialize(stream)
 		type = stream.readUnsignedByte().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 6954
 }

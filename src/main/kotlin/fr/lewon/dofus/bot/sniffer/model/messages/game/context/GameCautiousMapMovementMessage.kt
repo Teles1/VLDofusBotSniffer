@@ -10,4 +10,5 @@ open class GameCautiousMapMovementMessage : GameMapMovementMessage() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 9181
 }

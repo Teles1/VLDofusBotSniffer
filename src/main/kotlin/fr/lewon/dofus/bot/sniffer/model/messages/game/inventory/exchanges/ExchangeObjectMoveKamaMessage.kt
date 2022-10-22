@@ -12,4 +12,5 @@ open class ExchangeObjectMoveKamaMessage : NetworkMessage() {
 		super.deserialize(stream)
 		quantity = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 5003
 }

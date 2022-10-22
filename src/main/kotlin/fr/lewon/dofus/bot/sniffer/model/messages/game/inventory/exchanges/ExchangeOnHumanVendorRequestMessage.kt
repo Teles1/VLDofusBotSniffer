@@ -14,4 +14,5 @@ open class ExchangeOnHumanVendorRequestMessage : NetworkMessage() {
 		humanVendorId = stream.readVarLong().toDouble()
 		humanVendorCell = stream.readVarShort().toInt()
 	}
+	override fun getNetworkMessageId(): Int = 8299
 }

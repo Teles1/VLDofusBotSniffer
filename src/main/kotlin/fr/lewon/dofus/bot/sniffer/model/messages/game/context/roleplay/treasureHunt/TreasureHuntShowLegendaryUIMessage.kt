@@ -16,4 +16,5 @@ open class TreasureHuntShowLegendaryUIMessage : NetworkMessage() {
 			availableLegendaryIds.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 1443
 }

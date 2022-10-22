@@ -16,4 +16,5 @@ open class ExchangeObjectTransfertListFromInvMessage : NetworkMessage() {
 			ids.add(item)
 		}
 	}
+	override fun getNetworkMessageId(): Int = 4238
 }

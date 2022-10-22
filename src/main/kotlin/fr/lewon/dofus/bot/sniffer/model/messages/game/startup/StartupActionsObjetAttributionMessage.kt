@@ -14,4 +14,5 @@ open class StartupActionsObjetAttributionMessage : NetworkMessage() {
 		actionId = stream.readInt().toInt()
 		characterId = stream.readVarLong().toDouble()
 	}
+	override fun getNetworkMessageId(): Int = 8134
 }

@@ -15,4 +15,5 @@ open class GameActionFightDispellMessage : AbstractGameActionMessage() {
 		targetId = stream.readDouble().toDouble()
 		verboseCast = stream.readBoolean()
 	}
+	override fun getNetworkMessageId(): Int = 1918
 }

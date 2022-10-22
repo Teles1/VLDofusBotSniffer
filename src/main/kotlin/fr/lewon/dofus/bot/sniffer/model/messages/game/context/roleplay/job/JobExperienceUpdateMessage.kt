@@ -14,4 +14,5 @@ open class JobExperienceUpdateMessage : NetworkMessage() {
 		experiencesUpdate = JobExperience()
 		experiencesUpdate.deserialize(stream)
 	}
+	override fun getNetworkMessageId(): Int = 8216
 }
