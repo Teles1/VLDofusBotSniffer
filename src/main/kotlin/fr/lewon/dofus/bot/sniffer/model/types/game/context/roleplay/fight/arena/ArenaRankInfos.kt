@@ -15,9 +15,13 @@ open class ArenaRankInfos : NetworkType() {
 	override fun deserialize(stream: ByteArrayReader) {
 		super.deserialize(stream)
 		ranking = ArenaRanking()
-		ranking.deserialize(stream)
+		if (stream.readUnsignedByte() != 0) {
+			ranking.deserialize(stream)
+		}
 		leagueRanking = ArenaLeagueRanking()
-		leagueRanking.deserialize(stream)
+		if (stream.readUnsignedByte() != 0) {
+			leagueRanking.deserialize(stream)
+		}
 		victoryCount = stream.readVarShort().toInt()
 		fightcount = stream.readVarShort().toInt()
 		numFightNeededForLadder = stream.readUnsignedShort().toInt()

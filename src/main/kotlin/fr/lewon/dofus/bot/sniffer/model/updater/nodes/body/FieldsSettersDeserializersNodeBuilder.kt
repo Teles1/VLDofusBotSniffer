@@ -39,16 +39,20 @@ class FieldsSettersDeserializersNodeBuilder(
         val methodCall = Regex("$variableName = input\\.(.*?);")
             .find(fileContent)
             ?.destructured?.component1()
-            ?.replace("readVarUh", "readVar")
-            ?.replace("readShort", "readUnsignedShort")
-            ?.replace("readByte", "readUnsignedByte")
-            ?.replace("readUnsignedInt", "readInt")
+            ?.replaceStreamFuncNames()
+            ?.addCast(variableType)
             ?: error("Couldn't find setter for field $variableName (${nodeDescription.name})")
-        val convertCall = variableType?.kotlinType
-            ?.let { ".to$it()" }
-            ?: ""
-        return "$STREAM_NAME.$methodCall$convertCall"
+        return "$STREAM_NAME.$methodCall"
     }
+
+    private fun String.replaceStreamFuncNames(): String = replace("readVarUh", "readVar")
+        .replace("readShort", "readUnsignedShort")
+        .replace("readByte", "readUnsignedByte")
+        .replace("readUnsignedInt", "readInt")
+
+    private fun String.addCast(variableType: VariableType?): String = variableType?.kotlinType
+        ?.let { "$this.to${variableType.kotlinType}()" }
+        ?: this
 
     private fun getBooleanSetterLines(variableDeclaration: VariableDeclaration, fileContent: String): List<String> {
         val lines = ArrayList<String>()
@@ -76,7 +80,32 @@ class FieldsSettersDeserializersNodeBuilder(
         }
         return listOf(
             getAssignation(variableDeclaration, objValue),
-            "${variableDeclaration.name}.$DESERIALIZE_FUNC_NAME($STREAM_NAME)"
+            *wrapAssignationInConditionIfNeeded("${variableDeclaration.name}.$DESERIALIZE_FUNC_NAME($STREAM_NAME)").toTypedArray()
+        )
+    }
+
+    private fun wrapAssignationInConditionIfNeeded(assignationLine: String): List<String> {
+        val match = Regex(
+            "if\\(input\\.([a-zA-Z]+\\(\\)) == (\\d+)\\) +\\{ +" +
+                    "this\\.${variable.name} = null; +" +
+                    "} +else +\\{ +" +
+                    ".*?" +
+                    "}", setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.UNIX_LINES)
+        ).find(
+            nodeDescription.fileContent
+                .replace("\r", "")
+                .replace("\n", " ")
+                .replace("\t", " ")
+        )
+            ?: return listOf(assignationLine)
+        val conditionFunc = match.destructured.component1()
+            .replaceStreamFuncNames()
+            .addCast(variable.variableType)
+        val conditionValue = match.destructured.component2()
+        return listOf(
+            "if ($STREAM_NAME.$conditionFunc != $conditionValue) {",
+            "\t$assignationLine",
+            "}"
         )
     }
 

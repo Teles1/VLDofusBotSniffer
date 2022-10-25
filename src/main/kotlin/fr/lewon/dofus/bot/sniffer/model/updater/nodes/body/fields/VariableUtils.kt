@@ -19,7 +19,7 @@ object VariableUtils {
 
     fun getVariables(fileContent: String): List<VariableDeclaration> {
         val reversedFileContentLines = fileContent.split("\n").reversed()
-        return Regex("public var ([a-zA-Z]+):([^ =;]*)").findAll(fileContent).map {
+        return Regex("public var ([a-zA-Z\\d]+):([^ =;]*)").findAll(fileContent).map {
             val variableName = it.destructured.component1()
             val flashType = it.destructured.component2()
             val variableType = VariableType.fromFlashType(flashType)

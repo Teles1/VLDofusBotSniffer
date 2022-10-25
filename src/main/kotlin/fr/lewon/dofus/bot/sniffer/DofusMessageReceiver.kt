@@ -1,7 +1,7 @@
 package fr.lewon.dofus.bot.sniffer
 
 import fr.lewon.dofus.bot.core.logs.VldbLogger
-import fr.lewon.dofus.bot.core.utils.LockUtils
+import fr.lewon.dofus.bot.core.utils.LockUtils.executeSyncOperation
 import fr.lewon.dofus.bot.sniffer.store.EventStore
 import org.pcap4j.core.*
 import org.pcap4j.core.BpfProgram.BpfCompileMode
@@ -52,7 +52,7 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
                     val dstIp = ipV4Packet.header.dstAddr.hostAddress
                     val srcHost = Host(srcIp, srcPort)
                     val dstHost = Host(dstIp, dstPort)
-                    LockUtils.executeSyncOperation(lock) {
+                    lock.executeSyncOperation {
                         getCharacterReceiver(dstHost)?.treatReceivedTcpPacket(tcpPacket)
                             ?: getCharacterReceiver(srcHost)?.treatSentTcpPacket(tcpPacket)
                     }
@@ -62,13 +62,13 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
     }
 
     private fun getCharacterReceiver(host: Host): DofusMessageCharacterReceiver? {
-        return LockUtils.executeSyncOperation(lock) {
+        return lock.executeSyncOperation {
             connectionByHostPort[host]?.let { characterReceiverByConnection[it] }
         }
     }
 
     fun startListening(connection: DofusConnection, eventStore: EventStore, logger: VldbLogger) {
-        LockUtils.executeSyncOperation(lock) {
+        lock.executeSyncOperation {
             stopListening(connection.client)
             connectionByHostPort[connection.client] = connection
             characterReceiverByConnection[connection] = DofusMessageCharacterReceiver(connection, eventStore, logger)
@@ -77,7 +77,7 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
     }
 
     fun stopListening(host: Host) {
-        LockUtils.executeSyncOperation(lock) {
+        lock.executeSyncOperation {
             val connection = connectionByHostPort.remove(host)
             characterReceiverByConnection.remove(connection)
             updateFilter()
@@ -94,7 +94,7 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
     }
 
     private fun buildFilter(): String {
-        return LockUtils.executeSyncOperation(lock) {
+        return lock.executeSyncOperation {
             val connections = connectionByHostPort.values
             val clientToServerFilters = connections.map {
                 "src host ${it.client.ip} and src port ${it.client.port} and dst host ${it.server.ip} and dst port ${it.server.port}"

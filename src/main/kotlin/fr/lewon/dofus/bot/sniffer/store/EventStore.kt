@@ -1,6 +1,6 @@
 package fr.lewon.dofus.bot.sniffer.store
 
-import fr.lewon.dofus.bot.core.utils.LockUtils
+import fr.lewon.dofus.bot.core.utils.LockUtils.executeSyncOperation
 import fr.lewon.dofus.bot.sniffer.DofusConnection
 import fr.lewon.dofus.bot.sniffer.model.messages.NetworkMessage
 import fr.lewon.dofus.bot.sniffer.store.waiters.*
@@ -20,7 +20,7 @@ class EventStore {
 
 
     fun addSocketEvent(dofusEvent: NetworkMessage, connection: DofusConnection) {
-        LockUtils.executeSyncOperation(lock) {
+        lock.executeSyncOperation {
             getHandlers(dofusEvent.javaClass).forEach {
                 it.onEventReceived(dofusEvent, connection)
             }
@@ -33,7 +33,7 @@ class EventStore {
     }
 
     fun <T : NetworkMessage> getAllEvents(eventClass: Class<T>): List<T> {
-        return LockUtils.executeSyncOperation(lock) {
+        return lock.executeSyncOperation {
             eventQueue.filter { it::class.java == eventClass }.map { eventClass.cast(it) }
         }
     }
@@ -68,51 +68,51 @@ class EventStore {
     }
 
     private fun waitUntil(timeout: Int, buildWaiter: () -> AbstractMessageWaiter): Boolean {
-        return LockUtils.executeSyncOperation(waitLock) {
-            val newMessageWaiter = buildWaiter()
+        val newMessageWaiter = buildWaiter()
+        return newMessageWaiter.lock.executeSyncOperation {
             messageWaiter = newMessageWaiter
             newMessageWaiter.waitUntilNotify(timeout.toLong())
         }
     }
 
     fun <T : NetworkMessage> getLastEvent(eventClass: Class<T>, filterFunction: (T) -> Boolean = { true }): T? {
-        return LockUtils.executeSyncOperation(lock) {
+        return lock.executeSyncOperation {
             getAllEvents(eventClass).lastOrNull(filterFunction)
         }
     }
 
     fun <T : NetworkMessage> getFirstEvent(eventClass: Class<T>, filterFunction: (T) -> Boolean = { true }): T? {
-        return LockUtils.executeSyncOperation(lock) {
+        return lock.executeSyncOperation {
             getAllEvents(eventClass).firstOrNull(filterFunction)
         }
     }
 
     fun clear() {
-        LockUtils.executeSyncOperation(lock) {
+        lock.executeSyncOperation {
             eventQueue.clear()
         }
     }
 
     fun <T : NetworkMessage> clear(eventClass: Class<T>) {
-        LockUtils.executeSyncOperation(lock) {
+        lock.executeSyncOperation {
             eventQueue.removeIf { it::class.java == eventClass }
         }
     }
 
     fun clearUntilFirst(eventClass: Class<out NetworkMessage>) {
-        LockUtils.executeSyncOperation(lock) {
+        lock.executeSyncOperation {
             clearUntil(getFirstEvent(eventClass))
         }
     }
 
     fun clearUntilLast(eventClass: Class<out NetworkMessage>) {
-        LockUtils.executeSyncOperation(lock) {
+        lock.executeSyncOperation {
             clearUntil(getLastEvent(eventClass))
         }
     }
 
     private fun clearUntil(event: NetworkMessage?) {
-        LockUtils.executeSyncOperation(lock) {
+        lock.executeSyncOperation {
             while (eventQueue.firstOrNull() != event) {
                 eventQueue.poll()
             }
@@ -125,7 +125,7 @@ class EventStore {
         private val STATIC_LOCK = ReentrantLock()
 
         fun <T : NetworkMessage> getHandlers(eventClass: Class<T>): ArrayList<IEventHandler<T>> {
-            return LockUtils.executeSyncOperation(STATIC_LOCK) {
+            return STATIC_LOCK.executeSyncOperation {
                 (HANDLER_MAPPER[eventClass] ?: ArrayList()) as ArrayList<IEventHandler<T>>
             }
         }

@@ -8,6 +8,7 @@ import fr.lewon.dofus.bot.sniffer.exceptions.AddToStoreFailedException
 import fr.lewon.dofus.bot.sniffer.exceptions.IncompleteMessageException
 import fr.lewon.dofus.bot.sniffer.exceptions.ParseFailedException
 import fr.lewon.dofus.bot.sniffer.model.messages.NetworkMessage
+import org.apache.commons.codec.binary.Hex
 import org.pcap4j.packet.TcpPacket
 
 abstract class MessageParser(private val packetOrigin: PacketOrigin, private val state: MessageParserState) {
@@ -33,6 +34,15 @@ abstract class MessageParser(private val packetOrigin: PacketOrigin, private val
             // Nothing
         } catch (e: Exception) {
             println("${getLogPrefix()} : Couldn't read message - ${e.message} (packets count : ${packets.size})")
+            if (packets.size == 30) {
+                println("Packets order : ${packets.joinToString(", ") { it.header.sequenceNumberAsLong.toString() }}")
+                println("Sorted Packets order : ${getSortedPackets().joinToString(", ") { it.header.sequenceNumberAsLong.toString() }}")
+                val orderedRawData =
+                    getSortedPackets().joinToString("|") { Hex.encodeHexString(it.payload.rawData) }
+                val rawData = packets.joinToString("|") { Hex.encodeHexString(it.payload.rawData) }
+                println("Packets content : $rawData")
+                println("Ordered packets content : $orderedRawData")
+            }
         }
         if (packets.size == 30) {
             println("${getLogPrefix()} : Large packet buffer, character might have crashed. If a character is stuck, please reload sniffer.")
