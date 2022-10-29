@@ -11,6 +11,7 @@ import org.pcap4j.packet.Packet
 import org.pcap4j.packet.TcpPacket
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.Executors
 import java.util.concurrent.locks.ReentrantLock
 
 class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
@@ -22,10 +23,12 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
     private val characterReceiverByConnection = HashMap<DofusConnection, DofusMessageCharacterReceiver>()
     private val ethernetPackets = ArrayBlockingQueue<Packet>(300)
     private val timer = Timer()
+    private var dropped = 0L
+    private var droppedByIf = 0L
 
     init {
         val nif = findActiveDevice(networkInterfaceName)
-        handle = nif.openLive(65536000, PromiscuousMode.PROMISCUOUS, -1)
+        handle = nif.openLive(65536, PromiscuousMode.PROMISCUOUS, -1)
         updateFilter()
         packetListener = PacketListener {
             ethernetPackets.add(it)
@@ -35,6 +38,15 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
 
     private fun buildTreatEthernetPacketTimerTask() = object : TimerTask() {
         override fun run() {
+            val stats = handle.stats
+            if (stats.numPacketsDropped != dropped) {
+                dropped = stats.numPacketsDropped
+                println("Dropped : $dropped")
+            }
+            if (stats.numPacketsDroppedByIf != droppedByIf) {
+                droppedByIf = stats.numPacketsDroppedByIf
+                println("Dropped by if : $droppedByIf")
+            }
             treatEthernetPacket()
         }
     }
@@ -108,7 +120,10 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
 
     override fun run() {
         try {
-            handle.loop(-1, packetListener)
+            val pool = Executors.newCachedThreadPool()
+            handle.loop(-1, packetListener, pool)
+            pool.shutdown()
+            handle.stats.numPacketsDropped
         } catch (ex: PcapNativeException) {
             println(ex.message)
         } catch (ex: InterruptedException) {

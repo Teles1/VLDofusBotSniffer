@@ -24,7 +24,7 @@ abstract class MessageParser(private val packetOrigin: PacketOrigin, private val
     fun receivePacket(tcpPacket: TcpPacket) {
         try {
             packets.add(tcpPacket)
-            val printNevermind = packets.size > 30
+            val printNevermind = packets.size > 20
             handlePackets()
             packets.clear()
             if (printNevermind) {
@@ -33,8 +33,8 @@ abstract class MessageParser(private val packetOrigin: PacketOrigin, private val
         } catch (e: IncompleteMessageException) {
             // Nothing
         } catch (e: Exception) {
-            println("${getLogPrefix()} : Couldn't read message - ${e.message} (packets count : ${packets.size})")
-            if (packets.size == 30) {
+            if (packets.size == 20) {
+                println("${getLogPrefix()} : Couldn't read message - ${e.message} (packets count : ${packets.size})")
                 println("Packets order : ${packets.joinToString(", ") { it.header.sequenceNumberAsLong.toString() }}")
                 println("Sorted Packets order : ${getSortedPackets().joinToString(", ") { it.header.sequenceNumberAsLong.toString() }}")
                 val orderedRawData =
@@ -44,7 +44,7 @@ abstract class MessageParser(private val packetOrigin: PacketOrigin, private val
                 println("Ordered packets content : $orderedRawData")
             }
         }
-        if (packets.size == 30) {
+        if (packets.size == 20) {
             println("${getLogPrefix()} : Large packet buffer, character might have crashed. If a character is stuck, please reload sniffer.")
         }
     }
