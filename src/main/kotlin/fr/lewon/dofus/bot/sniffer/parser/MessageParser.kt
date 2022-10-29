@@ -50,7 +50,7 @@ abstract class MessageParser(private val packetOrigin: PacketOrigin, private val
     }
 
     private fun getLogPrefix(): String =
-        "${state.connection.client.ip}:${state.connection.client.port} [${packetOrigin.name}]"
+        "${state.connection.characterName} - ${state.connection.client.ip}:${state.connection.client.port} [${packetOrigin.name}]"
 
     private fun handlePackets() {
         val rawData = getSortedPackets().flatMap { it.payload.rawData.toList() }.toByteArray()

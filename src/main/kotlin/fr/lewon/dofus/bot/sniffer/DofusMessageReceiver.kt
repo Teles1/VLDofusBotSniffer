@@ -9,35 +9,52 @@ import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode
 import org.pcap4j.packet.IpV4Packet
 import org.pcap4j.packet.Packet
 import org.pcap4j.packet.TcpPacket
-import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.Executors
 import java.util.concurrent.locks.ReentrantLock
 
-class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
+class DofusMessageReceiver(networkInterfaceName: String) {
 
     private val lock = ReentrantLock()
     private val handle: PcapHandle
-    private val packetListener: PacketListener
+    private val readPacketThread: Thread
+    private val treatPacketThread: Thread
     private val connectionByHostPort = HashMap<Host, DofusConnection>()
     private val characterReceiverByConnection = HashMap<DofusConnection, DofusMessageCharacterReceiver>()
     private val ethernetPackets = ArrayBlockingQueue<Packet>(300)
-    private val timer = Timer()
     private var dropped = 0L
     private var droppedByIf = 0L
 
     init {
         val nif = findActiveDevice(networkInterfaceName)
-        handle = nif.openLive(65536, PromiscuousMode.PROMISCUOUS, -1)
+        handle = PcapHandle.Builder(nif.name)
+            .snaplen(65536)
+            .promiscuousMode(PromiscuousMode.PROMISCUOUS)
+            .timeoutMillis(-1)
+            .bufferSize(20 * 1024 * 1024)
+            .build()
         updateFilter()
-        packetListener = PacketListener {
-            ethernetPackets.add(it)
-            timer.schedule(buildTreatEthernetPacketTimerTask(), 0)
+        readPacketThread = Thread { readPackets() }
+        treatPacketThread = Thread { treatPackets() }
+    }
+
+    private fun readPackets() {
+        try {
+            while (true) {
+                handle.nextPacket?.let {
+                    ethernetPackets.add(it)
+                }
+            }
+        } catch (ex: PcapNativeException) {
+            println(ex.message)
+        } catch (ex: InterruptedException) {
+            println(ex.message)
+        } catch (ex: NotOpenException) {
+            println(ex.message)
         }
     }
 
-    private fun buildTreatEthernetPacketTimerTask() = object : TimerTask() {
-        override fun run() {
+    private fun treatPackets() {
+        while (true) {
             val stats = handle.stats
             if (stats.numPacketsDropped != dropped) {
                 dropped = stats.numPacketsDropped
@@ -47,12 +64,14 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
                 droppedByIf = stats.numPacketsDroppedByIf
                 println("Dropped by if : $droppedByIf")
             }
-            treatEthernetPacket()
+            while (ethernetPackets.isNotEmpty()) {
+                treatEthernetPacket(ethernetPackets.poll())
+            }
+            Thread.sleep(50)
         }
     }
 
-    private fun treatEthernetPacket() {
-        val ethernetPacket = ethernetPackets.poll()
+    private fun treatEthernetPacket(ethernetPacket: Packet) {
         val ipV4Packet = ethernetPacket.payload
         if (ipV4Packet != null) {
             val tcpPacket = ipV4Packet.payload
@@ -118,29 +137,21 @@ class DofusMessageReceiver(networkInterfaceName: String) : Thread() {
         }
     }
 
-    override fun run() {
-        try {
-            val pool = Executors.newCachedThreadPool()
-            handle.loop(-1, packetListener, pool)
-            pool.shutdown()
-            handle.stats.numPacketsDropped
-        } catch (ex: PcapNativeException) {
-            println(ex.message)
-        } catch (ex: InterruptedException) {
-            println(ex.message)
-        } catch (ex: NotOpenException) {
-            println(ex.message)
-        }
+    fun start() {
+        readPacketThread.start()
+        treatPacketThread.start()
     }
 
-    override fun interrupt() {
-        handle.breakLoop()
+    fun kill() {
+        readPacketThread.interrupt()
+        treatPacketThread.interrupt()
+        readPacketThread.join()
+        treatPacketThread.join()
         handle.close()
-        timer.cancel()
     }
 
     fun isSnifferRunning(): Boolean {
-        return isAlive && handle.isOpen
+        return readPacketThread.isAlive && treatPacketThread.isAlive
     }
 
     /** Find the current active pcap network interface.
