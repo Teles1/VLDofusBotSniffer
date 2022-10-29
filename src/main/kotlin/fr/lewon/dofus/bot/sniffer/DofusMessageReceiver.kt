@@ -3,9 +3,12 @@ package fr.lewon.dofus.bot.sniffer
 import fr.lewon.dofus.bot.core.logs.VldbLogger
 import fr.lewon.dofus.bot.core.utils.LockUtils.executeSyncOperation
 import fr.lewon.dofus.bot.sniffer.store.EventStore
-import org.pcap4j.core.*
 import org.pcap4j.core.BpfProgram.BpfCompileMode
+import org.pcap4j.core.PacketListener
+import org.pcap4j.core.PcapHandle
+import org.pcap4j.core.PcapNetworkInterface
 import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode
+import org.pcap4j.core.Pcaps
 import org.pcap4j.packet.IpV4Packet
 import org.pcap4j.packet.Packet
 import org.pcap4j.packet.TcpPacket
@@ -15,60 +18,12 @@ import java.util.concurrent.locks.ReentrantLock
 class DofusMessageReceiver(networkInterfaceName: String) {
 
     private val lock = ReentrantLock()
-    private val handle: PcapHandle
-    private val readPacketThread: Thread
-    private val treatPacketThread: Thread
     private val connectionByHostPort = HashMap<Host, DofusConnection>()
     private val characterReceiverByConnection = HashMap<DofusConnection, DofusMessageCharacterReceiver>()
-    private val ethernetPackets = ArrayBlockingQueue<Packet>(300)
-    private var dropped = 0L
-    private var droppedByIf = 0L
+    private var sniffer: Sniffer? = null
 
     init {
-        val nif = findActiveDevice(networkInterfaceName)
-        handle = PcapHandle.Builder(nif.name)
-            .snaplen(65536)
-            .promiscuousMode(PromiscuousMode.PROMISCUOUS)
-            .timeoutMillis(-1)
-            .bufferSize(20 * 1024 * 1024)
-            .build()
-        updateFilter()
-        readPacketThread = Thread { readPackets() }
-        treatPacketThread = Thread { treatPackets() }
-    }
-
-    private fun readPackets() {
-        try {
-            while (true) {
-                handle.nextPacket?.let {
-                    ethernetPackets.add(it)
-                }
-            }
-        } catch (ex: PcapNativeException) {
-            println(ex.message)
-        } catch (ex: InterruptedException) {
-            println(ex.message)
-        } catch (ex: NotOpenException) {
-            println(ex.message)
-        }
-    }
-
-    private fun treatPackets() {
-        while (true) {
-            val stats = handle.stats
-            if (stats.numPacketsDropped != dropped) {
-                dropped = stats.numPacketsDropped
-                println("Dropped : $dropped")
-            }
-            if (stats.numPacketsDroppedByIf != droppedByIf) {
-                droppedByIf = stats.numPacketsDroppedByIf
-                println("Dropped by if : $droppedByIf")
-            }
-            while (ethernetPackets.isNotEmpty()) {
-                treatEthernetPacket(ethernetPackets.poll())
-            }
-            Thread.sleep(50)
-        }
+        updateSniffer(networkInterfaceName)
     }
 
     private fun treatEthernetPacket(ethernetPacket: Packet) {
@@ -83,10 +38,9 @@ class DofusMessageReceiver(networkInterfaceName: String) {
                     val dstIp = ipV4Packet.header.dstAddr.hostAddress
                     val srcHost = Host(srcIp, srcPort)
                     val dstHost = Host(dstIp, dstPort)
-                    lock.executeSyncOperation {
-                        getCharacterReceiver(dstHost)?.treatReceivedTcpPacket(tcpPacket)
-                            ?: getCharacterReceiver(srcHost)?.treatSentTcpPacket(tcpPacket)
-                    }
+                    getCharacterReceiver(dstHost)?.treatReceivedTcpPacket(tcpPacket)
+                        ?: getCharacterReceiver(srcHost)?.treatSentTcpPacket(tcpPacket)
+                        ?: error("Connection not found, src : $srcHost / dst : $dstHost")
                 }
             }
         }
@@ -103,7 +57,7 @@ class DofusMessageReceiver(networkInterfaceName: String) {
             stopListening(connection.client)
             connectionByHostPort[connection.client] = connection
             characterReceiverByConnection[connection] = DofusMessageCharacterReceiver(connection, eventStore, logger)
-            updateFilter()
+            sniffer?.updateFilter(connectionByHostPort.values)
         }
     }
 
@@ -111,57 +65,72 @@ class DofusMessageReceiver(networkInterfaceName: String) {
         lock.executeSyncOperation {
             val connection = connectionByHostPort.remove(host)
             characterReceiverByConnection.remove(connection)
-            updateFilter()
+            sniffer?.updateFilter(connectionByHostPort.values)
         }
     }
 
-    private fun updateFilter() {
-        val filter = if (connectionByHostPort.isEmpty()) {
-            "src host 255.255.255.255 and dst host 255.255.255.255"
-        } else {
-            buildFilter()
-        }
-        handle.setFilter(filter, BpfCompileMode.OPTIMIZE)
-    }
-
-    private fun buildFilter(): String {
-        return lock.executeSyncOperation {
-            val connections = connectionByHostPort.values
-            val clientToServerFilters = connections.map {
-                "src host ${it.client.ip} and src port ${it.client.port} and dst host ${it.server.ip} and dst port ${it.server.port}"
-            }
-            val serverToClientFilters = connections.map {
-                "src host ${it.server.ip} and src port ${it.server.port} and dst host ${it.client.ip} and dst port ${it.client.port}"
-            }
-            clientToServerFilters.plus(serverToClientFilters).joinToString(" or ") { "($it)" }
-        }
-    }
-
-    fun start() {
-        readPacketThread.start()
-        treatPacketThread.start()
-    }
-
-    fun kill() {
-        readPacketThread.interrupt()
-        treatPacketThread.interrupt()
-        readPacketThread.join()
-        treatPacketThread.join()
-        handle.close()
-    }
-
-    fun isSnifferRunning(): Boolean {
-        return readPacketThread.isAlive && treatPacketThread.isAlive
-    }
-
-    /** Find the current active pcap network interface.
-     * @return The active pcap network interface
-     */
-    private fun findActiveDevice(networkInterfaceName: String): PcapNetworkInterface {
+    fun updateSniffer(networkInterfaceName: String) {
+        sniffer?.interrupt()
+        sniffer?.join()
+        connectionByHostPort.keys.forEach(this::stopListening)
         val inetAddress = DofusMessageReceiverUtil.findInetAddress(networkInterfaceName)
             ?: error("No active address found. Make sure you have an internet connection.")
-        return Pcaps.getDevByAddress(inetAddress)
-            ?: error("No active device found. Make sure WinPcap or libpcap is installed.")
+        val nif = Pcaps.getDevByAddress(inetAddress)
+            ?: error("No active device found. Make sure Npcap is installed.")
+        sniffer = Sniffer(nif, this::treatEthernetPacket).also { it.start() }
+    }
+
+    private class Sniffer(nif: PcapNetworkInterface, val treatPacket: (Packet) -> Unit) : Thread() {
+
+        private val handle: PcapHandle
+        private val packetListener: PacketListener
+        private val ethernetPackets = ArrayBlockingQueue<Packet>(500)
+
+        init {
+            handle = PcapHandle.Builder(nif.name)
+                .snaplen(65536)
+                .promiscuousMode(PromiscuousMode.PROMISCUOUS)
+                .timeoutMillis(-1)
+                .bufferSize(2 * 1024 * 1024)
+                .build()
+            handle.blockingMode = PcapHandle.BlockingMode.NONBLOCKING
+            updateFilter(emptyList())
+            packetListener = PacketListener {
+                ethernetPackets.add(it)
+                Thread { treatPacket(ethernetPackets.poll()) }.start()
+            }
+        }
+
+        fun updateFilter(connections: Collection<DofusConnection>) {
+            handle.setFilter(buildFilter(connections), BpfCompileMode.OPTIMIZE)
+        }
+
+        private fun buildFilter(connections: Collection<DofusConnection>): String {
+            return if (connections.isEmpty()) {
+                "src host 255.255.255.255 and dst host 255.255.255.255"
+            } else {
+                val clientToServerFilters = connections.map {
+                    "src host ${it.client.ip} and src port ${it.client.port} and dst host ${it.server.ip} and dst port ${it.server.port}"
+                }
+                val serverToClientFilters = connections.map {
+                    "src host ${it.server.ip} and src port ${it.server.port} and dst host ${it.client.ip} and dst port ${it.client.port}"
+                }
+                clientToServerFilters.plus(serverToClientFilters).joinToString(" or ") { "($it)" }
+            }
+        }
+
+        override fun run() {
+            try {
+                handle.loop(-1, packetListener)
+            } catch (_: Exception) {
+            }
+        }
+
+        override fun interrupt() {
+            handle.breakLoop()
+            handle.close()
+        }
+
     }
 
 }

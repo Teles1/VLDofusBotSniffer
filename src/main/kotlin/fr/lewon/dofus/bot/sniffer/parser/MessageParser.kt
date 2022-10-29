@@ -21,6 +21,7 @@ abstract class MessageParser(private val packetOrigin: PacketOrigin, private val
     private val objectMapper = ObjectMapper()
     private val packets = ArrayList<TcpPacket>()
 
+    @Synchronized
     fun receivePacket(tcpPacket: TcpPacket) {
         try {
             packets.add(tcpPacket)
