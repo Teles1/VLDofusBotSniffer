@@ -40,7 +40,6 @@ class DofusMessageReceiver(networkInterfaceName: String) {
                     val dstHost = Host(dstIp, dstPort)
                     getCharacterReceiver(dstHost)?.treatReceivedTcpPacket(tcpPacket)
                         ?: getCharacterReceiver(srcHost)?.treatSentTcpPacket(tcpPacket)
-                        ?: error("Connection not found, src : $srcHost / dst : $dstHost")
                 }
             }
         }
@@ -85,6 +84,7 @@ class DofusMessageReceiver(networkInterfaceName: String) {
         private val handle: PcapHandle
         private val packetListener: PacketListener
         private val ethernetPackets = ArrayBlockingQueue<Packet>(500)
+        private val treatPacketsThread: Thread
 
         init {
             handle = PcapHandle.Builder(nif.name)
@@ -97,8 +97,17 @@ class DofusMessageReceiver(networkInterfaceName: String) {
             updateFilter(emptyList())
             packetListener = PacketListener {
                 ethernetPackets.add(it)
-                Thread { treatPacket(ethernetPackets.poll()) }.start()
             }
+            treatPacketsThread = Thread {
+                while (!isInterrupted) {
+                    if (ethernetPackets.isNotEmpty()) {
+                        treatPacket(ethernetPackets.poll())
+                    } else {
+                        sleep(100)
+                    }
+                }
+            }
+            treatPacketsThread.start()
         }
 
         fun updateFilter(connections: Collection<DofusConnection>) {
@@ -127,6 +136,8 @@ class DofusMessageReceiver(networkInterfaceName: String) {
         }
 
         override fun interrupt() {
+            super.interrupt()
+            treatPacketsThread.join()
             handle.breakLoop()
             handle.close()
         }
