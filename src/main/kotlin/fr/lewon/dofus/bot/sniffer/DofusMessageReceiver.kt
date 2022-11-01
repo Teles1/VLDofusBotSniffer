@@ -12,7 +12,7 @@ import org.pcap4j.core.Pcaps
 import org.pcap4j.packet.IpV4Packet
 import org.pcap4j.packet.Packet
 import org.pcap4j.packet.TcpPacket
-import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.locks.ReentrantLock
 
 class DofusMessageReceiver(networkInterfaceName: String) {
@@ -83,7 +83,7 @@ class DofusMessageReceiver(networkInterfaceName: String) {
 
         private val handle: PcapHandle
         private val packetListener: PacketListener
-        private val ethernetPackets = ArrayBlockingQueue<Packet>(500)
+        private val ethernetPackets = ConcurrentLinkedQueue<Packet>()
         private val treatPacketsThread: Thread
 
         init {
